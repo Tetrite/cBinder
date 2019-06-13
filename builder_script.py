@@ -6,14 +6,20 @@ def main():
 	argparser = argparse.ArgumentParser()
 	argparser.add_argument('source_file')
 	argparser.add_argument('header_file')
-	argparser.add_argument('definition')
 	argparser.add_argument('output_name')
 	args = argparser.parse_args()
 	source = args.source_file
 	header = args.header_file
-	definition = args.definition
 	output_name = args.output_name
 
+	with open(header) as f:
+		lines = f.readlines()
+
+	lines = [x.strip() for x in lines]
+	lines = list(filter(lambda x: x[0] != '#', lines))
+	definition = ""
+	for l in lines:
+		definition = definition + l
 	ffi = FFI()
 	ffi.cdef(definition)
 	includes = '#include "' + header + '"'
