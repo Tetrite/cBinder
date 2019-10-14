@@ -1,10 +1,9 @@
 from pycparser import c_ast, parse_file
-import re
 import pathlib
+import CppHeaderParser
 
-includes_pattern = r'#include ".+"'
 
-
+# TODO: change scraping declarations to be more generic
 class DeclarationsScraper:
 
 	def __init__(self, cpppath):
@@ -49,6 +48,8 @@ class DeclarationsScraper:
 class IncludesScraper:
 
 	def extract_inludes(self, path):
-		text = path.read_text()
-		includes = re.findall(includes_pattern, text)
+		header = CppHeaderParser.CppHeader(path.name)
+		includes = []
+		for inc in header.includes:
+			includes.append(f'#include {inc}')
 		return includes
