@@ -1,3 +1,4 @@
 .idea/
 venv/
-test_library/Release
+test_library/Release/
+__pycache__/
