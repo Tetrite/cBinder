@@ -16,7 +16,7 @@ def generate_bindings(args):
 	for pair in pairs:
 		if verbosity:
 			print(f'Processing {pair.header_filepath.name} and {pair.source_filepath.name}')
-
+		# TODO: check for existing file
 		shutil.copy2(str(pair.header_filepath), '.')
 		shutil.copy2(str(pair.source_filepath), '.')
 
@@ -29,8 +29,8 @@ def generate_bindings(args):
 		ffibuilder.set_source('_' + outputname, "',".join(includes), sources=[sourcename])
 		ffibuilder.compile(verbose=verbosity)
 
-		os.remove('./' + pair.source_filepath.name)
-		os.remove('./' + pair.header_filepath.name)
+		# os.remove('./' + pair.source_filepath.name)
+		# os.remove('./' + pair.header_filepath.name)
 
 
 def main():

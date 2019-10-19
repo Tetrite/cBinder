@@ -11,18 +11,22 @@ class DeclarationsScraper:
 		self.declarations = []
 
 	def parse_file(self, filepath):
-		if isinstance(filepath, pathlib.Path):
-			filepath = filepath.as_posix()
-		if self.cpp_path is None:
-			ast = parse_file(filepath, use_cpp=True)
-		else:
-			ast = parse_file(filepath, use_cpp=True, cpp_path=self.cpp_path)
-
-		self.declarations = [x for x in ast.ext if isinstance(x, c_ast.Decl)]
+		header = CppHeaderParser.CppHeader(filepath.name)
+		for fun in header.functions:
+			self.declarations.append(fun['debug'])
+		# if isinstance(filepath, pathlib.Path):
+		# 	filepath = filepath.as_posix()
+		# if self.cpp_path is None:
+		# 	ast = parse_file(filepath, use_cpp=True)
+		# else:
+		# 	ast = parse_file(filepath, use_cpp=True, cpp_path=self.cpp_path)
+		#
+		# self.declarations = [x for x in ast.ext if isinstance(x, c_ast.Decl)]
 
 	def parse_and_return_decl(self, filepath):
 		self.parse_file(filepath)
-		return ' '.join([self.get_node_str(x) for x in self.declarations])
+		# return ' '.join([self.get_node_str(x) for x in self.declarations])
+		return ' '.join(self.declarations)
 
 	def print(self):
 		s = [self.get_node_str(x) for x in self.declarations]
