@@ -11,6 +11,7 @@ class DeclarationsScraper:
 		self.declarations = []
 
 	def parse_file(self, filepath):
+		self.declarations.clear()
 		header = CppHeaderParser.CppHeader(filepath.name)
 		for fun in header.functions:
 			self.declarations.append(fun['debug'])
