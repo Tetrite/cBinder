@@ -4,6 +4,7 @@ import argparse
 from cffi import FFI
 import os
 import shutil
+import WrapperBuilder
 
 
 def generate_bindings(args):
@@ -16,9 +17,10 @@ def generate_bindings(args):
 	for pair in pairs:
 		if verbosity:
 			print(f'Processing {pair.header_filepath.name} and {pair.source_filepath.name}')
-		# TODO: check for existing file
-		shutil.copy2(str(pair.header_filepath), '.')
-		shutil.copy2(str(pair.source_filepath), '.')
+		if not os.path.isfile('./'+pair.header_filepath.name):
+			shutil.copy2(str(pair.header_filepath), '.')
+		if not os.path.isfile('./' + pair.source_filepath.name):
+			shutil.copy2(str(pair.source_filepath), '.')
 
 		ffibuilder = FFI()
 		declarations = ds.parse_and_return_decl(pair.header_filepath)
@@ -29,8 +31,12 @@ def generate_bindings(args):
 		ffibuilder.set_source('_' + outputname, "',".join(includes), sources=[sourcename])
 		ffibuilder.compile(verbose=verbosity)
 
-		# os.remove('./' + pair.source_filepath.name)
-		# os.remove('./' + pair.header_filepath.name)
+		if verbosity:
+			print('Generating wrapper script')
+		WrapperBuilder.build_wrapper(outputname, declarations)
+
+		#os.remove('./' + pair.source_filepath.name)
+		#os.remove('./' + pair.header_filepath.name)
 
 
 def main():
