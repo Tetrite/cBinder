@@ -27,7 +27,7 @@ def get_argument(parts):
 	if not parts:
 		return None, None
 	arg = Argument(parts[1], parts[0])
-	if parts[2] == '[':
+	if len(parts) > 2 and parts[2] == '[':
 		arg.struct = 'list'
 		return arg, parts[4:]
 	return arg, parts[2:]
