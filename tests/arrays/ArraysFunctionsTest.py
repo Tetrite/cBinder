@@ -10,6 +10,8 @@ class SimpleFunctionsTest(unittest.TestCase):
         self.current_working_directory_path = pathlib.Path(os.getcwd())
         self.sources_path = self.current_working_directory_path.joinpath('sources')
         self.destination_path = self.current_working_directory_path.joinpath('generated')
+        if not os.path.exists(str(self.destination_path)):
+            os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../..")
         os.system(r'python main.py -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path))
