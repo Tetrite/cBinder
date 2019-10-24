@@ -1,4 +1,5 @@
-# cBinder
+# cBinder ![](https://travis-ci.org/Tetrite/cBinder.svg?branch=master)
+
 C bindings generator for Python using cffi
 
 # Develop
