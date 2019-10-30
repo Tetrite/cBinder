@@ -8,7 +8,7 @@ class SourceHeaderPair:
 	def __init__(self, src_path, h_path):
 		self.source_filepath = src_path
 		self.header_filepath = h_path
-		self.includes = IncludesScraper().extract_inludes(self.source_filepath)
+		self.includes = scr.IncludesScraper().extract_inludes(self.source_filepath)
 
 	def __str__(self):
 		return 'Source file path: ' + self.source_filepath.as_posix() + \
