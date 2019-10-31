@@ -38,7 +38,7 @@ class BindingsGenerator:
         if verbosity:
             print('Cleaning up output dir before wheel generation')
         self.cleanup_output_dir()
-        WheelGenerator('.', os.path.basename(self.args.files_path))
+        WheelGenerator('.', os.path.basename(self.args.files_path)).generate_wheel()
 
     def copy_needed_files_to_output_dir(self, pairs):
         for pair in pairs:
