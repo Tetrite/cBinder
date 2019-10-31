@@ -30,12 +30,12 @@ class WheelGenerator:
 			f.write('setuptools.setup(\r')
 			f.write('    name="'+self.package_name+'",\r')
 			f.write('    version="1.0.0",\r')
-			f.write('author_email="tetrite@gmail.com",\r')
-			f.write('description="Package build with cBinder",\r')
-			f.write('url="https://github.com/Tetrite/cBinder",\r')
-			f.write("packages=['"+self.package_name+"'],\r")
-			f.write("package_data={'"+self.package_name+"': ['*.pyd']},\r")
-			f.write('include_package_data=True)')
+			f.write('    author_email="tetrite@gmail.com",\r')
+			f.write('    description="Package build with cBinder",\r')
+			f.write('    url="https://github.com/Tetrite/cBinder",\r')
+			f.write("    packages=['"+self.package_name+"'],\r")
+			f.write("    package_data={'"+self.package_name+"': ['*.pyd']},\r")
+			f.write('    include_package_data=True)')
 
 	def run_wheel_command(self):
 		subprocess.run(["python", "setup.py", "sdist", "bdist_wheel"])

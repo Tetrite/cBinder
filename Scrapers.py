@@ -10,7 +10,7 @@ class DeclarationsScraper:
 
 	def parse_file(self, filepath):
 		self.declarations.clear()
-		header = CppHeaderParser.CppHeader(filepath.name)
+		header = CppHeaderParser.CppHeader(filepath)
 		for fun in header.functions:
 			self.declarations.append(fun['debug'])
 
@@ -22,7 +22,7 @@ class DeclarationsScraper:
 class IncludesScraper:
 
 	def extract_inludes(self, path):
-		header = CppHeaderParser.CppHeader(path.name)
+		header = CppHeaderParser.CppHeader(path)
 		includes = []
 		for inc in header.includes:
 			includes.append(f'#include {inc}')
