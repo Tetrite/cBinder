@@ -3,7 +3,6 @@ import os
 import pathlib
 
 from tests.util.folder_clearing import clear_folder_contents
-import nose
 
 
 class SimpleFunctionsTest(unittest.TestCase):
@@ -22,20 +21,16 @@ class SimpleFunctionsTest(unittest.TestCase):
         os.chdir(self.destination_path)
 
     def test_generate_bindings_to_simple_add_function_integer(self):
-        from tests.simplefunctions.generated import _add
-        sum = _add.lib.add(1, 2)
+        from tests.simplefunctions.generated.sources import add
+        sum = add.add(1, 2)
         self.assertEqual(sum, 3)
 
     def test_generate_bindings_to_simple_add_function_float(self):
-        from tests.simplefunctions.generated import _add
-        sum = _add.lib.addF(1.1, 2.2)
+        from tests.simplefunctions.generated.sources import add
+        sum = add.addF(1.1, 2.2)
         self.assertAlmostEqual(sum, 3.3, places=6)
 
     def test_generate_bindings_to_simple_print_char_function(self):
-        from tests.simplefunctions.generated import _char
-        char = _char.lib.printChar('a'.encode('ascii'))
+        from tests.simplefunctions.generated.sources import char
+        char = char.printChar('a'.encode('ascii'))
         self.assertEqual(char, 97)
-
-
-if __name__ == '__main__':
-    nose.run()
