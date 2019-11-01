@@ -88,7 +88,7 @@ def get_declaration(declaration):
 
 def build_wrapper(name, declarations):
 	with open(name+'.py', 'w+') as f:
-		f.write("import _"+name+"\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+		f.write("from . import _"+name+"\rfrom cffi import FFI\rffi = FFI()\r\n\n")
 		decls = declarations.split(';')
 		decls = [x for x in decls if x != '']
 		for decl in decls:
