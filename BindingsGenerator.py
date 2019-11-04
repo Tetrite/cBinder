@@ -28,7 +28,9 @@ class BindingsGenerator:
             outputname = pair.source_filepath.stem
             sourcename = pair.source_filepath.name
             ffibuilder.cdef(pair.declarations)
-            ffibuilder.set_source('_' + outputname, "',".join(pair.includes), sources=[sourcename])
+            ffibuilder.set_source('_' + outputname, "',".join(pair.includes), sources=[sourcename],
+                                  include_dirs=self.args.include, libraries=self.args.library,
+                                  library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
 
             if verbosity:
