@@ -18,6 +18,10 @@ class DoxygenParser:
         self.declaration_data_list = declaration_data_list
         self.function_metadata_list = []
 
+    def parse_and_get_metadata(self):
+        self.parse_doxygen()
+        return self.function_metadata_list
+
     def parse_doxygen(self):
         for declaration_data in self.declaration_data_list:
             # Data from header:
@@ -28,7 +32,7 @@ class DoxygenParser:
             function_name = self.get_function_name(declaration)
             function_parameters = self.get_function_parameters(doxygen)
 
-            self.function_metadata_list.append(FunctionMetadata(function_name, function_parameters))
+            self.function_metadata_list.append(FunctionMetadata(function_name, declaration, function_parameters))
 
 
     def get_function_name(self, declaration):
@@ -94,8 +98,9 @@ class DoxygenParser:
 
 class FunctionMetadata:
 
-    def __init__(self, name, parameters):
+    def __init__(self, name, declaration_string, parameters):
         self.name = name
+        self.declaration_string = declaration_string
         self.parameters = parameters
 
 

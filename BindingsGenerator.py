@@ -33,7 +33,7 @@ class BindingsGenerator:
 
             if verbosity:
                 print('Generating wrapper script')
-            build_wrapper(outputname, pair.declarations)
+            build_wrapper(outputname, pair.declaration_data_list)
 
         if verbosity:
             print('Cleaning up output dir before wheel generation')

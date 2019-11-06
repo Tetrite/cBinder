@@ -1,5 +1,5 @@
 import re
-
+from DoxygenParser import *
 
 class Argument:
 
@@ -86,11 +86,14 @@ def get_declaration(declaration):
 	return Declaration(declaration)
 
 
-def build_wrapper(name, declarations):
+def build_wrapper(name, declaration_data_list):
 	with open(name+'.py', 'w+') as f:
 		f.write("from . import _"+name+"\rfrom cffi import FFI\rffi = FFI()\r\n\n")
-		decls = declarations.split(';')
-		decls = [x for x in decls if x != '']
+		function_metadata_list = DoxygenParser(declaration_data_list).parse_and_get_metadata()
+
+		decls = []
+		# for declaration_data in declaration_data_list:
+		# 	decls.append(declaration_data.declaration.replace(';', ''))
 		for decl in decls:
 			df = get_declaration(decl)
 			s = str(df)

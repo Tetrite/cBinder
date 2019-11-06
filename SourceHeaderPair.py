@@ -10,6 +10,9 @@ class SourceHeaderPair:
 		self.header_filepath = h_path
 		self.includes = IncludesScraper().extract_inludes(self.source_filepath)
 		self.declarations = DeclarationsScraper(None).parse_and_return_decl(self.header_filepath)
+		declaration_scraper = DeclarationsScraper(None)
+		declaration_scraper.parse_file(self.header_filepath)
+		self.declaration_data_list = declaration_scraper.declarations
 
 	def __str__(self):
 		return 'Source file path: ' + self.source_filepath.as_posix() + \

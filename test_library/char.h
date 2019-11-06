@@ -1,1 +1,0 @@
-int printChar(char a);
