@@ -32,8 +32,9 @@ class DoxygenParser:
             function_name = self.get_function_name(declaration)
             function_parameters = self.get_function_parameters(doxygen)
 
-            self.function_metadata_list.append(FunctionMetadata(function_name, declaration, function_parameters))
-
+            function_metadata = FunctionMetadata(function_name, declaration, function_parameters)
+            function_metadata.set_parameters_c_types()
+            self.function_metadata_list.append(function_metadata)
 
     def get_function_name(self, declaration):
         declaration_parts = re.split('[ ,()]', declaration)
@@ -77,6 +78,7 @@ class DoxygenParser:
         match = matches[0]
         string_preceding_size = re.findall(self.REGEX_PRE_ARRAY_SIZE, match)[0]
         size = match.replace(string_preceding_size, '')
+        size = size.replace(')', '')
         if size.isdigit():
             return int(size)
         return size
@@ -103,10 +105,33 @@ class FunctionMetadata:
         self.declaration_string = declaration_string
         self.parameters = parameters
 
+    def set_parameters_c_types(self):
+        for parameter in self.parameters:
+            name = parameter.name
+            parameters = re.split('\(', self.declaration_string)
+            parameters = re.split('\)', parameters[1])[0]
+            parameters = re.split(',', parameters)
+            parameter_string = None
+            for parameter_str in parameters:
+                definition_splitted = re.split(' ', parameter_str)
+                if name in definition_splitted:
+                    parameter_string = parameter_str
+                    break
+            if parameter_string.find(CType.INT.value) >= 0:
+                parameter.set_c_type(CType.INT)
+            elif parameter_string.find(CType.FLOAT.value) >= 0:
+                parameter.set_c_type(CType.FLOAT)
+
 
 class ParameterType(Enum):
     IN = 'in'
     OUT = 'out'
+
+
+class CType(Enum):
+    INT = 'int'
+    FLOAT = 'float'
+    DOUBLE = 'double'
 
 
 class Parameter:
@@ -114,6 +139,10 @@ class Parameter:
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type
+        self.c_type = None
+
+    def set_c_type(self, c_type):
+        self.c_type = c_type
 
 
 class Array(Parameter):

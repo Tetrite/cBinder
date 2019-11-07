@@ -1,4 +1,3 @@
-#include "returntype.h"
 /**
   * Returns Z for given elemental symbols
   * @param[in]   n         number of elements in arrays
@@ -7,6 +6,6 @@
   * @return                status
   */
 
-int reverse_array_order( const int n,
+int reverse_array_order( int n,
 		int* in_order,
-		int reverse_order[] );
+		int* reverse_order );
