@@ -35,7 +35,10 @@ class BindingsGenerator:
 
             if verbosity:
                 print('Generating wrapper script')
-            build_wrapper(outputname, pair.declarations)
+            if (pair.declaration_data_list[0].doxygen == ''):
+                build_wrapper_without_doxygen(outputname, pair.declarations)
+            else:
+                build_wrapper(outputname, pair.declaration_data_list)
 
         if verbosity:
             print('Cleaning up output dir before wheel generation')
