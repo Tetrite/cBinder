@@ -7,11 +7,24 @@ import shutil
 
 
 class BindingsGenerator:
+    """
+    Class used to generate bindings for each source file using cffi library
+
+    Attributes
+    ----------
+    args : Namespace
+        Arguments parsed by argparse's ArgumentParser
+    """
 
     def __init__(self, args):
         self.args = args
 
     def generate_bindings(self):
+        """
+        Generates bindings and wrapper for each source file found at path given in arguments
+        and builds wheel out of created package
+        """
+
         path = self.args.files_path
         verbosity = self.args.verbose
 
@@ -47,6 +60,15 @@ class BindingsGenerator:
         WheelGenerator('.', os.path.basename(self.args.files_path)).generate_wheel()
 
     def copy_needed_files_to_output_dir(self, pairs):
+        """
+        Copies all source and header files to output directory given in arguments
+
+        Parameters
+        ----------
+        pairs : list
+            List of SourceHeaderPair objects
+        """
+
         for pair in pairs:
             if not os.path.isfile('./' + pair.header_filepath.name):
                 shutil.copy2(str(pair.header_filepath), '.')
@@ -55,6 +77,8 @@ class BindingsGenerator:
             # TODO: copy needed library dependencies here too
 
     def cleanup_output_dir(self):
+        """Cleans output directory leaving only .pyd and .py files"""
+
         for (root, dirs, files) in os.walk(self.args.dest, topdown=False):
             for file in files:
                 if not (file.endswith('.py') or file.endswith('.pyd')):
