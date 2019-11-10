@@ -4,14 +4,29 @@ from Scrapers import *
 
 
 class SourceHeaderPair:
+	"""
+	Class used to hold paths to source and header files
+
+	Attributes
+	----------
+	source_filepath : Path
+		Path object pointing to source file
+	header_filepath : Path
+		Path object pointing to header file
+	includes : list
+		List of include directives strings scraped from source
+	declarations : str
+		String of all declarations scraped from header
+	declaration_data_list : list
+		List of DeclarationData objects
+	"""
 
 	def __init__(self, src_path, h_path):
 		self.source_filepath = src_path
 		self.header_filepath = h_path
 		self.includes = IncludesScraper().extract_inludes(self.source_filepath)
-		self.declarations = DeclarationsScraper(None).parse_and_return_decl(self.header_filepath)
-		declaration_scraper = DeclarationsScraper(None)
-		declaration_scraper.parse_file(self.header_filepath)
+		declaration_scraper = DeclarationsScraper()
+		self.declarations = declaration_scraper.parse_and_return_decl(self.header_filepath)
 		self.declaration_data_list = declaration_scraper.declarations
 
 	def __str__(self):
@@ -19,8 +34,21 @@ class SourceHeaderPair:
 				' ; Header file path: ' + self.header_filepath.as_posix()
 
 
-# takes  list of PurePath objects
 def create_pairs(sources: list):
+	"""
+	Creates SourceHeaderPair objects using list of paths
+
+	Parameters
+	----------
+	sources : list
+		List of Path objects
+
+	Returns
+	-------
+	pairs : list
+		List of SourceHeaderPair objects
+	"""
+
 	pairs = []
 	while sources:
 		filepath = sources.pop()
@@ -40,14 +68,42 @@ def create_pairs(sources: list):
 
 
 def get_paths(dirpath):
-	sources = []
+	"""
+	Gets paths to all source and header files in directory
+
+	Paramters
+	---------
+	dirpath : str
+		Library directory path string
+
+	Returns
+	-------
+	paths : list
+		List of Path objects
+	"""
+
+	paths = []
 	for path, subdirs, files in os.walk(dirpath):
 		for name in files:
 			if name.endswith(('.c', '.h')):
-				sources.append(pathlib.Path(path, name))
-	return sources
+				paths.append(pathlib.Path(path, name))
+	return paths
 
 
 def get_sourceheader_pairs(dirpath):
+	"""
+	Gets paths to all source and header files and returns SourceHeaderPair objects
+
+	Parameters
+	----------
+	dirpath : str
+		Library directory path string
+
+	Returns
+	-------
+	list
+		List of SourceHeaderPair objects
+	"""
+
 	paths = get_paths(dirpath)
 	return create_pairs(paths)
