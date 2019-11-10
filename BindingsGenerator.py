@@ -1,6 +1,6 @@
-from SourceHeaderPair import *
-from WrapperBuilder import *
-from WheelGenerator import *
+from SourceHeaderPair import get_sourceheader_pairs
+from WrapperBuilder import build_wrapper, build_wrapper_without_doxygen
+from WheelGenerator import WheelGenerator
 from cffi import FFI
 import os
 import shutil
@@ -25,14 +25,14 @@ class BindingsGenerator:
         and builds wheel out of created package
         """
 
-        path = self.args.files_path
+        paths = self.args.files_path
         verbosity = self.args.verbose
 
-        pairs = get_sourceheader_pairs(path)
+        pairs = get_sourceheader_pairs(paths)
 
         if verbosity:
             print(f'Copying needed files to destination directory')
-        self.copy_needed_files_to_output_dir(pairs)
+        self._copy_needed_files_to_output_dir(pairs)
         for pair in pairs:
             if verbosity:
                 print(f'Processing {pair.header_filepath.name} and {pair.source_filepath.name}')
@@ -48,7 +48,7 @@ class BindingsGenerator:
 
             if verbosity:
                 print('Generating wrapper script')
-            if (pair.declaration_data_list[0].doxygen == ''):
+            if pair.declaration_data_list[0].doxygen == '':
                 build_wrapper_without_doxygen(outputname, pair.declarations)
             else:
                 build_wrapper(outputname, pair.declaration_data_list)
@@ -59,26 +59,14 @@ class BindingsGenerator:
         # self.cleanup_output_dir()
         WheelGenerator('.', os.path.basename(self.args.files_path)).generate_wheel()
 
-    def copy_needed_files_to_output_dir(self, pairs):
-        """
-        Copies all source and header files to output directory given in arguments
-
-        Parameters
-        ----------
-        pairs : list
-            List of SourceHeaderPair objects
-        """
-
+    def _copy_needed_files_to_output_dir(self, pairs):
         for pair in pairs:
             if not os.path.isfile('./' + pair.header_filepath.name):
                 shutil.copy2(str(pair.header_filepath), '.')
             if not os.path.isfile('./' + pair.source_filepath.name):
                 shutil.copy2(str(pair.source_filepath), '.')
-            # TODO: copy needed library dependencies here too
 
-    def cleanup_output_dir(self):
-        """Cleans output directory leaving only .pyd and .py files"""
-
+    def _cleanup_output_dir(self):
         for (root, dirs, files) in os.walk(self.args.dest, topdown=False):
             for file in files:
                 if not (file.endswith('.py') or file.endswith('.pyd')):

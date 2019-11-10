@@ -26,6 +26,10 @@ def main():
 	args.dest = os.path.abspath(args.dest)
 	for i, path in enumerate(args.files_path):
 		args.files_path[i] = os.path.abspath(path)
+	for i, path in enumerate(args.include):
+		args.include[i] = os.path.abspath(path)
+	for i, path in enumerate(args.lib_dir):
+		args.lib_dir[i] = os.path.abspath(path)
 	if not os.path.isdir(args.dest):
 		os.mkdir(args.dest)
 	os.chdir(args.dest)
