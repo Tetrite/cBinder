@@ -27,8 +27,8 @@ class BindingsGenerator:
 
         paths = self.args.files_path
         verbosity = self.args.verbose
-
-        pairs = get_sourceheader_pairs(paths)
+        # paths[0] for temporary compability
+        pairs = get_sourceheader_pairs(paths[0])
 
         if verbosity:
             print(f'Copying needed files to destination directory')
@@ -57,7 +57,7 @@ class BindingsGenerator:
             print('Cleaning up output dir before wheel generation')
         # Cleaning up a directory causes imports to fail in some test cases under linux
         # self.cleanup_output_dir()
-        WheelGenerator('.', os.path.basename(self.args.files_path)).generate_wheel()
+        WheelGenerator('.', os.path.basename(paths[0])).generate_wheel()
 
     def _copy_needed_files_to_output_dir(self, pairs):
         for pair in pairs:
