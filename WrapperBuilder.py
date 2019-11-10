@@ -132,29 +132,36 @@ class Declaration(FunctionMetadata):
 def get_declaration(declaration):
     return Declaration(declaration)
 
+def _build_wrapper_for_header_with_doxygen(name, f, header):
+    declaration_data_list = header.declaration_data_list
+    function_metadata_list = DoxygenParser(declaration_data_list).parse_and_get_metadata()
 
-def build_wrapper(name, declaration_data_list):
-    with open(name + '.py', 'w+') as f:
-        f.write("from . import _" + name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
-        function_metadata_list = DoxygenParser(declaration_data_list).parse_and_get_metadata()
-
-        for function_metadata in function_metadata_list:
-            declaration = Declaration(function_metadata.name, function_metadata.declaration_string,
-                                      function_metadata.parameters)
-            s = str(declaration)
-            s = s + declaration.build_body(name)
-            s = s + '\r\n\n'
-            f.write(s)
+    for function_metadata in function_metadata_list:
+        declaration = Declaration(function_metadata.name, function_metadata.declaration_string,
+                                  function_metadata.parameters)
+        s = str(declaration)
+        s = s + declaration.build_body(name)
+        s = s + '\r\n\n'
+        f.write(s)
 
 
-def build_wrapper_without_doxygen(name, declarations):
-    with open(name + '.py', 'w+') as f:
-        f.write("from . import _" + name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
-        decls = declarations.split(';')
-        decls = [x for x in decls if x != '']
-        for decl in decls:
-            df = SimpleDeclaration(decl)
-            s = str(df)
-            s = s + df.build_body(name)
-            s = s + '\r\n\n'
-            f.write(s)
+def _build_wrapper_for_header_without_doxygen(name, f, header):
+    declarations = header.declarations
+    decls = declarations.split(';')
+    decls = [x for x in decls if x != '']
+    for decl in decls:
+        df = SimpleDeclaration(decl)
+        s = str(df)
+        s = s + df.build_body(name)
+        s = s + '\r\n\n'
+        f.write(s)
+
+def build_wrapper_for_headers(header_name, source_name, headers):
+    with open(header_name + '.py', 'w+') as f:
+        f.write("from . import _" + source_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+
+        for header in headers:
+            if (header.declaration_data_list[0].doxygen == ''):
+                _build_wrapper_for_header_without_doxygen(header_name, f, header)
+            else:
+                _build_wrapper_for_header_with_doxygen(header_name, f, header)
