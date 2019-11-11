@@ -15,9 +15,9 @@ class CType(Enum):
     DOUBLE_POINTER = 'double *'
 
     def get_ffi_string_def(self):
-        if self.name == CType.INT or self.name == self.INT_POINTER.name:
+        if self.name == self.INT.name or self.name == self.INT_POINTER.name:
             return 'int'
-        elif self.name == CType.FLOAT or self.name == self.FLOAT_POINTER.name:
+        elif self.name == self.FLOAT.name or self.name == self.FLOAT_POINTER.name:
             return 'float'
-        elif self.name == CType.DOUBLE or self.name == self.DOUBLE_POINTER.name:
+        elif self.name == self.DOUBLE.name or self.name == self.DOUBLE_POINTER.name:
             return 'double'
