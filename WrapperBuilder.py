@@ -4,47 +4,58 @@ from Function import *
 def get_declaration(declaration):
     return Declaration(declaration)
 
+# TODO: better tool for idendation
+
 # TODO: what does this function name mean?
 def _get_rewriter_into_array(name):
-    s = '    for i,v in enumerate(' + name + '):\n'
-    s = s + '        ' + name + '2[i] = ' + name + '[i]\n'
-    return s
+    return [
+        f'\tfor i,v in enumerate({name}):',
+        f'\t\t{name}2[i] = {name}[i]'
+    ]
 
 def _get_rewriter_into_list(name):
-    s = '    for i,v in enumerate(' + name + '2):\n'
-    s = s + '        ' + name + '[i] = ' + name + '2[i]\n'
-    return s
+    return [
+        f'\tfor i,v in enumerate({name}):',
+        f'\t\t{name}[i] = {name}2[i]'
+    ]
 
 # TODO: just appending 2 to the parameter is not safe, there may be collisions
 #       use more sophisticated mangling, for example prepend/append $
 def _build_python_function_wrapper_for_declaration(module_name, declaration):
-    s = 'def ' + declaration.name + '('
-    s = s + ','.join([x.name for x in declaration.parameters])
-    s = s + '):\n'
+    lines = [
+        f'def {declaration.name}(' + ','.join([x.name for x in declaration.parameters]) + '):'
+    ]
 
     for parameter in declaration.parameters:
         if parameter.is_out and parameter.is_array:
             size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-            s = s + '    ' + parameter.name + '2 = ffi.new("' + parameter.c_type.value + '[]", ' + size + ')\n'
-            s = s + _get_rewriter_into_array(parameter.name)
+            lines.append(f'\t{parameter.name}2 = ffi.new("{parameter.c_type.value}[]", {size})')
+            lines += _get_rewriter_into_array(parameter.name)
         else:
-            s = s + '    ' + parameter.name + '2 = ' + parameter.name + '\n'
+            lines.append(f'\t{parameter.name}2 = {parameter.name}')
 
-    s = s + '    ' + ('ret = ' if not declaration.returns.is_void else '') + '_' + module_name + '.lib.' + \
-        declaration.name + '(' + ','.join([x.name + '2' for x in declaration.parameters]) + ')\n'
+    lines.append(
+        '\t'
+        + ('ret = ' if not declaration.returns.is_void else '')
+        + f'_{module_name}.lib.{declaration.name}('
+        + ','.join([x.name + '2' for x in declaration.parameters])
+        + ')')
 
     for parameter in declaration.parameters:
         if not parameter.is_out:
             continue
         if parameter.is_array:
-            s = s + _get_rewriter_into_list(parameter.name)
+            lines += _get_rewriter_into_list(parameter.name)
         else:
-            s = s + '    ' + parameter.name + ' = ' + parameter.name + '2\n'
+            lines.append(f'\t{parameter.name} = {parameter.name}2')
 
     if not declaration.returns.is_void:
-        s = s + '    return ret'
+        lines.append(f'\treturn ret')
 
-    return s + '\n\n'
+    lines.append('')
+    lines.append('')
+
+    return '\n'.join(lines)
 
 def _build_wrapper_for_declaration(header_name, f, declaration):
     s = _build_python_function_wrapper_for_declaration(header_name, declaration)
