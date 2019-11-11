@@ -20,7 +20,8 @@ def _get_pairs_and_remainder(headers, sources):
             if header.filepath.stem == source.filepath.stem:
                 pairs.append((header, source))
                 break
-        lone_sources.append(source)
+        else:
+            lone_sources.append(source)
 
     return pairs, lone_sources
 
