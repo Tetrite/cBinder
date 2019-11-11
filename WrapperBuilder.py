@@ -65,7 +65,7 @@ def _build_wrapper_for_header(header_name, f, header):
 
 def build_wrapper_for_header(header_name, header):
     with open(header_name + '.py', 'w+') as f:
-        f.write("from . import _" + source_name + "\nfrom cffi import FFI\nffi = FFI()\n\n")
+        f.write("from . import _" + header_name + "\nfrom cffi import FFI\nffi = FFI()\n\n")
 
         _build_wrapper_for_header(header_name, f, header)
 
