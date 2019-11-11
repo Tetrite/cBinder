@@ -1,22 +1,14 @@
+unique_identifier_suffix = '__internal'
+
 # TODO: better tool for idendation
 
-# TODO: what does this function name mean?
-def _get_rewriter_into_array(name):
+def _build_array_copy(name, _from, to):
     return [
         f'\tfor i,v in enumerate({name}):',
-        f'\t\t{name}2[i] = {name}[i]'
+        f'\t\t{name}{_from}[i] = {name}{to}[i]'
     ]
 
 
-def _get_rewriter_into_list(name):
-    return [
-        f'\tfor i,v in enumerate({name}):',
-        f'\t\t{name}[i] = {name}2[i]'
-    ]
-
-
-# TODO: just appending 2 to the parameter is not safe, there may be collisions
-#       use more sophisticated mangling, for example prepend/append $
 def _build_python_function_wrapper_for_declaration(module_name, declaration):
     lines = [
         f'def {declaration.name}(' + ','.join([x.name for x in declaration.parameters]) + '):'
@@ -25,25 +17,25 @@ def _build_python_function_wrapper_for_declaration(module_name, declaration):
     for parameter in declaration.parameters:
         if parameter.is_out and parameter.is_array:
             size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-            lines.append(f'\t{parameter.name}2 = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
-            lines += _get_rewriter_into_array(parameter.name)
+            lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+            lines += _build_array_copy(parameter.name, unique_identifier_suffix, '')
         else:
-            lines.append(f'\t{parameter.name}2 = {parameter.name}')
+            lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}')
 
     lines.append(
         '\t'
         + ('ret = ' if not declaration.returns.is_void else '')
         + f'_{module_name}.lib.{declaration.name}('
-        + ','.join([x.name + '2' for x in declaration.parameters])
+        + ','.join([x.name + unique_identifier_suffix for x in declaration.parameters])
         + ')')
 
     for parameter in declaration.parameters:
         if not parameter.is_out:
             continue
         if parameter.is_array:
-            lines += _get_rewriter_into_list(parameter.name)
+            lines += _build_array_copy(parameter.name, '', unique_identifier_suffix)
         else:
-            lines.append(f'\t{parameter.name} = {parameter.name}2')
+            lines.append(f'\t{parameter.name} = {parameter.name}{unique_identifier_suffix}')
 
     if not declaration.returns.is_void:
         lines.append(f'\treturn ret')
