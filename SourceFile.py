@@ -24,9 +24,8 @@ class SourceFile:
 
     def get_declarations(self):
         declaration_scraper = DeclarationsScraper()
-        declarations = declaration_scraper.parse_and_return_decl(self.filepath.as_posix())
-        declarations = declarations.replace('{', ';')
-        return declarations
+        declaration_scraper.parse_and_return_decl(self.filepath.as_posix())
+        return declaration_scraper.declaration_data_list
 
 
 def get_source_files(dirpath):

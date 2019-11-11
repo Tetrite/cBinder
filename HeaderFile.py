@@ -23,7 +23,7 @@ class HeaderFile:
         self.filepath = h_path
         declaration_scraper = DeclarationsScraper()
         self.declarations = declaration_scraper.parse_and_return_decl(self.filepath.as_posix())
-        self.declaration_data_list = declaration_scraper.declarations
+        self.declaration_data_list = declaration_scraper.declaration_data_list
         self.includes = IncludesScraper().extract_inludes(self.filepath.as_posix())
 
     def __str__(self):

@@ -61,7 +61,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper(name, header)
+            build_wrapper(name, header.declaration_data_list)
 
     def _generate_bindings_for_remainder(self, sources):
         """Generates bindings and wrapper the remainder of source files"""
@@ -78,12 +78,14 @@ class BindingsGenerator:
             if verbosity:
                 print(f'Compiling and creating bindings for {name}')
 
+            declaration_data_list = source.get_declarations()
             ffibuilder = FFI()
-            ffibuilder.cdef(source.get_declarations())
+            ffibuilder.cdef(' '.join([x.declaration for x in declaration_data_list]))
             ffibuilder.set_source('_'+name, '\n'.join(source.includes), sources=[source.filepath],
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
+            build_wrapper(name, declaration_data_list)
 
     def generate_bindings(self):
         """
