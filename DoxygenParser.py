@@ -5,20 +5,54 @@ from FunctionParameterTraits import *
 
 class DoxygenParser:
     """
-    Get metadata about a function from doxygen comment
+    Class used to retrieve information about parameters from doxygen comment
+
+    Attributes
+    ----------
+    doxygen : str
+        Single doxygen comment
+    metadata : DoxygenFunctionMetadata
+        Metadata about parameters parsed inside the class
     """
+
     REGEX_IN_PARAM_NAME = r'@param\[in\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+    """ REGEX_IN_PARAM_NAME 
+        Regex used to retrieve IN parameter name from doxygen comment line
+        @param\[in\]  <-- indicates IN parameter
+        [s]* <-- any number of whitespace characters
+        ([a-zA-Z_][a-zA-Z0-9_]*) <-- parameter name (starts with a character, not a number)
+        For example:        
+        '* @param[in]   in_order   sample array (array of size n)'
+        retrieves string 'in_order'
+    """
     REGEX_OUT_PARAM_NAME = r'@param\[out\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+    """ REGEX_OUT_PARAM_NAME 
+        Regex used to retrieve OUT parameter name from doxygen comment line
+        @param\[out\]  <-- indicates OUT parameter
+        The rest - just like in REGEX_IN_PARAM_NAME
+    """
     REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9])\)'
+    """ REGEX_ARRAY_SIZE 
+        Regex used to retrieve size of an array
+        For example:        
+        '* @param[in]   in_order   sample array (array of size n)'
+        retrieves string 'n'
+    """
 
     def __init__(self, doxygen):
         self.doxygen = doxygen
         self.metadata = self.parse()
 
     def get_parameter(self, name):
+        """ Returns a parameter from a list for a given parameter name """
         return self.metadata.get_parameter(name)
 
     def parse(self):
+        """ Executes parsing of a doxygen comment (retrieves information about parameters)
+            -parameter type (IN/OUT)
+            -whether or not a parameter is an arry
+                -size of an array
+        """
         function_parameters = self.get_function_parameters(self.doxygen)
         return DoxygenFunctionMetadata(function_parameters)
 
@@ -76,7 +110,16 @@ class DoxygenParser:
 
 
 class DoxygenFunctionMetadata:
+    """
+    Class used to represent metadata about a certain function
+    It provides methods for accessing descriptions of function's parameters
 
+    Attributes
+    ----------
+    parameters : list
+        List of DoxygenFunctionParameters - every element
+        in a list contains description of a single parameter, that was read while parsing
+    """
     def __init__(self, parameters):
         self.parameters = parameters
 
@@ -103,13 +146,31 @@ class DoxygenFunctionMetadata:
 
 
 class DoxygenFunctionParameter:
+    """
+    Class used to represent a function parameter - it contains information that
+    was gathered during the parsing of a doxygen comment
 
+    Attributes
+    ----------
+    name: str
+        Name of a parameter
+    param_type: ParameterType
+        Type of a parameter. It can be IN or OUT
+    """
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type
 
 
 class DoxygenFunctionArrayParameter(DoxygenFunctionParameter):
+    """
+    Class used to represent a function parameter that is an array
+
+    Attributes
+    ----------
+    size:
+        Size of an array (int or str)
+    """
 
     def __init__(self, name, param_type: ParameterType, size):
         super().__init__(name, param_type)
