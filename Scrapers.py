@@ -7,28 +7,21 @@ class DeclarationsScraper:
 
     Attributes
     ----------
-    declarations : list
+    declaration_data_list : list
         A list of scraped declarations in DeclarationData object
     """
 
     def __init__(self):
-        self.declarations = []
+        self.declaration_data_list = []
 
-    def parse_file(self, filepath):
-        """
-        Parses file at given path and fills declarations attribute with DeclarationData objects
+    def _parse_file(self, filepath):
+        """Parses file at given path and fills declarations attribute with DeclarationData objects"""
 
-        Parameters
-        ----------
-        filepath : str
-            Filepath string
-        """
-
-        self.declarations.clear()
-        header = CppHeaderParser.CppHeader(filepath)
-        for fun in header.functions:
+        self.declaration_data_list.clear()
+        file = CppHeaderParser.CppHeader(filepath)
+        for fun in file.functions:
             doxygen_comment = fun['doxygen'] if 'doxygen' in fun.keys() else ''
-            self.declarations.append(DeclarationData(doxygen_comment, fun['debug']))
+            self.declaration_data_list.append(DeclarationData(doxygen_comment, fun['debug']))
 
     def parse_and_return_decl(self, filepath):
         """
@@ -38,16 +31,15 @@ class DeclarationsScraper:
         ----------
         filepath : str
             Filepath string
-
         Returns
         -------
         str
             String of declarations' strings joined together
         """
 
-        self.parse_file(filepath)
+        self._parse_file(filepath)
         declaration_strings = []
-        for declaration_data in self.declarations:
+        for declaration_data in self.declaration_data_list:
             declaration_strings.append(declaration_data.declaration)
         return ' '.join(declaration_strings)
 
@@ -93,4 +85,4 @@ class DeclarationData:
 
     def __init__(self, doxygen_comment, declaration_string):
         self.doxygen = doxygen_comment
-        self.declaration = declaration_string
+        self.declaration = declaration_string.replace('{', ';')
