@@ -1,160 +1,68 @@
 from DoxygenParser import *
+from Function import *
 
+def get_declaration(declaration):
+    return Declaration(declaration)
 
-class Argument:
+# TODO: what does this function name mean?
+def _get_rewriter_into_array(name):
+    s = '    for i,v in enumerate(' + name + '):\r'
+    s = s + '        ' + name + '2[i] = ' + name + '[i]\r'
+    return s
 
-    def __init__(self, name, typ):
-        self.name = name
-        self.type = typ
-        self.struct = None
-        self.is_out_param = True  # TODO: identify out params
+def _get_rewriter_into_list(name):
+    s = '    for i,v in enumerate(' + name + '2):\r'
+    s = s + '        ' + name + '[i] = ' + name + '2[i]\r'
+    return s
 
-    def __str__(self):
-        return self.name + (':' + self.struct if self.struct else '')
+# TODO: just appending 2 to the parameter is not safe, there may be collisions
+#       use more sophisticated mangling, for example prepend/append $
+def _build_python_function_wrapper_for_declaration(module_name, declaration):
+    s = 'def ' + declaration.name + '('
+    s = s + ','.join([x.name for x in declaration.parameters])
+    s = s + '):\r'
 
+    for parameter in declaration.parameters:
+        if parameter.is_out and parameter.is_array:
+            size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+            s = s + '    ' + parameter.name + '2 = ffi.new("' + parameter.c_type.value + '[]", ' + size + ')\r'
+            s = s + _get_rewriter_into_array(parameter.name)
+        else:
+            s = s + '    ' + parameter.name + '2 = ' + parameter.name + '\r'
 
-def get_arguments(parts):
-    args = []
-    arg, parts = get_argument(parts)
-    args.append(arg)
-    while parts:
-        arg, parts = get_argument(parts)
-        args.append(arg)
-    return args
+    s = s + '    ' + ('ret = ' if not declaration.returns.is_void else '') + '_' + module_name + '.lib.' + \
+        declaration.name + '(' + ','.join([x.name + '2' for x in declaration.parameters]) + ')\r'
 
+    for parameter in declaration.parameters:
+        if not parameter.is_out:
+            continue
+        if parameter.is_array:
+            s = s + _get_rewriter_into_list(parameter.name)
+        else:
+            s = s + '    ' + parameter.name + ' = ' + parameter.name + '2\r'
 
-def get_argument(parts):
-    if not parts:
-        return None, None
-    arg = Argument(parts[1], parts[0])
-    if len(parts) > 2 and parts[2] == '[':
-        arg.struct = 'list'
-        return arg, parts[4:]
-    return arg, parts[2:]
+    if not declaration.returns.is_void:
+        s = s + '    return ret'
 
+    return s + '\r\n\n'
 
-class SimpleDeclaration:
-
-    def __init__(self, declaration):
-        parts = re.split('[ ,()]', declaration)
-        parts = [x for x in parts if x != '' and x != ';']
-        self.is_void = parts[0] == 'void'
-        self.name = parts[1]
-        self.arguments = get_arguments(parts[2:])
-
-    def __str__(self):
-        s = 'def ' + self.name + '('
-        s = s + ','.join([str(x) for x in self.arguments])
-        s = s + '):\r'
-        return s
-
-    def get_rewriter_into_array(self, name):
-        s = '    for i,v in enumerate(' + name + '):\r'
-        s = s + '        ' + name + '2[i] = ' + name + '[i]\r'
-        return s
-
-    def get_rewriter_into_list(self, name):
-        s = '    for i,v in enumerate(' + name + '2):\r'
-        s = s + '        ' + name + '.append(' + name + '2[i])\r'
-        return s
-
-    def build_body(self, module_name):
-        s = ''
-        for arg in self.arguments:
-            if arg.struct:
-                # TODO: get size of array to be allocated
-                s = s + '    ' + arg.name + '2 = ffi.new("' + arg.type + '[]", 5)\r'
-                s = s + self.get_rewriter_into_array(arg.name)
-            else:
-                s = s + '    ' + arg.name + '2 = ' + arg.name + '\r'
-        s = s + '    ' + ('ret = ' if not self.is_void else '') + '_' + module_name + '.lib.' + \
-            self.name + '(' + ','.join([x.name + '2' for x in self.arguments]) + ')\r'
-        for arg in self.arguments:
-            if not arg.is_out_param:
-                continue
-            if arg.struct:
-                s = s + self.get_rewriter_into_list(arg.name)
-            else:
-                s = s + '    ' + arg.name + ' = ' + arg.name + '2\r'
-
-        if not self.is_void:
-            s = s + '    return ret'
-        return s
-
-
-class Declaration(FunctionMetadata):
-
-    def __init__(self, name, declaration_string, parameters):
-        super().__init__(name, declaration_string, parameters)
-        self.is_void = False
-
-    def __str__(self):
-        s = 'def ' + self.name + '('
-        s = s + ','.join([x.name for x in self.parameters])
-        s = s + '):\r'
-        return s
-
-    def get_rewriter_into_array(self, name):
-        s = '    for i,v in enumerate(' + name + '):\r'
-        s = s + '        ' + name + '2[i] = ' + name + '[i]\r'
-        return s
-
-    def get_rewriter_into_list(self, name):
-        s = '    for i,v in enumerate(' + name + '2):\r'
-        s = s + '        ' + name + '.append(' + name + '2[i])\r'
-        return s
-
-    def build_body(self, module_name):
-        s = ''
-        for parameter in self.parameters:
-            if isinstance(parameter.param_type, type(ParameterType.OUT)) and isinstance(parameter, Array):
-                # TODO: get size of array to be allocated
-                s = s + '    ' + parameter.name + '2 = ffi.new("' + parameter.c_type.value + '[]", ' + str(
-                    parameter.size) + ')\r'
-                s = s + self.get_rewriter_into_array(parameter.name)
-            else:
-                s = s + '    ' + parameter.name + '2 = ' + parameter.name + '\r'
-        s = s + '    ' + ('ret = ' if not self.is_void else '') + '_' + module_name + '.lib.' + \
-            self.name + '(' + ','.join([x.name + '2' for x in self.parameters]) + ')\r'
-        for parameter in self.parameters:
-            if not isinstance(parameter.param_type, type(ParameterType.OUT)):
-                continue
-            if isinstance(parameter, Array):
-                s = s + self.get_rewriter_into_list(parameter.name)
-            else:
-                s = s + '    ' + parameter.name + ' = ' + parameter.name + '2\r'
-
-        if not self.is_void:
-            s = s + '    return ret'
-        return s
-
-
-def _build_wrapper_for_declaration_with_doxygen(name, f, declaration_data):
-    function_metadata_list = DoxygenParser().parse_and_get_metadata([declaration_data])
-
-    for function_metadata in function_metadata_list:
-        declaration = Declaration(function_metadata.name, function_metadata.declaration_string,
-                                  function_metadata.parameters)
-        s = str(declaration)
-        s = s + declaration.build_body(name)
-        s = s + '\r\n\n'
-        f.write(s)
-
-
-def _build_wrapper_for_declaration_without_doxygen(name, f, declaration_data):
-    df = SimpleDeclaration(declaration_data.declaration)
-    s = str(df)
-    s = s + df.build_body(name)
-    s = s + '\r\n\n'
+def _build_wrapper_for_declaration(header_name, f, declaration):
+    s = _build_python_function_wrapper_for_declaration(header_name, declaration)
     f.write(s)
 
+def _build_wrapper_for_header(header_name, f, header):
+    for decl in header.declarations:
+        _build_wrapper_for_declaration(header_name, f, decl)
 
-def build_wrapper(name, declaration_data_list):
-    with open(name + '.py', 'w+') as f:
-        f.write("from . import _" + name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+def build_wrapper_for_header(header_name, header):
+    with open(header_name + '.py', 'w+') as f:
+        f.write("from . import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
 
-        for declaration_data in declaration_data_list:
-            if declaration_data.doxygen == '':
-                _build_wrapper_for_declaration_without_doxygen(name, f, declaration_data)
-            else:
-                _build_wrapper_for_declaration_with_doxygen(name, f, declaration_data)
+        _build_wrapper_for_header(header_name, f, header)
+
+def build_wrapper_for_declarations(header_name, declarations):
+    with open(header_name + '.py', 'w+') as f:
+        f.write("from . import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+
+        for decl in declarations:
+            _build_wrapper_for_declaration(header_name, f, decl)

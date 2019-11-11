@@ -1,6 +1,6 @@
 import re
-from enum import Enum
 
+from FunctionParameterTraits import *
 
 class DoxygenParser:
     """
@@ -14,25 +14,13 @@ class DoxygenParser:
     REGEX_ARRAY_SIZE = r'\(array of size [A-Za-z0-9]\)'
     REGEX_PRE_ARRAY_SIZE = r'\(array of size '
 
-    def parse_and_get_metadata(self, declaration_data_list):
-        function_metadata_list = []
-        for declaration_data in declaration_data_list:
-            # Data from header:
-            doxygen = declaration_data.doxygen
-            declaration = declaration_data.declaration
+    def __init__(self, doxygen):
+        self.doxygen = doxygen
+        self.metadata = self.parse()
 
-            # Data to be taken from declaration data:
-            function_name = self.get_function_name(declaration)
-            function_parameters = self.get_function_parameters(doxygen)
-
-            function_metadata = FunctionMetadata(function_name, declaration, function_parameters)
-            function_metadata.set_parameters_c_types()
-            function_metadata_list.append(function_metadata)
-        return function_metadata_list
-
-    def get_function_name(self, declaration):
-        declaration_parts = re.split('[ ,()]', declaration)
-        return declaration_parts[1]
+    def parse(self):
+        function_parameters = self.get_function_parameters(self.doxygen)
+        function_metadata = FunctionMetadata(function_parameters)
 
     def get_function_parameters(self, doxygen):
         lines = doxygen.splitlines()
@@ -55,8 +43,8 @@ class DoxygenParser:
 
         array_size = self.get_size_of_array(line)
         if array_size is not None:
-            return Array(parameter_name, parameter_type, array_size)
-        return Parameter(parameter_name, parameter_type)
+            return DoxygenFunctionArrayParameter(parameter_name, parameter_type, array_size)
+        return DoxygenFunctionParameter(parameter_name, parameter_type)
 
     def get_parameter_type_from_line(self, line):
         if len(re.findall("@param\[in\]", line)) > 0:
@@ -92,55 +80,56 @@ class DoxygenParser:
         return match.replace(string_preceding_name, '')
 
 
-class FunctionMetadata:
+class DoxygenFunctionMetadata:
 
-    def __init__(self, name, declaration_string, parameters):
-        self.name = name
-        self.declaration_string = declaration_string
+    def __init__(self, parameters):
         self.parameters = parameters
 
-    def set_parameters_c_types(self):
-        for parameter in self.parameters:
-            name = parameter.name
-            parameters = re.split('\(', self.declaration_string)
-            parameters = re.split('\)', parameters[1])[0]
-            parameters = re.split(',', parameters)
-            parameter_string = None
-            for parameter_str in parameters:
-                definition_splitted = re.split(' ', parameter_str)
-                if name in definition_splitted:
-                    parameter_string = parameter_str
-                    break
-            if parameter_string.find(CType.INT.value) >= 0:
-                parameter.set_c_type(CType.INT)
-            elif parameter_string.find(CType.FLOAT.value) >= 0:
-                parameter.set_c_type(CType.FLOAT)
+    def get_parameter(self, name):
+        for param in self.parameters:
+            if param.name == name:
+                return param
+
+        return None
+
+    def param_type(self, name):
+        for param in self.parameters:
+            if param.name == name:
+                return param.param_type
+
+        return None
+
+    def is_array(self, name):
+        for param in self.parameters:
+            if isinstance(param, DoxygenFunctionArrayParameter):
+                return True
+
+        return False
 
 
-class ParameterType(Enum):
-    IN = 'in'
-    OUT = 'out'
-
-
-class CType(Enum):
-    INT = 'int'
-    FLOAT = 'float'
-    DOUBLE = 'double'
-
-
-class Parameter:
+class DoxygenFunctionParameter:
 
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type
-        self.c_type = None
-
-    def set_c_type(self, c_type):
-        self.c_type = c_type
 
 
-class Array(Parameter):
+class DoxygenFunctionArrayParameter(DoxygenFunctionParameter):
 
     def __init__(self, name, param_type: ParameterType, size):
         super().__init__(name, param_type)
         self.size = size
+
+
+# For debugging puproses:
+def main():
+    import Scrapers
+    scr = Scrapers.DeclarationsScraper()
+    scr.parse_file(
+        "C:\\Users\\Mateusz\\Desktop\\AGH\\Semestr7\\Inżynierka\\cBinder\\tests\\functionwithdoxygen\\sources\\ex_doxygen.h")
+    parser = DoxygenParser(scr.declarations[0])
+    parser.metadata
+
+
+if __name__ == '__main__':
+    main()

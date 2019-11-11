@@ -1,6 +1,6 @@
 from HeaderFile import get_header_files
 from SourceFile import get_source_files
-from WrapperBuilder import build_wrapper
+from WrapperBuilder import build_wrapper_for_header, build_wrapper_for_declarations
 from WheelGenerator import WheelGenerator
 from cffi import FFI
 import os
@@ -56,12 +56,13 @@ class BindingsGenerator:
                 print(f'Compiling and creating bindings for {name}')
 
             ffibuilder = FFI()
-            ffibuilder.cdef(header.declarations)
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.declarations)
+            ffibuilder.cdef(all_declaration_strings)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper(name, header.declaration_data_list)
+            build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_remainder(self, sources):
         """Generates bindings and wrapper the remainder of source files"""
@@ -85,7 +86,7 @@ class BindingsGenerator:
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper(name, declaration_data_list)
+            build_wrapper_for_declarations(name, declaration_data_list)
 
     def generate_bindings(self):
         """

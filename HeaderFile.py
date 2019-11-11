@@ -1,6 +1,6 @@
 import os
 import pathlib
-from Scrapers import DeclarationsScraper, IncludesScraper
+from Scrapers import *
 
 
 class HeaderFile:
@@ -21,10 +21,8 @@ class HeaderFile:
 
     def __init__(self, h_path):
         self.filepath = h_path
-        declaration_scraper = DeclarationsScraper()
-        self.declarations = declaration_scraper.parse_and_return_decl(self.filepath.as_posix())
-        self.declaration_data_list = declaration_scraper.declaration_data_list
-        self.includes = IncludesScraper().extract_inludes(self.filepath.as_posix())
+        self.declarations = get_function_declarations(self.filepath)
+        self.includes = get_includes(self.filepath)
 
     def __str__(self):
         return 'Header file path: ' + self.filepath.as_posix()
