@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 
 class WheelGenerator:
@@ -55,4 +56,4 @@ class WheelGenerator:
 
 	def run_wheel_command(self):
 		"""Runs wheel command"""
-		subprocess.run(["python", "setup.py", "sdist", "bdist_wheel"])
+		subprocess.run([sys.executable, "setup.py", "sdist", "bdist_wheel"])
