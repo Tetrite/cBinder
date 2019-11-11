@@ -6,7 +6,7 @@ void func(double out[]){
     }
 }
 
-double sum(double a, double out[]){
+double sum(double a, const double out[]){
     double s = a;
 	for(int i=0;i<5;i++){
         s += out[i];

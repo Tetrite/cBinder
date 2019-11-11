@@ -16,7 +16,8 @@ class FunctionParameter:
         self.c_type = get_c_type_for_type(self.type)
         self.is_array = param['array'] != 0 or param['pointer'] != 0
         self.sizes = (None,)
-        self.is_out = self.is_array
+        self.is_const = param['constant'] != 0
+        self.is_out = self.is_array and not self.is_const
         self.struct = None
 
     def __str__(self):
