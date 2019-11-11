@@ -150,17 +150,3 @@ class Array(Parameter):
     def __init__(self, name, param_type: ParameterType, size):
         super().__init__(name, param_type)
         self.size = size
-
-
-# For debugging puproses:
-def main():
-    import Scrapers
-    scr = Scrapers.DeclarationsScraper()
-    scr.parse_file(
-        "C:\\Users\\Mateusz\\Desktop\\AGH\\Semestr7\\Inżynierka\\cBinder\\tests\\functionwithdoxygen\\sources\\ex_doxygen.h")
-    parser = DoxygenParser(scr.declarations)
-    parser.parse_doxygen()
-
-
-if __name__ == '__main__':
-    main()

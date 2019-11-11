@@ -14,19 +14,12 @@ class DeclarationsScraper:
     def __init__(self):
         self.declarations = []
 
-    def parse_file(self, filepath):
-        """
-        Parses file at given path and fills declarations attribute with DeclarationData objects
-
-        Parameters
-        ----------
-        filepath : str
-            Filepath string
-        """
+    def _parse_file(self, filepath):
+        """Parses file at given path and fills declarations attribute with DeclarationData objects"""
 
         self.declarations.clear()
-        header = CppHeaderParser.CppHeader(filepath)
-        for fun in header.functions:
+        file = CppHeaderParser.CppHeader(filepath)
+        for fun in file.functions:
             doxygen_comment = fun['doxygen'] if 'doxygen' in fun.keys() else ''
             self.declarations.append(DeclarationData(doxygen_comment, fun['debug']))
 
@@ -38,14 +31,13 @@ class DeclarationsScraper:
         ----------
         filepath : str
             Filepath string
-
         Returns
         -------
         str
             String of declarations' strings joined together
         """
 
-        self.parse_file(filepath)
+        self._parse_file(filepath)
         declaration_strings = []
         for declaration_data in self.declarations:
             declaration_strings.append(declaration_data.declaration)

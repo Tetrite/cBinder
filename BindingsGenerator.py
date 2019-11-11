@@ -1,60 +1,46 @@
-from HeaderFile import *
-from SourceFile import *
-from WrapperBuilder import *
-from WheelGenerator import *
+from HeaderFile import get_header_files
+from SourceFile import get_source_files
+from WrapperBuilder import build_wrapper
+from WheelGenerator import WheelGenerator
 from cffi import FFI
 import os
 import shutil
 
-"""
-Pairs header and source files if possible.
-Unpaired ones are returned separately.
-returns a 3-tuple with:
-    [0] - a list of pairs of header and source files (a tuple - first header then source)
-    [1] - a list of lone header files
-    [2] - a list of lone source files
-"""
-def _pairs_and_remainders(headers, sources):
-    pairs = []
-    lone_headers = []
-    lone_sources = []
 
-    # TODO: possibly optimize, currently O(n^2)
-    for header in headers:
-        for source in sources:
-            if header.filepath.stem == source.filepath.stem:
-                pairs.append((header, source))
-                break
-        else:
-            lone_headers.append(header)
+def _get_pairs_and_remainder(headers, sources):
+    """
+    Pairs header and source files if possible.
+    Unpaired sources are returned separately.
+    """
+    pairs = []
+    lone_sources = []
 
     for source in sources:
         for header in headers:
             if header.filepath.stem == source.filepath.stem:
+                pairs.append((header, source))
                 break
-        else:
-            lone_sources.append(source)
+        lone_sources.append(source)
 
-    return (pairs, lone_headers, lone_sources)
+    return pairs, lone_sources
 
-"""
-Class used to generate bindings for each source file using cffi library
 
-Attributes
-----------
-args : Namespace
-    Arguments parsed by argparse's ArgumentParser
-"""
 class BindingsGenerator:
+    """
+    Class used to generate bindings for each source file using cffi library
+
+    Attributes
+    ----------
+    args : Namespace
+        Arguments parsed by argparse's ArgumentParser
+    """
 
     def __init__(self, args):
         self.args = args
 
-    """
-    Generates bindings and wrapper for each pair of
-    source and header files
-    """
     def _generate_bindings_for_pairs(self, pairs):
+        """Generates bindings and wrapper for each pair of source and header files"""
+
         verbosity = self.args.verbose
 
         if len(pairs) == 0:
@@ -74,49 +60,35 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper_for_headers(name, name, [header]);
+            build_wrapper(name, header)
 
-    """
-    Generates bindings and wrapper the remainder of files
-    (ones that couldn't be paired)
-    """
-    def _generate_bindings_for_remainder(self, headers, sources):
+    def _generate_bindings_for_remainder(self, sources):
+        """Generates bindings and wrapper the remainder of source files"""
+
         verbosity = self.args.verbose
 
-        if len(headers) == 0 or len(sources) == 0:
+        if len(sources) == 0:
             if verbosity:
-                print(f'No remainder to process')
+                print(f'No remainder source files to process')
             return
 
-        if len(headers) == 0:
-            print(f'warning: remainder sources but no headers. The functions will be inaccessible.')
-
-        if verbosity:
-            print(f'Compiling and creating bindings for the unpaired files')
-
-        includes = set()
-
-        ffibuilder = FFI()
-
-        for header in headers:
-            ffibuilder.cdef(header.declarations, override=True)
-            build_wrapper_for_headers(header.filepath.stem, '_remainder', [header])
-
-        includes = set()
         for source in sources:
-            for include in source.includes:
-                includes.add(include)
+            name = source.filepath.stem
+            if verbosity:
+                print(f'Compiling and creating bindings for {name}')
 
-        ffibuilder.set_source('__remainder', '\n'.join(includes), sources=[source.filepath for source in sources],
+            ffibuilder = FFI()
+            ffibuilder.cdef(source.get_declarations())
+            ffibuilder.set_source('_'+name, '\n'.join(source.includes), sources=[source.filepath],
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir)
-        ffibuilder.compile(verbose=verbosity)
+            ffibuilder.compile(verbose=verbosity)
 
-    """
-    Generates bindings and wrapper for each source file found at path given in arguments
-    and builds wheel out of created package
-    """
     def generate_bindings(self):
+        """
+        Generates bindings and wrapper for each source file found at path given in arguments
+        and builds wheel out of created package
+        """
         path = self.args.files_path[0]
         verbosity = self.args.verbose
 
@@ -129,10 +101,10 @@ class BindingsGenerator:
         self.copy_needed_files_to_output_dir(headers)
         self.copy_needed_files_to_output_dir(sources)
 
-        pairs, lone_headers, lone_sources = _pairs_and_remainders(headers, sources)
+        pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
 
         self._generate_bindings_for_pairs(pairs)
-        self._generate_bindings_for_remainder(lone_headers, lone_sources)
+        self._generate_bindings_for_remainder(lone_sources)
 
         if verbosity:
             print('Cleaning up output dir before wheel generation')
@@ -140,19 +112,12 @@ class BindingsGenerator:
         # self.cleanup_output_dir()
         WheelGenerator('.', os.path.basename(path)).generate_wheel()
 
-    """
-    Copies all header or source files to output directory given in arguments
-
-    Parameters
-    ----------
-    pairs : list
-        List of header or source objects
-    """
     def copy_needed_files_to_output_dir(self, files):
+        """Copies all header or source files to output directory given in arguments"""
+
         for file in files:
             if not os.path.isfile('./' + file.filepath.name):
                 shutil.copy2(str(file.filepath), '.')
-            # TODO: copy needed library dependencies here too
 
     def cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""

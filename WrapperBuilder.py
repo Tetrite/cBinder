@@ -33,7 +33,7 @@ def get_argument(parts):
     return arg, parts[2:]
 
 
-class SimpleDeclaration():
+class SimpleDeclaration:
 
     def __init__(self, declaration):
         parts = re.split('[ ,()]', declaration)
@@ -132,6 +132,7 @@ class Declaration(FunctionMetadata):
 def get_declaration(declaration):
     return Declaration(declaration)
 
+
 def _build_wrapper_for_header_with_doxygen(name, f, header):
     declaration_data_list = header.declaration_data_list
     function_metadata_list = DoxygenParser(declaration_data_list).parse_and_get_metadata()
@@ -156,12 +157,12 @@ def _build_wrapper_for_header_without_doxygen(name, f, header):
         s = s + '\r\n\n'
         f.write(s)
 
-def build_wrapper_for_headers(header_name, source_name, headers):
-    with open(header_name + '.py', 'w+') as f:
-        f.write("from . import _" + source_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
 
-        for header in headers:
-            if (header.declaration_data_list[0].doxygen == ''):
-                _build_wrapper_for_header_without_doxygen(header_name, f, header)
-            else:
-                _build_wrapper_for_header_with_doxygen(header_name, f, header)
+def build_wrapper(name, header):
+    with open(name + '.py', 'w+') as f:
+        f.write("from . import _" + name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+
+        if header.declaration_data_list[0].doxygen == '':
+            _build_wrapper_for_header_without_doxygen(name, f, header)
+        else:
+            _build_wrapper_for_header_with_doxygen(name, f, header)
