@@ -62,6 +62,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
+
             build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_remainder(self, sources):

@@ -1,12 +1,14 @@
 from DoxygenParser import *
 from FunctionParameterTraits import *
 
+
 def get_c_type_for_type(t):
     for ct in CType:
         if ct.value == t:
             return ct
 
     return None
+
 
 class FunctionParameter:
 
@@ -23,12 +25,14 @@ class FunctionParameter:
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
 
+
 class FunctionReturn:
 
     def __init__(self, t):
         self.type = t
         self.c_type = get_c_type_for_type(t)
         self.is_void = t == 'void'
+
 
 class FunctionDeclaration:
 
@@ -40,15 +44,16 @@ class FunctionDeclaration:
         self.returns = FunctionReturn(function['rtnType'])
 
         if self.doxygen:
-            self.imbue_with_doxygen(doxygen)
+            self.imbue_with_doxygen(self.doxygen)
 
     def imbue_with_doxygen(self, doxygen):
         meta = DoxygenParser(doxygen)
-        param = meta.get_parameter(self.name)
-        if isinstance(param, DoxygenFunctionArrayParameter):
-            self.is_array = True
-            self.sizes = (param.size,)
-        else:
-            self.is_array = False
+        for parameter in self.parameters:
+            doxygen_function_param = meta.get_parameter(parameter.name)
+            if isinstance(doxygen_function_param, DoxygenFunctionArrayParameter):
+                parameter.is_array = True
+                parameter.sizes = (doxygen_function_param.size,)
+            else:
+                parameter.is_array = False
 
-        self.is_out = (param.param_type == ParameterType.OUT)
+            parameter.is_out = (doxygen_function_param.param_type == ParameterType.OUT)

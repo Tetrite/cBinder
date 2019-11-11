@@ -1,6 +1,7 @@
 import CppHeaderParser
 from Function import *
 
+
 def get_function_declarations(filepath):
     """
     Parses file at given path and fills declarations attribute with FunctionDeclaration objects
@@ -16,6 +17,7 @@ def get_function_declarations(filepath):
         declarations.append(FunctionDeclaration(fun))
 
     return declarations
+
 
 def get_includes(filepath):
     """

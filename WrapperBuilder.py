@@ -1,9 +1,3 @@
-from DoxygenParser import *
-from Function import *
-
-def get_declaration(declaration):
-    return Declaration(declaration)
-
 # TODO: better tool for idendation
 
 # TODO: what does this function name mean?
@@ -13,11 +7,13 @@ def _get_rewriter_into_array(name):
         f'\t\t{name}2[i] = {name}[i]'
     ]
 
+
 def _get_rewriter_into_list(name):
     return [
         f'\tfor i,v in enumerate({name}):',
         f'\t\t{name}[i] = {name}2[i]'
     ]
+
 
 # TODO: just appending 2 to the parameter is not safe, there may be collisions
 #       use more sophisticated mangling, for example prepend/append $
@@ -29,7 +25,7 @@ def _build_python_function_wrapper_for_declaration(module_name, declaration):
     for parameter in declaration.parameters:
         if parameter.is_out and parameter.is_array:
             size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-            lines.append(f'\t{parameter.name}2 = ffi.new("{parameter.c_type.value}[]", {size})')
+            lines.append(f'\t{parameter.name}2 = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
             lines += _get_rewriter_into_array(parameter.name)
         else:
             lines.append(f'\t{parameter.name}2 = {parameter.name}')
@@ -57,9 +53,11 @@ def _build_python_function_wrapper_for_declaration(module_name, declaration):
 
     return '\n'.join(lines)
 
+
 def _build_wrapper_for_declaration(header_name, f, declaration):
     s = _build_python_function_wrapper_for_declaration(header_name, declaration)
     f.write(s)
+
 
 def _build_wrapper_for_header(header_name, f, header):
     for decl in header.declarations:

@@ -2,25 +2,25 @@ import re
 
 from FunctionParameterTraits import *
 
+
 class DoxygenParser:
     """
     Get metadata about a function from doxygen comment
     """
-    REGEX_IN_PARAM = r'@param\[in\][\s]*[a-zA-Z_][a-zA-Z0-9_]{0,31}'
-    REGEX_IN_PRE_PARAM_NAME = r'@param\[in\][\s]*'
-    REGEX_OUT_PARAM = r'@param\[out\][\s]*[a-zA-Z_][a-zA-Z0-9_]{0,31}'
-    REGEX_OUT_PRE_PARAM_NAME = r'@param\[out\][\s]*'
-
-    REGEX_ARRAY_SIZE = r'\(array of size [A-Za-z0-9]\)'
-    REGEX_PRE_ARRAY_SIZE = r'\(array of size '
+    REGEX_IN_PARAM_NAME = r'@param\[in\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+    REGEX_OUT_PARAM_NAME = r'@param\[out\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+    REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9])\)'
 
     def __init__(self, doxygen):
         self.doxygen = doxygen
         self.metadata = self.parse()
 
+    def get_parameter(self, name):
+        return self.metadata.get_parameter(name)
+
     def parse(self):
         function_parameters = self.get_function_parameters(self.doxygen)
-        function_metadata = FunctionMetadata(function_parameters)
+        return DoxygenFunctionMetadata(function_parameters)
 
     def get_function_parameters(self, doxygen):
         lines = doxygen.splitlines()
@@ -57,27 +57,22 @@ class DoxygenParser:
         matches = re.findall(self.REGEX_ARRAY_SIZE, line)
         if len(matches) == 0:
             return None
-        match = matches[0]
-        string_preceding_size = re.findall(self.REGEX_PRE_ARRAY_SIZE, match)[0]
-        size = match.replace(string_preceding_size, '')
-        size = size.replace(')', '')
+        size = matches[0]
         if size.isdigit():
             return int(size)
         return size
 
     def get_input_parameter_name(self, line):
-        return self.get_parameter_name(line, self.REGEX_IN_PARAM, self.REGEX_IN_PRE_PARAM_NAME)
+        return self.get_parameter_name(line, self.REGEX_IN_PARAM_NAME)
 
     def get_output_parameter_name(self, line):
-        return self.get_parameter_name(line, self.REGEX_OUT_PARAM, self.REGEX_OUT_PRE_PARAM_NAME)
+        return self.get_parameter_name(line, self.REGEX_OUT_PARAM_NAME)
 
-    def get_parameter_name(self, line, REGEX_ALL, REGEX_PRE_NAME):
-        matches = re.findall(REGEX_ALL, line)
+    def get_parameter_name(self, line, REGEX_STRING):
+        matches = re.findall(REGEX_STRING, line)
         if len(matches) == 0:
             return None
-        match = matches[0]
-        string_preceding_name = re.findall(REGEX_PRE_NAME, match)[0]
-        return match.replace(string_preceding_name, '')
+        return matches[0]
 
 
 class DoxygenFunctionMetadata:
@@ -119,17 +114,3 @@ class DoxygenFunctionArrayParameter(DoxygenFunctionParameter):
     def __init__(self, name, param_type: ParameterType, size):
         super().__init__(name, param_type)
         self.size = size
-
-
-# For debugging puproses:
-def main():
-    import Scrapers
-    scr = Scrapers.DeclarationsScraper()
-    scr.parse_file(
-        "C:\\Users\\Mateusz\\Desktop\\AGH\\Semestr7\\Inżynierka\\cBinder\\tests\\functionwithdoxygen\\sources\\ex_doxygen.h")
-    parser = DoxygenParser(scr.declarations[0])
-    parser.metadata
-
-
-if __name__ == '__main__':
-    main()
