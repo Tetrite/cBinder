@@ -14,16 +14,9 @@ class DoxygenParser:
     REGEX_ARRAY_SIZE = r'\(array of size [A-Za-z0-9]\)'
     REGEX_PRE_ARRAY_SIZE = r'\(array of size '
 
-    def __init__(self, declaration_data_list):
-        self.declaration_data_list = declaration_data_list
-        self.function_metadata_list = []
-
-    def parse_and_get_metadata(self):
-        self.parse_doxygen()
-        return self.function_metadata_list
-
-    def parse_doxygen(self):
-        for declaration_data in self.declaration_data_list:
+    def parse_and_get_metadata(self, declaration_data_list):
+        function_metadata_list = []
+        for declaration_data in declaration_data_list:
             # Data from header:
             doxygen = declaration_data.doxygen
             declaration = declaration_data.declaration
@@ -34,7 +27,8 @@ class DoxygenParser:
 
             function_metadata = FunctionMetadata(function_name, declaration, function_parameters)
             function_metadata.set_parameters_c_types()
-            self.function_metadata_list.append(function_metadata)
+            function_metadata_list.append(function_metadata)
+        return function_metadata_list
 
     def get_function_name(self, declaration):
         declaration_parts = re.split('[ ,()]', declaration)
