@@ -6,13 +6,13 @@ def get_declaration(declaration):
 
 # TODO: what does this function name mean?
 def _get_rewriter_into_array(name):
-    s = '    for i,v in enumerate(' + name + '):\r'
-    s = s + '        ' + name + '2[i] = ' + name + '[i]\r'
+    s = '    for i,v in enumerate(' + name + '):\n'
+    s = s + '        ' + name + '2[i] = ' + name + '[i]\n'
     return s
 
 def _get_rewriter_into_list(name):
-    s = '    for i,v in enumerate(' + name + '2):\r'
-    s = s + '        ' + name + '[i] = ' + name + '2[i]\r'
+    s = '    for i,v in enumerate(' + name + '2):\n'
+    s = s + '        ' + name + '[i] = ' + name + '2[i]\n'
     return s
 
 # TODO: just appending 2 to the parameter is not safe, there may be collisions
@@ -20,18 +20,18 @@ def _get_rewriter_into_list(name):
 def _build_python_function_wrapper_for_declaration(module_name, declaration):
     s = 'def ' + declaration.name + '('
     s = s + ','.join([x.name for x in declaration.parameters])
-    s = s + '):\r'
+    s = s + '):\n'
 
     for parameter in declaration.parameters:
         if parameter.is_out and parameter.is_array:
             size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-            s = s + '    ' + parameter.name + '2 = ffi.new("' + parameter.c_type.value + '[]", ' + size + ')\r'
+            s = s + '    ' + parameter.name + '2 = ffi.new("' + parameter.c_type.value + '[]", ' + size + ')\n'
             s = s + _get_rewriter_into_array(parameter.name)
         else:
-            s = s + '    ' + parameter.name + '2 = ' + parameter.name + '\r'
+            s = s + '    ' + parameter.name + '2 = ' + parameter.name + '\n'
 
     s = s + '    ' + ('ret = ' if not declaration.returns.is_void else '') + '_' + module_name + '.lib.' + \
-        declaration.name + '(' + ','.join([x.name + '2' for x in declaration.parameters]) + ')\r'
+        declaration.name + '(' + ','.join([x.name + '2' for x in declaration.parameters]) + ')\n'
 
     for parameter in declaration.parameters:
         if not parameter.is_out:
@@ -39,12 +39,12 @@ def _build_python_function_wrapper_for_declaration(module_name, declaration):
         if parameter.is_array:
             s = s + _get_rewriter_into_list(parameter.name)
         else:
-            s = s + '    ' + parameter.name + ' = ' + parameter.name + '2\r'
+            s = s + '    ' + parameter.name + ' = ' + parameter.name + '2\n'
 
     if not declaration.returns.is_void:
         s = s + '    return ret'
 
-    return s + '\r\n\n'
+    return s + '\n\n'
 
 def _build_wrapper_for_declaration(header_name, f, declaration):
     s = _build_python_function_wrapper_for_declaration(header_name, declaration)
@@ -56,7 +56,7 @@ def _build_wrapper_for_header(header_name, f, header):
 
 def build_wrapper_for_header(header_name, header):
     with open(header_name + '.py', 'w+') as f:
-        f.write("from . import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+        f.write("from . import _" + source_name + "\nfrom cffi import FFI\nffi = FFI()\n\n")
 
         _build_wrapper_for_header(header_name, f, header)
 
