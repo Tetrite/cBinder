@@ -1,6 +1,6 @@
 import os
 import pathlib
-from Scrapers import DeclarationsScraper, IncludesScraper
+from Scrapers import get_function_declarations, get_includes
 
 
 class SourceFile:
@@ -17,15 +17,14 @@ class SourceFile:
 
     def __init__(self, src_path):
         self.filepath = src_path
-        self.includes = IncludesScraper().extract_inludes(self.filepath.as_posix())
+        self.includes = get_includes(self.filepath)
 
     def __str__(self):
         return 'Source file path: ' + self.filepath.as_posix()
 
     def get_declarations(self):
-        declaration_scraper = DeclarationsScraper()
-        declaration_scraper.parse_and_return_decl(self.filepath.as_posix())
-        return declaration_scraper.declaration_data_list
+        declarations = get_function_declarations(self.filepath)
+        return declarations
 
 
 def get_source_files(dirpath):
