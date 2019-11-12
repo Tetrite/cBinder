@@ -6,6 +6,16 @@ unique_identifier_suffix = '__internal'
 
 
 class WrapperBuilder:
+    """
+    Class holding all related info and methods for wrapper building
+
+    Attributes
+    ----------
+    wrap_dynamic_lib : bool
+        True if wrapper should be created for dynamic library
+    dynamic_lib_ext : str
+        .so if running os is Linux, .dll if Windows
+    """
 
     def __init__(self, wrap_dynamic_lib=False):
         self.wrap_dynamic_lib = wrap_dynamic_lib
