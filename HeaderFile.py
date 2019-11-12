@@ -1,6 +1,6 @@
 import os
 import pathlib
-from Scrapers import *
+from Scrapers import get_function_declarations, get_includes
 
 
 class HeaderFile:
@@ -13,10 +13,8 @@ class HeaderFile:
         Path object pointing to header file
     includes : list
         List of include directives strings scraped from the header
-    declarations : str
-        String of all declarations scraped from header
-    declaration_data_list : list
-        List of DeclarationData objects
+    declarations : list
+        List of FunctionDeclaration objects scraped from header
     """
 
     def __init__(self, h_path):

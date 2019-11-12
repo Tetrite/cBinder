@@ -1,6 +1,5 @@
 import re
-
-from FunctionParameterTraits import *
+from FunctionParameterTraits import ParameterType
 
 
 class DoxygenParser:
@@ -41,53 +40,53 @@ class DoxygenParser:
 
     def __init__(self, doxygen):
         self.doxygen = doxygen
-        self.metadata = self.parse()
+        self.metadata = self._parse()
 
     def get_parameter(self, name):
         """ Returns a parameter from a list for a given parameter name """
         return self.metadata.get_parameter(name)
 
-    def parse(self):
+    def _parse(self):
         """ Executes parsing of a doxygen comment (retrieves information about parameters)
             -parameter type (IN/OUT)
-            -whether or not a parameter is an arry
+            -whether or not a parameter is an array
                 -size of an array
         """
-        function_parameters = self.get_function_parameters(self.doxygen)
+        function_parameters = self._get_function_parameters(self.doxygen)
         return DoxygenFunctionMetadata(function_parameters)
 
-    def get_function_parameters(self, doxygen):
+    def _get_function_parameters(self, doxygen):
         lines = doxygen.splitlines()
         function_parameters = []
         for line in lines:
-            parameter = self.create_parameter_object(line)
+            parameter = self._create_parameter_object(line)
             if parameter is not None:
                 function_parameters.append(parameter)
         return function_parameters
 
-    def create_parameter_object(self, line):
-        parameter_type = self.get_parameter_type_from_line(line)
+    def _create_parameter_object(self, line):
+        parameter_type = self._get_parameter_type_from_line(line)
         parameter_name = ''
         if parameter_type is None:
             return None
         if parameter_type == ParameterType.IN:
-            parameter_name = self.get_input_parameter_name(line)
+            parameter_name = self._get_input_parameter_name(line)
         if parameter_type == ParameterType.OUT:
-            parameter_name = self.get_output_parameter_name(line)
+            parameter_name = self._get_output_parameter_name(line)
 
-        array_size = self.get_size_of_array(line)
+        array_size = self._get_size_of_array(line)
         if array_size is not None:
             return DoxygenFunctionArrayParameter(parameter_name, parameter_type, array_size)
         return DoxygenFunctionParameter(parameter_name, parameter_type)
 
-    def get_parameter_type_from_line(self, line):
+    def _get_parameter_type_from_line(self, line):
         if len(re.findall("@param\[in\]", line)) > 0:
             return ParameterType.IN
         if len(re.findall("@param\[out\]", line)) > 0:
             return ParameterType.OUT
         return None
 
-    def get_size_of_array(self, line):
+    def _get_size_of_array(self, line):
         matches = re.findall(self.REGEX_ARRAY_SIZE, line)
         if len(matches) == 0:
             return None
@@ -96,13 +95,13 @@ class DoxygenParser:
             return int(size)
         return size
 
-    def get_input_parameter_name(self, line):
-        return self.get_parameter_name(line, self.REGEX_IN_PARAM_NAME)
+    def _get_input_parameter_name(self, line):
+        return self._get_parameter_name(line, self.REGEX_IN_PARAM_NAME)
 
-    def get_output_parameter_name(self, line):
-        return self.get_parameter_name(line, self.REGEX_OUT_PARAM_NAME)
+    def _get_output_parameter_name(self, line):
+        return self._get_parameter_name(line, self.REGEX_OUT_PARAM_NAME)
 
-    def get_parameter_name(self, line, REGEX_STRING):
+    def _get_parameter_name(self, line, REGEX_STRING):
         matches = re.findall(REGEX_STRING, line)
         if len(matches) == 0:
             return None
@@ -124,6 +123,20 @@ class DoxygenFunctionMetadata:
         self.parameters = parameters
 
     def get_parameter(self, name):
+        """
+        Getter for parameter in parameters list
+
+        Parameters
+        ----------
+        name : str
+            Name of wanted parameter
+
+        Returns
+        -------
+        param : DoxygenFunctionParameter
+            DoxygenFunctionParameter object if parameter if specified name was found,
+            None otherwise
+        """
         for param in self.parameters:
             if param.name == name:
                 return param
@@ -131,13 +144,35 @@ class DoxygenFunctionMetadata:
         return None
 
     def param_type(self, name):
+        """
+        Getter for parameter type in parameters list
+
+        Parameters
+        ----------
+        name : str
+            Name of wanted parameter's type
+
+        Returns
+        -------
+        param_type : ParameterType
+            ParameterType object if parameter if specified name was found,
+            None otherwise
+        """
         for param in self.parameters:
             if param.name == name:
                 return param.param_type
 
         return None
 
-    def is_array(self, name):
+    def is_any_array(self):
+        """
+        Checks if any parameter object is of type DoxygenFunctionArrayParameter
+
+        Returns
+        -------
+        bool
+            True if any parameter is of type DoxygenFunctionArrayParameter
+        """
         for param in self.parameters:
             if isinstance(param, DoxygenFunctionArrayParameter):
                 return True

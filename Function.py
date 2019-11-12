@@ -1,8 +1,12 @@
-from DoxygenParser import *
-from FunctionParameterTraits import *
+from DoxygenParser import DoxygenParser, DoxygenFunctionArrayParameter
+from FunctionParameterTraits import ParameterType, CType
 
 
 def get_c_type_for_type(t):
+    """
+    Returns CType object for given type,
+    None if no CType object with this type was found
+    """
     for ct in CType:
         if ct.value == t:
             return ct
@@ -11,6 +15,29 @@ def get_c_type_for_type(t):
 
 
 class FunctionParameter:
+    """
+    Class representing single function parameter
+
+    Attributes
+    ----------
+    name : str
+        Parameter name
+    type : str
+        Parameter type
+    c_type : CType
+        CType enum for type attribute
+    is_array : bool
+        True if parameter is array
+    sizes : tuple
+        Sizes of array, default (None,)
+    is_const : bool
+        True if parameter is constant
+    is_out : bool
+        True if parameter is of ParameterType OUT,
+        default True if parameter is array and not constant
+    struct : str
+        Python object type used to hold this parameter in wrapper
+    """
 
     def __init__(self, param):
         self.name = param['name']
@@ -27,6 +54,18 @@ class FunctionParameter:
 
 
 class FunctionReturn:
+    """
+    Class for holding return info of function
+
+    Attributes
+    ----------
+    type : str
+        Return type string
+    c_type : CType
+        CType enum for type attribute
+    is_void : bool
+        True if return type is void
+    """
 
     def __init__(self, t):
         self.type = t
@@ -35,6 +74,22 @@ class FunctionReturn:
 
 
 class FunctionDeclaration:
+    """
+    Class representing function declaration
+
+    Attributes
+    ----------
+    doxygen : str
+        Doxygen comment string if exists, None otherwise
+    name : str
+        Function name string
+    declaration_string : str
+        String representation of whole declaration
+    parameters : list
+        List of FunctionParameter objects
+    returns : FunctionReturn
+        FunctionReturn object
+    """
 
     def __init__(self, function):
         self.doxygen = function['doxygen'] if 'doxygen' in function.keys() else None
@@ -47,9 +102,10 @@ class FunctionDeclaration:
             self.imbue_with_doxygen(self.doxygen)
 
     def imbue_with_doxygen(self, doxygen):
-        meta = DoxygenParser(doxygen)
+        """Parses doxygen comment and fills attributes with relevant info"""
+        parser = DoxygenParser(doxygen)
         for parameter in self.parameters:
-            doxygen_function_param = meta.get_parameter(parameter.name)
+            doxygen_function_param = parser.get_parameter(parameter.name)
             if isinstance(doxygen_function_param, DoxygenFunctionArrayParameter):
                 parameter.is_array = True
                 parameter.sizes = (doxygen_function_param.size,)

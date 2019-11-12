@@ -1,5 +1,5 @@
 import CppHeaderParser
-from Function import *
+from Function import FunctionDeclaration
 
 
 def get_function_declarations(filepath):
@@ -10,6 +10,11 @@ def get_function_declarations(filepath):
     ----------
     filepath : str
         Filepath string
+
+    Returns
+    -------
+    declarations : list
+        List of FunctionDeclaration objects
     """
     declarations = []
     header = CppHeaderParser.CppHeader(filepath)

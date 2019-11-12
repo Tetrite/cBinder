@@ -1,6 +1,24 @@
 unique_identifier_suffix = '__internal'
 
-# TODO: better tool for idendation
+# TODO: better tool for indendation
+
+
+def build_wrapper_for_header(header_name, header):
+    """Creates wrapper file for given HeaderFile"""
+    with open(header_name + '.py', 'w+') as f:
+        f.write("from . import _" + header_name + "\nfrom cffi import FFI\nffi = FFI()\n\n")
+
+        _build_wrapper_for_header(header_name, f, header)
+
+
+def build_wrapper_for_declarations(header_name, declarations):
+    """Creates wrapper file for given list of FunctionDeclaration objects"""
+    with open(header_name + '.py', 'w+') as f:
+        f.write("from . import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+
+        for decl in declarations:
+            _build_wrapper_for_declaration(header_name, f, decl)
+
 
 def _build_array_copy(name, _from, to):
     return [
@@ -54,16 +72,3 @@ def _build_wrapper_for_declaration(header_name, f, declaration):
 def _build_wrapper_for_header(header_name, f, header):
     for decl in header.declarations:
         _build_wrapper_for_declaration(header_name, f, decl)
-
-def build_wrapper_for_header(header_name, header):
-    with open(header_name + '.py', 'w+') as f:
-        f.write("from . import _" + header_name + "\nfrom cffi import FFI\nffi = FFI()\n\n")
-
-        _build_wrapper_for_header(header_name, f, header)
-
-def build_wrapper_for_declarations(header_name, declarations):
-    with open(header_name + '.py', 'w+') as f:
-        f.write("from . import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
-
-        for decl in declarations:
-            _build_wrapper_for_declaration(header_name, f, decl)
