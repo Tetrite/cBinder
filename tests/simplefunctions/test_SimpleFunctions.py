@@ -17,7 +17,7 @@ class SimpleFunctionsTest(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../..")
-        os.system(r'python main.py -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.system(r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path)
 
     def test_generate_bindings_to_simple_add_function_integer(self):

@@ -68,7 +68,7 @@ class BindingsGenerator:
             print('Cleaning up output dir before wheel generation')
         # Cleaning up a directory causes imports to fail in some test cases under linux
         # self.cleanup_output_dir()
-        WheelGenerator('.', os.path.basename(os.getcwd())).generate_wheel()
+        WheelGenerator('.', self.args.package_name).generate_wheel()
 
     def _generate_bindings_for_pairs(self, pairs):
         """Generates bindings and wrapper for each pair of source and header files"""
