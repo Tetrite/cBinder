@@ -112,4 +112,4 @@ class FunctionDeclaration:
             else:
                 parameter.is_array = False
 
-            parameter.is_out = (doxygen_function_param.param_type == ParameterType.OUT)
+            parameter.is_out = (doxygen_function_param.param_type != ParameterType.IN)

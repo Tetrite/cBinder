@@ -2,7 +2,7 @@ import unittest
 import pathlib
 import os
 
-from tests.util.folder_clearing import clear_folder_contents
+from tests._util.folder_clearing import clear_folder_contents
 
 
 class SimpleFunctionsTest(unittest.TestCase):
@@ -16,21 +16,15 @@ class SimpleFunctionsTest(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
-        os.chdir("../..")
-        os.system(r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.chdir("../../..")
+        os.system(
+            r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
-    def test_generate_bindings_to_function_with_array(self):
-
-        from tests.arrays.generated.sources import arraytest
-        a = [0]*5
-        arraytest.func(a)
-        self.assertEqual(a, [0.0, 1.0, 2.0, 3.0, 4.0])
-
-    def test_generate_bindings_to_function_with_array_sum(self):
-
-        from tests.arrays.generated.sources import arraytest
-        a = [2.0, 3.0, 4.0, 5.0, 6.0]
-        i = arraytest.sum(4.0, a)
-        self.assertEqual(i, 24.0)
-
+    def test_generate_bindings_to_function_with_doxygen(self):
+        from tests.withdoxygen.in_and_out_single_param.generated.sources import ex_doxygen as ex
+        n = 5
+        array = [1,2,3,4,5]
+        return_value = ex.reverse_array_order(n, array)
+        self.assertEqual(return_value, 0)
+        self.assertEqual(array, [5,4,3,2,1])
