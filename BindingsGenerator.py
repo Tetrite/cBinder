@@ -1,8 +1,7 @@
 from HeaderFile import get_header_files
 from SourceFile import get_source_files
-from LibraryFile import  get_shared_library_files
-from WrapperBuilder import build_wrapper_for_header, \
-    build_wrapper_for_declarations, build_wrapper_for_dynamic_library
+from LibraryFile import get_shared_library_files
+from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
 from cffi import FFI
 import os
@@ -89,7 +88,7 @@ class BindingsGenerator:
 
         for header, source in pairs:
             name = header.filepath.stem
-            build_wrapper_for_dynamic_library(name, header)
+            WrapperBuilder(wrap_dynamic_lib=True).build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_pairs(self, pairs):
         """Generates bindings and wrapper for each pair of source and header files"""
@@ -114,7 +113,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper_for_header(name, header)
+            WrapperBuilder().build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_remainder(self, sources):
         """Generates bindings and wrapper the remainder of source files"""
@@ -138,7 +137,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            build_wrapper_for_declarations(name, declarations)
+            WrapperBuilder().build_wrapper_for_declarations(name, declarations)
 
     def _copy_needed_files_to_output_dir(self, files):
         """Copies all header or source files to output directory given in arguments"""
