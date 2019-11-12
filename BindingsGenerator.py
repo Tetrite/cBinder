@@ -88,7 +88,7 @@ class BindingsGenerator:
             ffibuilder.cdef(all_declaration_strings)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir)
+                                  library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             build_wrapper_for_header(name, header)
 
