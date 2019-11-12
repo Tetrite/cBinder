@@ -20,6 +20,10 @@ def build_wrapper_for_declarations(header_name, declarations):
             _build_wrapper_for_declaration(header_name, f, decl)
 
 
+def build_wrapper_for_dynamic_library(header_name, header):
+    pass
+
+
 def _build_array_copy(name, _from, to):
     return [
         f'\tfor i,v in enumerate({name}):',

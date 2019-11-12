@@ -1,6 +1,8 @@
 from HeaderFile import get_header_files
 from SourceFile import get_source_files
-from WrapperBuilder import build_wrapper_for_header, build_wrapper_for_declarations
+from LibraryFile import  get_shared_library_files
+from WrapperBuilder import build_wrapper_for_header, \
+    build_wrapper_for_declarations, build_wrapper_for_dynamic_library
 from WheelGenerator import WheelGenerator
 from cffi import FFI
 import os
@@ -51,7 +53,10 @@ class BindingsGenerator:
         sources = []
         for path in paths:
             headers.extend(get_header_files(path))
-            sources.extend(get_source_files(path))
+            if self.args.mode == 'compile':
+                sources.extend(get_source_files(path))
+            else:
+                sources.extend(get_shared_library_files(path))
 
         if verbosity:
             print(f'Copying needed files to destination directory')
@@ -61,14 +66,30 @@ class BindingsGenerator:
 
         pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
 
-        self._generate_bindings_for_pairs(pairs)
-        self._generate_bindings_for_remainder(lone_sources)
+        if self.args.mode == 'compile':
+            self._generate_bindings_for_pairs(pairs)
+            self._generate_bindings_for_remainder(lone_sources)
+        else:
+            self._generate_bindings_for_dynamic_libraries(pairs)
 
         if verbosity:
             print('Cleaning up output dir before wheel generation')
         # Cleaning up a directory causes imports to fail in some test cases under linux
         # self.cleanup_output_dir()
         WheelGenerator('.', self.args.package_name).generate_wheel()
+
+    def _generate_bindings_for_dynamic_libraries(self, pairs):
+        """Generates bindings and wrapper for each pair of shared/dynamic library and header files"""
+        verbosity = self.args.verbose
+
+        if len(pairs) == 0:
+            if verbosity:
+                print(f'No header source pairs to process')
+            return
+
+        for header, source in pairs:
+            name = header.filepath.stem
+            build_wrapper_for_dynamic_library(name, header)
 
     def _generate_bindings_for_pairs(self, pairs):
         """Generates bindings and wrapper for each pair of source and header files"""

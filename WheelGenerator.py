@@ -51,7 +51,7 @@ class WheelGenerator:
 			f.write('    description="Package build with cBinder",\r')
 			f.write('    url="https://github.com/Tetrite/cBinder",\r')
 			f.write("    packages=['"+self.package_name+"'],\r")
-			f.write("    package_data={'"+self.package_name+"': ['*.pyd']},\r")
+			f.write("    package_data={'': ['*.pyd','*.so','*.dll']},\r")
 			f.write('    include_package_data=True)')
 
 	def run_wheel_command(self):

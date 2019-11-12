@@ -20,6 +20,19 @@ class LibraryFile:
 
 
 def get_shared_library_files(dirpath):
+	"""
+	Gets paths to all source files in directory (recursively)
+
+	Parameters
+	---------
+	dirpath : str
+		Library directory path string
+
+	Returns
+	-------
+	libraries : list
+		List of LibraryFile objects
+	"""
 	library_ext = '.so' if platform.system() == 'Linux' else '.dll'
 	libraries = []
 	for path, subdirs, files in os.walk(dirpath):
