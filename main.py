@@ -4,11 +4,12 @@ from BindingsGenerator import BindingsGenerator
 
 
 def main():
-	arg_parser = argparse.ArgumentParser(description='Generate python bindings')
+	arg_parser = argparse.ArgumentParser(description='generate python bindings')
 	optional_args = arg_parser._action_groups.pop()
 	required_args = arg_parser.add_argument_group('required arguments')
+	required_args.add_argument('package_name', action='store', help='name of package')
 	required_args.add_argument('-f', '--files_path', action='append', required=True, help='path to C files', metavar='PATH')
-	required_args.add_argument('-d', '--dest', action='store', required=True, help='Path to destination directory', metavar='PATH')
+	required_args.add_argument('-d', '--dest', action='store', required=True, help='path to destination directory', metavar='PATH')
 	optional_args.add_argument('-v', '--verbose', action='store_true', help='output verbosity')
 	arg_parser._action_groups.append(optional_args)
 	subparsers = arg_parser.add_subparsers(title='mode', dest='mode')
