@@ -39,7 +39,7 @@ def get_source_files(dirpath):
     Returns
     -------
     paths : list
-        List of Path objects
+        List of SourceFile objects
     """
     sources = []
     for path, subdirs, files in os.walk(dirpath):

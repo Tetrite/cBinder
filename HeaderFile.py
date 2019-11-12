@@ -38,7 +38,7 @@ def get_header_files(dirpath):
     Returns
     -------
     paths : list
-        List of Path objects
+        List of HeaderFile objects
     """
     headers = []
     for path, subdirs, files in os.walk(dirpath):
