@@ -14,9 +14,11 @@ class WrapperBuilder:
     def build_wrapper_for_header(self, header_name, header):
         """Creates wrapper file for given HeaderFile"""
         with open(header_name + '.py', 'w+') as f:
+            f.write("from cffi import FFI\nffi = FFI()\n\n")
             if not self.wrap_dynamic_lib:
                 f.write("from . import _" + header_name + "\n")
-            f.write("from cffi import FFI\nffi = FFI()\n\n")
+            else:
+                f.write("ffi.cdef(\"" + "\\\n".join([x.declaration_string for x in header.declarations]) + "\")\n\n")
 
             self._build_wrapper_for_header(header_name, f, header)
 
@@ -48,9 +50,7 @@ class WrapperBuilder:
         ]
 
         if self.wrap_dynamic_lib:
-            lines.append(
-                f'\tffi.cdef("{declaration.declaration_string}")\n' +
-                f'\tlib = ffi.dlopen("{module_name}{self.dynamic_lib_ext}")\n')
+            lines.append(f'\tlib = ffi.dlopen("{module_name}{self.dynamic_lib_ext}")\n')
 
         for parameter in declaration.parameters:
             if parameter.is_out and parameter.is_array:
