@@ -31,10 +31,9 @@ def preprocess_header(path_to_header, def_pairs):
         filedata = file.read()
 
     for def_name, def_value in def_pairs.items():
-        lines = filedata.splitlines()
         # Replace the target string
         full_define_statement = '#define ' + def_name + ' ' + def_value
-        modified_define_statement = '#define ' + '__do_not_delete' + ' ' + def_value
+        modified_define_statement = '#define ' + '__do_not_delete__' + ' ' + def_value
         filedata = filedata.replace(full_define_statement, modified_define_statement)
         filedata = filedata.replace(def_name, def_value)
         filedata = filedata.replace(modified_define_statement, full_define_statement)
