@@ -1,8 +1,9 @@
+#define ARRAY_SIZE 10
 /**
   * Returns Z for given elemental symbols
   * @param[in]   n         number of elements in arrays
-  * @param[in]   in_order   sample array (array of size n)
-  * @param[out]  reverse_order    sample reversed array (array of size n)
+  * @param[in]   in_order   sample array (array of size ARRAY_SIZE)
+  * @param[out]  reverse_order    sample reversed array (array of size ARRAY_SIZE)
   * @return                status
   */
 
