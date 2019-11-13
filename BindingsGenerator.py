@@ -52,7 +52,6 @@ class BindingsGenerator:
         headers = []
         sources = []
         for path in paths:
-            preprocess_headers(path)
             headers.extend(get_header_files(path))
             if self.args.mode == 'compile':
                 sources.extend(get_source_files(path))
@@ -64,6 +63,9 @@ class BindingsGenerator:
 
         self._copy_needed_files_to_output_dir(headers)
         self._copy_needed_files_to_output_dir(sources)
+
+        preprocess_headers('.')
+        headers = get_header_files('.')
 
         pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
 
