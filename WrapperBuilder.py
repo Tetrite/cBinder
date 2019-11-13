@@ -26,7 +26,7 @@ class WrapperBuilder:
         with open(header_name + '.py', 'w+') as f:
             f.write("from cffi import FFI\nffi = FFI()\n\n")
             if not self.wrap_dynamic_lib:
-                f.write("from lib import _" + header_name + "\n")
+                f.write("from .lib import _" + header_name + "\n")
             else:
                 f.write("ffi.cdef(\"" + "\\\n".join([x.declaration_string for x in header.declarations]) + "\")\n\n")
                 f.write("import os\n\n")
@@ -36,7 +36,7 @@ class WrapperBuilder:
     def build_wrapper_for_declarations(self, header_name, declarations):
         """Creates wrapper file for given list of FunctionDeclaration objects"""
         with open(header_name + '.py', 'w+') as f:
-            f.write("from lib import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+            f.write("from .lib import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
 
             for decl in declarations:
                 self._build_wrapper_for_declaration(header_name, f, decl)
