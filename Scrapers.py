@@ -43,3 +43,24 @@ def get_includes(filepath):
     for inc in header.includes:
         includes.append(f'#include {inc}')
     return includes
+
+
+def get_defines(filepath):
+    """
+    Parses file at given path and returns list of define statements
+
+    Parameters
+    ----------
+    filepath : str
+        Filepath string
+
+    Returns
+    -------
+    defines : list
+        List of define directive strings
+    """
+    header = CppHeaderParser.CppHeader(filepath)
+    defines = []
+    for inc in header.defines:
+        defines.append(f'#define {inc}')
+    return defines

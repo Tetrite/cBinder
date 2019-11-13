@@ -3,6 +3,7 @@ from SourceFile import get_source_files
 from LibraryFile import get_shared_library_files
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
+from MiniPreprocessing import preprocess_headers
 from cffi import FFI
 import os
 import shutil
@@ -51,6 +52,7 @@ class BindingsGenerator:
         headers = []
         sources = []
         for path in paths:
+            preprocess_headers(path)
             headers.extend(get_header_files(path))
             if self.args.mode == 'compile':
                 sources.extend(get_source_files(path))
@@ -133,7 +135,7 @@ class BindingsGenerator:
             declarations = source.get_declarations()
             ffibuilder = FFI()
             ffibuilder.cdef(' '.join([x.declaration_string for x in declarations]))
-            ffibuilder.set_source('_'+name, '\n'.join(source.includes), sources=[source.filepath],
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
