@@ -23,6 +23,10 @@ def main():
 	shared_parser = subparsers.add_parser('shared', help='create bindings to dynamic/shared libraries (requires header files too)')
 
 	args = arg_parser.parse_args()
+	if args.mode is None:
+		print('Error: No mode specified')
+		return
+
 	args.dest = os.path.abspath(args.dest)
 	for i, path in enumerate(args.files_path):
 		args.files_path[i] = os.path.abspath(path)
