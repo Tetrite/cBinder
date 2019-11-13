@@ -51,16 +51,10 @@ class WheelGenerator:
 			open(os.path.join(libs_dir, '__init__.py'), 'a').close()
 		open(os.path.join(package_dir, '__init__.py'), 'a').close()
 		with open('setup.py', 'w+') as f:
-			f.write('import setuptools\r\n')
-			f.write('setuptools.setup(\r')
-			f.write('    name="'+self.package_name+'",\r')
-			f.write('    version="1.0.0",\r')
-			f.write('    author_email="tetrite@gmail.com",\r')
-			f.write('    description="Package build with cBinder",\r')
-			f.write('    url="https://github.com/Tetrite/cBinder",\r')
-			f.write("    packages=['"+self.package_name+"'],\r")
-			f.write("    package_data={'': ['*.pyd','*.so','*.dll']},\r")
-			f.write('    include_package_data=True)')
+			conf_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setup.config")
+			with open(conf_file_path, 'r') as conf:
+				lines = [line.replace('%LIB%', self.package_name) for line in conf.readlines()]
+				f.write(''.join(lines))
 
 	def run_wheel_command(self):
 		"""Runs wheel command"""
