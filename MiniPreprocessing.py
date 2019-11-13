@@ -1,9 +1,11 @@
 import re
+from HeaderFile import get_header_files
 
 
-def preprocess_headers(headers):
+def preprocess_headers(path_to_directory):
     """Method used to substitute every #define NAME ??? in header files in order to parse doxygen
     comments correctly"""
+    headers = get_header_files(path_to_directory)
     for header_file in headers:
         path_to_header = header_file.filepath
         defines_list = header_file.defines
@@ -29,9 +31,13 @@ def preprocess_header(path_to_header, def_pairs):
         filedata = file.read()
 
     for def_name, def_value in def_pairs.items():
+        lines = filedata.splitlines()
         # Replace the target string
-        filedata = filedata.replace('#define ' + def_name + ' ' + def_value, '')
+        full_define_statement = '#define ' + def_name + ' ' + def_value
+        modified_define_statement = '#define ' + '__do_not_delete' + ' ' + def_value
+        filedata = filedata.replace(full_define_statement, modified_define_statement)
         filedata = filedata.replace(def_name, def_value)
+        filedata = filedata.replace(modified_define_statement, full_define_statement)
 
     # Write the file out again
     with open(path_to_header, 'w') as file:

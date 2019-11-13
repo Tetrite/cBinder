@@ -52,13 +52,12 @@ class BindingsGenerator:
         headers = []
         sources = []
         for path in paths:
+            preprocess_headers(path)
             headers.extend(get_header_files(path))
             if self.args.mode == 'compile':
                 sources.extend(get_source_files(path))
             else:
                 sources.extend(get_shared_library_files(path))
-
-        preprocess_headers(headers)
 
         if verbosity:
             print(f'Copying needed files to destination directory')
@@ -136,7 +135,7 @@ class BindingsGenerator:
             declarations = source.get_declarations()
             ffibuilder = FFI()
             ffibuilder.cdef(' '.join([x.declaration_string for x in declarations]))
-            ffibuilder.set_source('_'+name, '\n'.join(source.includes), sources=[source.filepath],
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)

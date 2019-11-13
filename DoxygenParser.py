@@ -34,7 +34,7 @@ class DoxygenParser:
     """ REGEX_OUT_PARAM_NAME 
         Regex used to retrieve IN&OUT parameter name from doxygen comment line
     """
-    REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9])\)'
+    REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9]*)\)'
     """ REGEX_ARRAY_SIZE 
         Regex used to retrieve size of an array
         For example:        
