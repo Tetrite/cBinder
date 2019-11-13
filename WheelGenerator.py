@@ -35,12 +35,11 @@ class WheelGenerator:
 		os.mkdir(package_dir)
 		for file in files:
 			shutil.move(os.path.join(self.lib_path, file), package_dir)
-		libraries = [f for f in os.listdir(package_dir) if f.endswith('.so') or f.endswith('.dll')]
-		if libraries:
-			libs = os.path.join(package_dir, 'lib')
-			os.mkdir(libs)
-			for lib in libraries:
-				shutil.move(os.path.join(package_dir, lib), libs)
+		libraries = [f for f in os.listdir(package_dir) if f.endswith(('.so', '.dll', '.pyd'))]
+		libs = os.path.join(package_dir, 'lib')
+		os.mkdir(libs)
+		for lib in libraries:
+			shutil.move(os.path.join(package_dir, lib), libs)
 		self.create_necessary_files()
 
 	def create_necessary_files(self):
