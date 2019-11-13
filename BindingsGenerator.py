@@ -3,6 +3,7 @@ from SourceFile import get_source_files
 from LibraryFile import get_shared_library_files
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
+from MiniPreprocessing import preprocess_headers
 from cffi import FFI
 import os
 import shutil
@@ -56,6 +57,8 @@ class BindingsGenerator:
                 sources.extend(get_source_files(path))
             else:
                 sources.extend(get_shared_library_files(path))
+
+        preprocess_headers(headers)
 
         if verbosity:
             print(f'Copying needed files to destination directory')
