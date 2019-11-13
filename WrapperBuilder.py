@@ -29,6 +29,7 @@ class WrapperBuilder:
                 f.write("from . import _" + header_name + "\n")
             else:
                 f.write("ffi.cdef(\"" + "\\\n".join([x.declaration_string for x in header.declarations]) + "\")\n\n")
+                f.write("import os\n\n")
 
             self._build_wrapper_for_header(header_name, f, header)
 
@@ -60,7 +61,9 @@ class WrapperBuilder:
         ]
 
         if self.wrap_dynamic_lib:
-            lines.append(f'\tlib = ffi.dlopen("{module_name}{self.dynamic_lib_ext}")\n')
+            # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
+            lib_open_str = f'os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/{module_name}{self.dynamic_lib_ext}")'
+            lines.append(f'\tlib = ffi.dlopen({lib_open_str})\n')
 
         for parameter in declaration.parameters:
             if parameter.is_out and parameter.is_array:

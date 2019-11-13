@@ -35,12 +35,21 @@ class WheelGenerator:
 		os.mkdir(package_dir)
 		for file in files:
 			shutil.move(os.path.join(self.lib_path, file), package_dir)
+		libraries = [f for f in os.listdir(package_dir) if f.endswith('.so') or f.endswith('.dll')]
+		if libraries:
+			libs = os.path.join(package_dir, 'lib')
+			os.mkdir(libs)
+			for lib in libraries:
+				shutil.move(os.path.join(package_dir, lib), libs)
 		self.create_necessary_files()
 
 	def create_necessary_files(self):
 		"""Creates necessary files for package e.g. setup.py"""
 
 		package_dir = os.path.join(self.lib_path, self.package_name)
+		libs_dir = os.path.join(package_dir, 'lib')
+		if os.path.exists(libs_dir):
+			open(os.path.join(libs_dir, '__init__.py'), 'a').close()
 		open(os.path.join(package_dir, '__init__.py'), 'a').close()
 		with open('setup.py', 'w+') as f:
 			f.write('import setuptools\r\n')
