@@ -25,12 +25,16 @@ class HeaderFile:
         d = ScrapedData(h_path)
         self.filepath = h_path
         self.functions = d.functions
-        self.struct = d.structs
+        self.structs = d.structs
         self.includes = d.includes
         self.defines = d.defines
 
     def __str__(self):
         return 'Header file path: ' + self.filepath.as_posix()
+
+    def read(self):
+        with open(self.filepath, 'r') as h:
+            return h.read()
 
 
 def get_header_files(dirpath):

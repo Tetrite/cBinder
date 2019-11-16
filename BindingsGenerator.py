@@ -111,8 +111,7 @@ class BindingsGenerator:
                 print(f'Compiling and creating bindings for {name}')
 
             ffibuilder = FFI()
-            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.functions)
-            ffibuilder.cdef(all_declaration_strings)
+            ffibuilder.cdef(header.read())
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
@@ -136,6 +135,7 @@ class BindingsGenerator:
 
             functions = source.get_functions()
             ffibuilder = FFI()
+            # TODO: how to handle struct declarations?
             ffibuilder.cdef(' '.join([x.declaration_string for x in functions]))
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,

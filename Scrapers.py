@@ -1,5 +1,6 @@
 import CppHeaderParser
 from Function import FunctionDeclaration
+from Struct import StructDeclaration
 
 class ScrapedData:
     def __init__(self, filepath):

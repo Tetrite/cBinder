@@ -42,11 +42,18 @@ class WrapperBuilder:
                 self._build_wrapper_for_function(header_name, f, decl)
 
     def _build_wrapper_for_header(self, header_name, f, header):
+        for struct in header.structs:
+            self._build_wrapper_for_struct(header_name, f, struct)
+
         for decl in header.functions:
             self._build_wrapper_for_function(header_name, f, decl)
 
+    def _build_wrapper_for_struct(self, header_name, f, struct):
+        s = self._build_python_wrapper_for_struct(header_name, struct)
+        f.write(s)
+
     def _build_wrapper_for_function(self, header_name, f, function):
-        s = self._build_python_function_wrapper_for_function(header_name, function)
+        s = self._build_python_wrapper_for_function(header_name, function)
         f.write(s)
 
     def _build_array_copy(self, name, _from, to):
@@ -55,7 +62,18 @@ class WrapperBuilder:
             f'\t\t{name}{_from}[i] = {name}{to}[i]'
         ]
 
-    def _build_python_function_wrapper_for_function(self, module_name, function):
+    def _build_python_wrapper_for_struct(self, module_name, struct):
+        lines = [
+            f'class {struct.name}:',
+            f'\tdef __init__(self):'
+        ]
+
+        for member in struct.members:
+            lines.append(f'\t\tself.{member.name}=None')
+
+        return '\n'.join(lines)
+
+    def _build_python_wrapper_for_function(self, module_name, function):
         lines = [
             f'def {function.name}(' + ','.join([x.name for x in function.parameters]) + '):'
         ]
@@ -66,6 +84,9 @@ class WrapperBuilder:
             lines.append(f'\tlib = ffi.dlopen({lib_open_str})\n')
 
         for parameter in function.parameters:
+            if parameter.c_type is None:
+                return ''
+
             if parameter.is_out and parameter.is_array:
                 size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
                 lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
