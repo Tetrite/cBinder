@@ -111,8 +111,9 @@ class BindingsGenerator:
                 print(f'Compiling and creating bindings for {name}')
 
             ffibuilder = FFI()
-            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.declarations)
-            ffibuilder.cdef(all_declaration_strings)
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
+            ffibuilder.cdef(header.read())
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
@@ -134,14 +135,17 @@ class BindingsGenerator:
             if verbosity:
                 print(f'Compiling and creating bindings for {name}')
 
-            declarations = source.get_declarations()
+            functions = source.functions
+            structs = source.structs
             ffibuilder = FFI()
-            ffibuilder.cdef(' '.join([x.declaration_string for x in declarations]))
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
+            ffibuilder.cdef(all_declaration_strings)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
             ffibuilder.compile(verbose=verbosity)
-            WrapperBuilder().build_wrapper_for_declarations(name, declarations)
+            WrapperBuilder().build_wrapper_for_functions(name, functions)
 
     def _copy_needed_files_to_output_dir(self, files):
         """Copies all header or source files to output directory given in arguments"""

@@ -1,6 +1,6 @@
 import os
 import pathlib
-from Scrapers import get_function_declarations, get_includes
+from Scrapers import ScrapedData
 
 
 class SourceFile:
@@ -16,15 +16,17 @@ class SourceFile:
     """
 
     def __init__(self, src_path):
+        d = ScrapedData(src_path)
         self.filepath = src_path
-        self.includes = get_includes(self.filepath)
+        self.includes = d.includes
+        self.functions = d.functions
+        self.structs = d.structs
 
     def __str__(self):
         return 'Source file path: ' + self.filepath.as_posix()
 
-    def get_declarations(self):
-        declarations = get_function_declarations(self.filepath)
-        return declarations
+    def get_functions(self):
+        return self.functions
 
 
 def get_source_files(dirpath):
