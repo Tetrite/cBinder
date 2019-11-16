@@ -2,6 +2,7 @@ import platform
 
 unique_identifier_suffix = '__internal'
 
+
 # TODO: better tool for indendation
 # TODO: handle escaping when creating sorce that may contains trings
 
@@ -88,7 +89,7 @@ class WrapperBuilder:
         ]
         for member in struct.members:
             if member.struct:
-                #TODO: handle nested structs
+                # TODO: handle nested structs
                 #      use keepalive
                 pass
 
@@ -101,7 +102,7 @@ class WrapperBuilder:
         ]
         for member in struct.members:
             if member.struct:
-                #TODO: handle nested structs
+                # TODO: handle nested structs
                 #      use keepalive
                 pass
 
@@ -115,6 +116,8 @@ class WrapperBuilder:
         lines = [
             f'def {function.name}(' + ','.join([x.name for x in function.parameters]) + '):'
         ]
+
+        self._add_documentation_to_a_function(function, lines)
 
         if self.wrap_dynamic_lib:
             # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
@@ -170,3 +173,14 @@ class WrapperBuilder:
         lines.append('')
 
         return '\n'.join(lines)
+
+    def _add_documentation_to_a_function(self, function, lines):
+        """ Add documentation to a function, based on doxygen comment """
+        if function.doxygen is not None:
+            lines.append(f'\t\"\"\"')
+            for line in function.doxygen.splitlines():
+                if line.startswith('/**') or line.startswith('*/'):
+                    continue
+                if line.startswith('*') and line[1:]:
+                    lines.append('\t' + line[1:].strip())
+            lines.append(f'\t\"\"\"')
