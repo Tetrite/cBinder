@@ -1,15 +1,43 @@
 import CppHeaderParser
 from Function import FunctionDeclaration
 
+class ScrapedData:
+    def __init__(self, filepath):
+        header = CppHeaderParser.CppHeader(filepath)
+        self.functions = _get_function_declarations(header)
+        self.includes = _get_includes(header)
+        self.defines = _get_defines(header)
+        self.structs = _get_struct_declarations(header)
 
-def get_function_declarations(filepath):
+
+def _get_struct_declarations(header):
     """
-    Parses file at given path and fills declarations attribute with FunctionDeclaration objects
+    Return declarations attribute with StructDeclaration objects
 
     Parameters
     ----------
-    filepath : str
-        Filepath string
+    header : str
+        CppHeader
+
+    Returns
+    -------
+    declarations : list
+        List of StructDeclaration objects
+    """
+    declarations = []
+    for _, struct in header.classes.items():
+        declarations.append(StructDeclaration(struct))
+
+    return declarations
+
+def _get_function_declarations(header):
+    """
+    Return declarations attribute with FunctionDeclaration objects
+
+    Parameters
+    ----------
+    header : str
+        CppHeader
 
     Returns
     -------
@@ -17,49 +45,46 @@ def get_function_declarations(filepath):
         List of FunctionDeclaration objects
     """
     declarations = []
-    header = CppHeaderParser.CppHeader(filepath)
     for fun in header.functions:
         declarations.append(FunctionDeclaration(fun))
 
     return declarations
 
 
-def get_includes(filepath):
+def _get_includes(header):
     """
-    Parses file at given path and returns list of include directives
+    Returns list of include directives
 
     Parameters
     ----------
-    filepath : str
-        Filepath string
+    header : str
+        CppHeader
 
     Returns
     -------
     includes : list
         List of include directive strings
     """
-    header = CppHeaderParser.CppHeader(filepath)
     includes = []
     for inc in header.includes:
         includes.append(f'#include {inc}')
     return includes
 
 
-def get_defines(filepath):
+def _get_defines(header):
     """
-    Parses file at given path and returns list of define statements
+    Returns list of define statements
 
     Parameters
     ----------
-    filepath : str
-        Filepath string
+    header : str
+        CppHeader
 
     Returns
     -------
     defines : list
         List of define directive strings
     """
-    header = CppHeaderParser.CppHeader(filepath)
     defines = []
     for inc in header.defines:
         defines.append(f'#define {inc}')
