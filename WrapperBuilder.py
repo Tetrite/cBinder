@@ -1,4 +1,6 @@
 import platform
+import re
+from WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 
 unique_identifier_suffix = '__internal'
 
@@ -119,6 +121,8 @@ class WrapperBuilder:
 
         self._add_documentation_to_a_function(function, lines)
 
+        self._add_series_of_array_arguments_checks(function.parameters, lines)
+
         if self.wrap_dynamic_lib:
             # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
             lib_open_str = f'os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/{module_name}{self.dynamic_lib_ext}")'
@@ -176,18 +180,46 @@ class WrapperBuilder:
 
     def _add_documentation_to_a_function(self, function, lines):
         """ Add documentation to a function, based on doxygen comment """
+        relevant_parameters = self._get_relevant_parameters(function.parameters)
+        # Regex used to get a parameter name from a doxygen comment line:
+        REGEX_ANY_PARAM_NAME = r'@param\[.*\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+        # Regex used to get an '(array of size x)' string from a doxygen comment line:
+        REGEX_ARR_SIZE = r'(\(array of size [A-Za-z0-9_]*\))'
         if function.doxygen is not None:
             lines.append(f'\t\"\"\"')
             for line in function.doxygen.splitlines():
+                # Discard unnecessary char sequence
                 if line.startswith('/**') or line.startswith('*/'):
                     continue
                 if line.startswith('*') and line[1:]:
+                    # Check if a line has a parameter description
+                    parameter_name_matches = re.findall(REGEX_ANY_PARAM_NAME, line)
+                    # Check if a line has '(array of size x)' definition
+                    array_of_size_matches = re.findall(REGEX_ARR_SIZE, line)
+
+                    # Do not include unnecessary parameters inside a python doc
+                    if len(parameter_name_matches) > 0:
+                        name = parameter_name_matches[0]
+                        if name not in relevant_parameters:
+                            continue
+
+                    # Do not include information about array size in a python doc
+                    if len(array_of_size_matches) > 0:
+                        character_sequence = array_of_size_matches[0]
+                        line = line.replace(character_sequence, '')
                     lines.append('\t' + line[1:].strip())
             lines.append(f'\t\"\"\"')
 
     def _get_relevant_parameters(self, parameters):
+        """ Relevant parameters - such parameters that will be on a parameter list in a wrapping
+            python function. Every parameter that is a size of an array, will be discarded.
+        """
         relevant_parameters = []
         for param in parameters:
             if not param.is_array_size:
                 relevant_parameters.append(param.name)
         return relevant_parameters
+
+    def _add_series_of_array_arguments_checks(self, parameters, lines):
+        # Check 1:
+        _check_if_every_in_array_is_not_empty(parameters, lines)
