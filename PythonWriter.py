@@ -40,5 +40,11 @@ class PythonWriter:
     def escaped(self, text):
         return _escape_string(text)
 
+    def add_indent(self):
+        self._indent += 1
+
+    def remove_indent(self):
+        self._indent -= 1
+
     def indent(self):
         return PythonWriter.Indent(self)
