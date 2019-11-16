@@ -114,7 +114,7 @@ class WrapperBuilder:
 
     def _build_python_wrapper_for_function(self, module_name, function):
         lines = [
-            f'def {function.name}(' + ','.join([x.name for x in function.parameters]) + '):'
+            f'def {function.name}(' + ','.join(self._get_relevant_parameters(function.parameters)) + '):'
         ]
 
         self._add_documentation_to_a_function(function, lines)
@@ -184,3 +184,10 @@ class WrapperBuilder:
                 if line.startswith('*') and line[1:]:
                     lines.append('\t' + line[1:].strip())
             lines.append(f'\t\"\"\"')
+
+    def _get_relevant_parameters(self, parameters):
+        relevant_parameters = []
+        for param in parameters:
+            if not param.is_array_size:
+                relevant_parameters.append(param.name)
+        return relevant_parameters

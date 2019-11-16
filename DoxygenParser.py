@@ -190,6 +190,27 @@ class DoxygenFunctionMetadata:
 
         return False
 
+    def is_array_size(self, name):
+        """
+        Checks if a parameter object is in fact an array size definition
+        common use: n - parameter defining a size of an input array passed
+        as another parameter
+
+        Returns
+        -------
+        bool
+            True if the parameter is an array size
+        """
+        array_sizes_parameters = []
+        for parameter in self.parameters:
+            if isinstance(parameter, DoxygenFunctionArrayParameter):
+                array_sizes_parameters.append(parameter.size)
+        for parameter in self.parameters:
+            if parameter.name == name:
+                return name in array_sizes_parameters
+        return False
+
+
 
 class DoxygenFunctionParameter:
     """
@@ -206,6 +227,7 @@ class DoxygenFunctionParameter:
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type
+        self.is_array_size = False
 
 
 class DoxygenFunctionArrayParameter(DoxygenFunctionParameter):
