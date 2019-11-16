@@ -20,6 +20,7 @@ class SourceFile:
         self.filepath = src_path
         self.includes = d.includes
         self.functions = d.functions
+        self.structs = d.structs
 
     def __str__(self):
         return 'Source file path: ' + self.filepath.as_posix()

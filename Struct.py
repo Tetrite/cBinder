@@ -41,3 +41,15 @@ class StructDeclaration:
     def __init__(self, struct):
         self.name = struct['name']
         self.members = [StructMember(member) for member in struct['properties']['public']]
+        self.declaration_string = self._build_declaration_string(struct)
+
+    def _build_declaration_string(self, struct):
+        parts = ['typedef struct{']
+        for member in self.members:
+            parts.append(member.type + ' ' + member.name)
+            if member.is_array:
+                parts.append('*')
+            parts.append(';')
+        parts += ['}', self.name, ';\n']
+
+        return ''.join(parts)

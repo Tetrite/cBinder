@@ -3,7 +3,7 @@ import platform
 unique_identifier_suffix = '__internal'
 
 # TODO: better tool for indendation
-
+# TODO: handle escaping when creating sorce that may contains trings
 
 class WrapperBuilder:
     """
@@ -42,6 +42,9 @@ class WrapperBuilder:
                 self._build_wrapper_for_function(header_name, f, decl)
 
     def _build_wrapper_for_header(self, header_name, f, header):
+        decl = '\n'.join(decl.declaration_string for decl in header.structs)
+        f.write(f'ffi.cdef("""{decl}""")\n')
+
         for struct in header.structs:
             self._build_wrapper_for_struct(header_name, f, struct)
 
@@ -63,6 +66,7 @@ class WrapperBuilder:
         ]
 
     def _build_python_wrapper_for_struct(self, module_name, struct):
+        decl = 'typedef struct {int a;double b;char c;}simple_struct;'
         lines = [
             f'class {struct.name}:',
             f'\tdef __init__(self):'
@@ -70,6 +74,12 @@ class WrapperBuilder:
 
         for member in struct.members:
             lines.append(f'\t\tself.{member.name}=None')
+
+        lines += [
+            f'\tdef to_cffi(self, keepalive):',
+            f'\t\ts=ffi.new("{struct.name}*")',
+            f'\t\treturn s'
+        ]
 
         return '\n'.join(lines)
 

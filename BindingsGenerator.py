@@ -111,6 +111,8 @@ class BindingsGenerator:
                 print(f'Compiling and creating bindings for {name}')
 
             ffibuilder = FFI()
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(header.read())
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
@@ -133,10 +135,12 @@ class BindingsGenerator:
             if verbosity:
                 print(f'Compiling and creating bindings for {name}')
 
-            functions = source.get_functions()
+            functions = source.functions
+            structs = source.structs
             ffibuilder = FFI()
-            # TODO: how to handle struct declarations?
-            ffibuilder.cdef(' '.join([x.declaration_string for x in functions]))
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
+            ffibuilder.cdef(all_declaration_strings)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir)
