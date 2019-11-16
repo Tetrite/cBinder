@@ -1,3 +1,5 @@
+from CType import CType, get_c_type_for_type
+
 class StructMember:
     """
     Class representing a single member of a struct
@@ -19,9 +21,10 @@ class StructMember:
     def __init__(self, member):
         self.name = member['name']
         self.type = member['type']
+        self.c_type = get_c_type_for_type(self.type)
         self.is_array = member['array'] != 0 or member['pointer'] != 0
         self.sizes = (None,)
-        self.struct = None
+        self.struct = member['class']['name'] if member['class'] != 0 else None
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')

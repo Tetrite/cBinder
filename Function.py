@@ -1,17 +1,6 @@
 from DoxygenParser import DoxygenParser, DoxygenFunctionArrayParameter
-from FunctionParameterTraits import ParameterType, CType
-
-
-def get_c_type_for_type(t):
-    """
-    Returns CType object for given type,
-    None if no CType object with this type was found
-    """
-    for ct in CType:
-        if ct.value == t:
-            return ct
-
-    return None
+from FunctionParameterTraits import ParameterType
+from CType import CType, get_c_type_for_type
 
 
 class FunctionParameter:
@@ -47,7 +36,7 @@ class FunctionParameter:
         self.sizes = (None,)
         self.is_const = param['constant'] != 0
         self.is_out = self.is_array and not self.is_const
-        self.struct = None
+        self.struct = param['class']['name'] if param['class'] != 0 else None
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
@@ -98,8 +87,17 @@ class FunctionDeclaration:
         self.parameters = [FunctionParameter(param) for param in function['parameters']]
         self.returns = FunctionReturn(function['rtnType'])
 
+        self.set_parameters_names_if_empty()
+
         if self.doxygen:
             self.imbue_with_doxygen(self.doxygen)
+
+    def set_parameters_names_if_empty(self):
+        i = 0
+        for param in self.parameters:
+            if param.name == '':
+                param.name = '__gen_name__' + str(i) + '__'
+                i += 1
 
     def imbue_with_doxygen(self, doxygen):
         """Parses doxygen comment and fills attributes with relevant info"""

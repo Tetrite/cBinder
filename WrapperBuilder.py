@@ -24,10 +24,13 @@ class WrapperBuilder:
     def build_wrapper_for_header(self, header_name, header):
         """Creates wrapper file for given HeaderFile"""
         with open(header_name + '.py', 'w+') as f:
-            f.write("from cffi import FFI\nffi = FFI()\n\n")
             if not self.wrap_dynamic_lib:
                 f.write("from .lib import _" + header_name + "\n")
+                f.write(f'from cffi import FFI\nffi = _{header_name}.ffi\n\n')
             else:
+                f.write("from cffi import FFI\nffi = FFI()\n\n")
+                decl = '\n'.join(decl.declaration_string for decl in header.structs)
+                f.write(f'ffi.cdef("""{decl}""")\n')
                 f.write("ffi.cdef(\"" + "\\\n".join([x.declaration_string for x in header.functions]) + "\")\n\n")
                 f.write("import os\n\n")
 
@@ -42,9 +45,6 @@ class WrapperBuilder:
                 self._build_wrapper_for_function(header_name, f, decl)
 
     def _build_wrapper_for_header(self, header_name, f, header):
-        decl = '\n'.join(decl.declaration_string for decl in header.structs)
-        f.write(f'ffi.cdef("""{decl}""")\n')
-
         for struct in header.structs:
             self._build_wrapper_for_struct(header_name, f, struct)
 
@@ -59,10 +59,17 @@ class WrapperBuilder:
         s = self._build_python_wrapper_for_function(header_name, function)
         f.write(s)
 
-    def _build_array_copy(self, name, _from, to):
+    def _build_array_copy(self, name, _to, _from):
         return [
             f'\tfor i,v in enumerate({name}):',
-            f'\t\t{name}{_from}[i] = {name}{to}[i]'
+            f'\t\t{name}{_to}[i] = {name}{_from}[i]'
+        ]
+
+    def _build_array_copy_struct_to_cffi(self, name, _to, _from):
+        return [
+            f'\tfor i,v in enumerate({name}):',
+            # __keepalive must be in the scope
+            f'\t\t{name}{_from}[i].to_cffi_out({name}{_to}[i], __keepalive)'
         ]
 
     def _build_python_wrapper_for_struct(self, module_name, struct):
@@ -77,9 +84,30 @@ class WrapperBuilder:
 
         lines += [
             f'\tdef to_cffi(self, keepalive):',
-            f'\t\ts=ffi.new("{struct.name}*")',
-            f'\t\treturn s'
+            f'\t\ts=ffi.new("{struct.name}*")'
         ]
+        for member in struct.members:
+            if member.struct:
+                #TODO: handle nested structs
+                #      use keepalive
+                pass
+
+            lines.append(f'\t\ts.{member.name}=self.{member.name}')
+
+        lines.append(f'\t\treturn s\n')
+
+        lines += [
+            f'\tdef to_cffi_out(self, out, keepalive):',
+        ]
+        for member in struct.members:
+            if member.struct:
+                #TODO: handle nested structs
+                #      use keepalive
+                pass
+
+            lines.append(f'\t\tout.{member.name}=self.{member.name}')
+
+        lines.append('')
 
         return '\n'.join(lines)
 
@@ -94,15 +122,26 @@ class WrapperBuilder:
             lines.append(f'\tlib = ffi.dlopen({lib_open_str})\n')
 
         for parameter in function.parameters:
-            if parameter.c_type is None:
-                return ''
+            if parameter.struct:
+                lines.append(f'\t__keepalive=[]')
+                break
 
-            if parameter.is_out and parameter.is_array:
-                size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
-                lines += self._build_array_copy(parameter.name, unique_identifier_suffix, '')
+        for parameter in function.parameters:
+            if parameter.struct:
+                if parameter.is_array:
+                    size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                    lines.append(f'\t{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
+                    lines += self._build_array_copy_struct_to_cffi(parameter.name, unique_identifier_suffix, '')
+                else:
+                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
             else:
-                lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}')
+                if parameter.is_out and parameter.is_array:
+                    size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+                    lines += self._build_array_copy(parameter.name, unique_identifier_suffix, '')
+                else:
+                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}')
 
         lines.append(
             '\t'
@@ -112,12 +151,17 @@ class WrapperBuilder:
             + ')')
 
         for parameter in function.parameters:
-            if not parameter.is_out:
-                continue
-            if parameter.is_array:
-                lines += self._build_array_copy(parameter.name, '', unique_identifier_suffix)
+            if parameter.struct:
+                if parameter.is_array and parameter.is_out:
+                    # TODO: from_cffi
+                    pass
             else:
-                lines.append(f'\t{parameter.name} = {parameter.name}{unique_identifier_suffix}')
+                if not parameter.is_out:
+                    continue
+                if parameter.is_array:
+                    lines += self._build_array_copy(parameter.name, '', unique_identifier_suffix)
+                else:
+                    lines.append(f'\t{parameter.name} = {parameter.name}{unique_identifier_suffix}')
 
         if not function.returns.is_void:
             lines.append(f'\treturn ret')
