@@ -35,7 +35,7 @@ class MultipleArraysTest(unittest.TestCase):
     def test_array_adding_result_in_separate_correct(self):
         from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
         c = [0, 0, 0]
-        return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6])
+        return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6], c)
         self.assertEqual(return_value, 0)
         self.assertEqual(c, [5, 7, 9])
 
@@ -43,19 +43,19 @@ class MultipleArraysTest(unittest.TestCase):
         from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
         with self.assertWarns(Warning):
             c = []
-            return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6])
+            return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6], c)
             self.assertEqual(return_value, 0)
             self.assertEqual(c, [5, 7, 9])
 
     def test_array_adding_result_in_separate_err1(self):
         from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
-            tw.sum_of_two_arrays([1, 2], [1, 2, 3], [1, 2, 3])
+            tw.array_adding_result_in_separate([1, 2], [1, 2, 3], [1, 2, 3])
 
     def test_sum_of_two_arrays_err2(self):
         from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
-            tw.sum_of_two_arrays([], [1, 2, 3], [1, 2, 3])
+            tw.array_adding_result_in_separate([], [1, 2, 3], [1, 2, 3])
 
     # /**
     #   * Case 2: there are four arrays: two IN, and two OUT, different sizes
