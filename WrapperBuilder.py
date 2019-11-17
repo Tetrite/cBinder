@@ -127,7 +127,8 @@ class WrapperBuilder:
 
         self._add_documentation_to_a_function(function, lines)
 
-        self._add_series_of_array_arguments_checks(function.parameters, lines)
+        if function.doxygen is not None:
+            self._add_series_of_array_arguments_checks(function.parameters, lines)
 
         if self.wrap_dynamic_lib:
             # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
