@@ -23,6 +23,46 @@ class PythonWriter:
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
 
+    class For:
+        def __init__(self, writer, what, _in):
+            self.writer = writer
+            self.what = what
+            self._in = _in
+            pass
+
+        def __enter__(self):
+            self.writer.write_line(f'for {self.what} in {self._in}:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+
+    class While:
+        def __init__(self, writer, cond):
+            self.writer = writer
+            self.cond = cond
+            pass
+
+        def __enter__(self):
+            self.writer.write_line(f'while {self.cond}:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+
+    class If:
+        def __init__(self, writer, cond):
+            self.writer = writer
+            self.cond = cond
+            pass
+
+        def __enter__(self):
+            self.writer.write_line(f'if {self.cond}:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+
     def __init__(self):
         self._lines = []
         self._indent = '\t'
@@ -36,6 +76,15 @@ class PythonWriter:
             self._lines.append(self._indent * self._indent_level + line)
         else:
             self._lines.append(line)
+
+    def write_for(self, what, _in):
+        return PythonWriter.For(self, what, _in)
+
+    def write_if(self, cond):
+        return PythonWriter.If(self, cond)
+
+    def write_while(self, cond):
+        return PythonWriter.While(self, cond)
 
     def escaped(self, text):
         return _escape_string(text)
