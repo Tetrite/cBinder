@@ -40,12 +40,10 @@ class WrapperBuilder:
                 writer.write_line('from .lib import _' + header_name)
                 writer.write_line('from cffi import FFI')
                 writer.write_line(f'ffi = _{header_name}.ffi')
-                writer.write_line('')
             else:
                 writer.write_line('import warnings')
                 writer.write_line('from cffi import FFI')
                 writer.write_line('ffi = FFI()')
-                writer.write_line('')
 
                 struct_decls = writer.escaped('\n'.join(decl.declaration_string for decl in structs))
                 func_decls = writer.escaped('\n'.join(decl.declaration_string for decl in functions))
@@ -56,154 +54,127 @@ class WrapperBuilder:
 
             writer.write_line('')
 
+            self._build_wrapper_for_structs_and_functions(writer, header_name, structs, functions)
+
+            writer.write_line('')
+
             f.write(writer.get_string())
 
-            self._build_wrapper_for_structs_and_functions(header_name, f, structs, functions)
-
-    def _build_wrapper_for_structs_and_functions(self, header_name, f, structs, functions):
+    def _build_wrapper_for_structs_and_functions(self, writer, header_name, structs, functions):
         for struct in structs:
-            self._build_wrapper_for_struct(header_name, f, struct)
+            self._build_wrapper_for_struct(writer, header_name, struct)
 
         for decl in functions:
-            self._build_wrapper_for_function(header_name, f, decl)
+            self._build_wrapper_for_function(writer, header_name, decl)
 
-    def _build_wrapper_for_struct(self, header_name, f, struct):
-        s = self._build_python_wrapper_for_struct(header_name, struct)
-        f.write(s)
+    def _build_wrapper_for_struct(self, writer, header_name, struct):
+        self._build_python_wrapper_for_struct(writer, header_name, struct)
 
-    def _build_wrapper_for_function(self, header_name, f, function):
-        s = self._build_python_wrapper_for_function(header_name, function)
-        f.write(s)
+    def _build_wrapper_for_function(self, writer, header_name, function):
+        self._build_python_wrapper_for_function(writer, header_name, function)
 
-    def _build_array_copy(self, name, _to, _from):
-        return [
-            f'\tfor i,v in enumerate({name}):',
-            f'\t\t{name}{_to}[i] = {name}{_from}[i]'
-        ]
+    def _build_array_copy(self, writer, name, _to, _from):
+        with writer.write_for('i,v', f'enumerate({name})'):
+            writer.write_line(f'{name}{_to}[i] = {name}{_from}[i]')
 
-    def _build_array_copy_struct_to_cffi(self, name, _to, _from):
-        return [
-            f'\tfor i,v in enumerate({name}):',
+    def _build_array_copy_struct_to_cffi(self, writer, name, _to, _from):
+        with writer.write_for('i,v', f'enumerate({name})'):
             # __keepalive must be in the scope
-            f'\t\t{name}{_from}[i].to_cffi_out({name}{_to}[i], __keepalive)'
-        ]
+            writer.write_line(f'{name}{_from}[i].to_cffi_out({name}{_to}[i], __keepalive)')
 
-    def _build_python_wrapper_for_struct(self, module_name, struct):
-        decl = 'typedef struct {int a;double b;char c;}simple_struct;'
-        lines = [
-            f'class {struct.name}:',
-            f'\tdef __init__(self):'
-        ]
+    def _build_python_wrapper_for_struct(self, writer, module_name, struct):
+        with writer.write_class(struct.name):
+            with writer.write_def('__init__', ['self']):
+                for member in struct.members:
+                    writer.write_line(f'self.{member.name}=None')
 
-        for member in struct.members:
-            lines.append(f'\t\tself.{member.name}=None')
+            with writer.write_def('to_cffi', ['self', 'keepalive']):
+                writer.write_line(f's=ffi.new("{struct.name}*")')
 
-        lines += [
-            f'\tdef to_cffi(self, keepalive):',
-            f'\t\ts=ffi.new("{struct.name}*")'
-        ]
-        for member in struct.members:
-            if member.struct:
-                # TODO: handle nested structs
-                #      use keepalive
-                pass
+                for member in struct.members:
+                    if member.struct:
+                        # TODO: handle nested structs, use keepalive
+                        pass
 
-            lines.append(f'\t\ts.{member.name}=self.{member.name}')
+                    writer.write_line(f's.{member.name}=self.{member.name}')
 
-        lines.append(f'\t\treturn s\n')
+                writer.write_line(f'return s')
 
-        lines += [
-            f'\tdef to_cffi_out(self, out, keepalive):',
-        ]
-        for member in struct.members:
-            if member.struct:
-                # TODO: handle nested structs
-                #      use keepalive
-                pass
+            with writer.write_def('to_cffi_out', ['self', 'out', 'keepalive']):
+                for member in struct.members:
+                    if member.struct:
+                        # TODO: handle nested structs, use keepalive
+                        pass
 
-            lines.append(f'\t\tout.{member.name}=self.{member.name}')
+                    writer.write_line(f'out.{member.name}=self.{member.name}')
 
-        lines.append('')
+    def _build_python_wrapper_for_function(self, writer, module_name, function):
+        with writer.write_def(function.name, self._get_relevant_parameters(function.parameters)):
+            if function.doxygen is not None:
+                self._add_documentation_to_a_function(writer, function)
+                self._add_series_of_array_arguments_checks(writer, function.parameters)
 
-        return '\n'.join(lines)
+            if self.wrap_dynamic_lib:
+                # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
+                lib_open_str = f'os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/{module_name}{self.dynamic_lib_ext}")'
+                writer.write_line(f'lib = ffi.dlopen({lib_open_str})')
 
-    def _build_python_wrapper_for_function(self, module_name, function):
-        lines = [
-            f'def {function.name}(' + ','.join(self._get_relevant_parameters(function.parameters)) + '):'
-        ]
+            for parameter in function.parameters:
+                if parameter.struct:
+                    writer.write_line(f'__keepalive=[]')
+                    break
 
-        self._add_documentation_to_a_function(function, lines)
-
-        if function.doxygen is not None:
-            self._add_series_of_array_arguments_checks(function.parameters, lines)
-
-        if self.wrap_dynamic_lib:
-            # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
-            lib_open_str = f'os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/{module_name}{self.dynamic_lib_ext}")'
-            lines.append(f'\tlib = ffi.dlopen({lib_open_str})\n')
-
-        for parameter in function.parameters:
-            if parameter.struct:
-                lines.append(f'\t__keepalive=[]')
-                break
-
-        for parameter in function.parameters:
-            if parameter.struct:
-                if parameter.is_array:
-                    size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                    lines.append(
-                        f'\t{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
-                    lines.append(
-                        f'\t{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
-                    lines += self._build_array_copy_struct_to_cffi(parameter.name, unique_identifier_suffix, '')
+            for parameter in function.parameters:
+                if parameter.struct:
+                    if parameter.is_array:
+                        size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                        writer.write_line(
+                            f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                        writer.write_line(
+                            f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
+                        self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+                    else:
+                        writer.write_line(
+                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
                 else:
-                    lines.append(
-                        f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
-            else:
-                if parameter.is_out and parameter.is_array:
-                    size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                    lines.append(
-                        f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
-                    lines += self._build_array_copy(parameter.name, unique_identifier_suffix, '')
+                    if parameter.is_out and parameter.is_array:
+                        size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                        writer.write_line(
+                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+                        self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
+                    else:
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}')
+
+            writer.write_line(
+                ('ret = ' if not function.returns.is_void else '')
+                + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
+                + ','.join([x.name + unique_identifier_suffix for x in function.parameters])
+                + ')')
+
+            for parameter in function.parameters:
+                if parameter.struct:
+                    if parameter.is_array and parameter.is_out:
+                        # TODO: from_cffi
+                        pass
                 else:
-                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}')
+                    if not parameter.is_out:
+                        continue
+                    if parameter.is_array:
+                        self._build_array_copy(writer, parameter.name, '', unique_identifier_suffix)
+                    else:
+                        writer.write_line(f'{parameter.name} = {parameter.name}{unique_identifier_suffix}')
 
-        lines.append(
-            '\t'
-            + ('ret = ' if not function.returns.is_void else '')
-            + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
-            + ','.join([x.name + unique_identifier_suffix for x in function.parameters])
-            + ')')
+            if not function.returns.is_void:
+                writer.write_line(f'return ret')
 
-        for parameter in function.parameters:
-            if parameter.struct:
-                if parameter.is_array and parameter.is_out:
-                    # TODO: from_cffi
-                    pass
-            else:
-                if not parameter.is_out:
-                    continue
-                if parameter.is_array:
-                    lines += self._build_array_copy(parameter.name, '', unique_identifier_suffix)
-                else:
-                    lines.append(f'\t{parameter.name} = {parameter.name}{unique_identifier_suffix}')
-
-        if not function.returns.is_void:
-            lines.append(f'\treturn ret')
-
-        lines.append('')
-        lines.append('')
-
-        return '\n'.join(lines)
-
-    def _add_documentation_to_a_function(self, function, lines):
+    def _add_documentation_to_a_function(self, writer, function):
         """ Add documentation to a function, based on doxygen comment """
         relevant_parameters = self._get_relevant_parameters(function.parameters)
         # Regex used to get a parameter name from a doxygen comment line:
         REGEX_ANY_PARAM_NAME = r'@param\[.*\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
 
         if function.doxygen is not None:
-            lines.append(f'\t\"\"\"')
+            writer.write_line(f'\"\"\"')
             for line in function.doxygen.splitlines():
                 # Discard unnecessary char sequence
                 if line.startswith('/**') or line.startswith('*/'):
@@ -218,8 +189,8 @@ class WrapperBuilder:
                         if name not in relevant_parameters:
                             continue
 
-                    lines.append('\t' + line[1:].strip())
-            lines.append(f'\t\"\"\"')
+                    writer.write_line(line[1:].strip())
+            writer.write_line(f'\"\"\"')
 
     def _get_relevant_parameters(self, parameters):
         """ Relevant parameters - such parameters that will be on a parameter list in a wrapping
@@ -231,15 +202,15 @@ class WrapperBuilder:
                 relevant_parameters.append(param.name)
         return relevant_parameters
 
-    def _add_series_of_array_arguments_checks(self, parameters, lines):
+    def _add_series_of_array_arguments_checks(self, writer, parameters):
         # Check 1:
-        _check_if_every_in_array_is_not_empty(parameters, lines)
+        _check_if_every_in_array_is_not_empty(writer, parameters)
         # Check 2:
-        _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, lines)
+        _check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters)
         # Check 3:
-        _check_array_sizes_consistency_when_there_are_only_out_arrays(parameters, lines)
+        _check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters)
 
         # Initialize OUT arrays if necessary:
-        _initialize_out_arrays_if_necessary(parameters, lines)
+        _initialize_out_arrays_if_necessary(writer, parameters)
         # Array sizes variables initialization:
-        _initialize_array_size_params_inside_wrapper(parameters, lines)
+        _initialize_array_size_params_inside_wrapper(writer, parameters)
