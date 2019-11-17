@@ -104,6 +104,18 @@ class BindingsGenerator:
                 print(f'No header source pairs to process')
             return
 
+        """ Attention: temporary measure.
+            To properly compile sources that have internal dependencies,
+            (for example: including function defined in other .c file)
+            it is necessary to pass all needed sources for a given .c file
+            to ffibuilder.set_source(.... sources=[?]) instead of just itself.
+            It is ineffective though.
+         """
+        sources_combined = []
+        for header, source in pairs:
+            sources_combined.append(source.filepath)
+        """ Temporary measure - end """
+
         for header, source in pairs:
             name = header.filepath.stem
 
@@ -114,7 +126,7 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(header.read())
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,#instead of '[source.filepath]'
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)

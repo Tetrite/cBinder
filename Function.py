@@ -36,7 +36,9 @@ class FunctionParameter:
         self.sizes = (None,)
         self.is_const = param['constant'] != 0
         self.is_out = self.is_array and not self.is_const
+        self.is_in = not self.is_out
         self.struct = param['class']['name'] if param['class'] != 0 else None
+        self.is_array_size = False
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
@@ -110,4 +112,10 @@ class FunctionDeclaration:
             else:
                 parameter.is_array = False
 
-            parameter.is_out = (doxygen_function_param.param_type != ParameterType.IN)
+            parameter.is_out = doxygen_function_param.param_type == ParameterType.OUT or \
+                              doxygen_function_param.param_type == ParameterType.IN_AND_OUT
+
+            parameter.is_in = doxygen_function_param.param_type == ParameterType.IN or \
+                              doxygen_function_param.param_type == ParameterType.IN_AND_OUT
+
+            parameter.is_array_size = parser.metadata.is_array_size(parameter.name)
