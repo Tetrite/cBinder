@@ -1,6 +1,6 @@
 /**
   * Case 1: there are three arrays: two IN, and one OUT, same size
-  * The function multiply array adds a to b and result is in c
+  * The function adds a to b and result is in c
   * @param[in]   n   size of an array
   * @param[in]   a   sample array (array of size n)
   * @param[in]   b    sample array (array of size n)
