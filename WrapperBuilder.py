@@ -4,6 +4,7 @@ from WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 from WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
 from WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
 from WrapperArgumentsProcessing import _initialize_array_size_params_inside_wrapper
+from WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary
 
 unique_identifier_suffix = '__internal'
 
@@ -31,9 +32,11 @@ class WrapperBuilder:
         """Creates wrapper file for given HeaderFile"""
         with open(header_name + '.py', 'w+') as f:
             if not self.wrap_dynamic_lib:
+                f.write("import warnings\n")
                 f.write("from .lib import _" + header_name + "\n")
                 f.write(f'from cffi import FFI\nffi = _{header_name}.ffi\n\n')
             else:
+                f.write("import warnings\n")
                 f.write("from cffi import FFI\nffi = FFI()\n\n")
                 decl = '\n'.join(decl.declaration_string for decl in header.structs)
                 f.write(f'ffi.cdef("""{decl}""")\n')
@@ -221,10 +224,14 @@ class WrapperBuilder:
         return relevant_parameters
 
     def _add_series_of_array_arguments_checks(self, parameters, lines):
-        _initialize_array_size_params_inside_wrapper(parameters, lines)
         # Check 1:
         _check_if_every_in_array_is_not_empty(parameters, lines)
         # Check 2:
         _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, lines)
         # Check 3:
         _check_array_sizes_consistency_when_there_are_only_out_arrays(parameters, lines)
+
+        # Initialize OUT arrays if necessary:
+        _initialize_out_arrays_if_necessary(parameters, lines)
+        # Array sizes variables initialization:
+        _initialize_array_size_params_inside_wrapper(parameters, lines)

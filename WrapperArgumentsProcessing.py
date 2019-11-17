@@ -8,6 +8,29 @@ def _initialize_array_size_params_inside_wrapper(parameters, lines):
         lines.append('\t' + size + ' = len(' + first_available_param.name + ')')
 
 
+def _initialize_out_arrays_if_necessary(parameters, lines):
+    array_params = [param for param in parameters if param.is_array]
+    arrays_same_sizes_list = _get_arrays_of_same_size_list(array_params)
+    for arr_same_size_obj in arrays_same_sizes_list:
+        arr_same_size_obj.check_for_decisive_in_param()
+
+    array_out_params = [param for param in parameters if param.is_array and param.is_out and not param.is_in]
+    for arr_out in array_out_params:
+        same_arr_size_obj = _get_object_for_given_param(arrays_same_sizes_list, arr_out)
+        decisive_parameter_name = same_arr_size_obj.decisive_param_name
+        if decisive_parameter_name is not None:
+            _initialize_out_array_if_necessary(lines, arr_out, decisive_parameter_name)
+
+
+def _initialize_out_array_if_necessary(lines, arr_out_param, decisive_param_name):
+    lines.append('\t# Procedure to check if OUT array ' + arr_out_param.name + ' is passed correctly:')
+    lines.append('\tif len(' + arr_out_param.name + ') != len(' + decisive_param_name + '):')
+    lines.append('\t\twarnings.warn(\"Warning: OUT array parameter ' + arr_out_param.name +
+                 ' was passed with incorrect size. Wrapper initializes it with a correct value ' +
+                 'based on an IN array parameter of the same declared size' + '\")')
+    lines.append('\t\t' + arr_out_param.name + ' = list(range(len(' + decisive_param_name + ')))')
+
+
 def _check_if_every_in_array_is_not_empty(parameters, lines):
     array_in_params = [param.name for param in parameters if param.is_array and param.is_in]
     if array_in_params:
@@ -58,6 +81,13 @@ def _get_arr_same_size_object(same_arr_size_list, size):
     return None
 
 
+def _get_object_for_given_param(same_arr_size_list, param):
+    for elem in same_arr_size_list:
+        if elem.object_contains_param(param):
+            return elem
+    return None
+
+
 def _get_arrays_of_same_size_list(array_parameters):
     arrays_same_sizes_list = []
     for param in array_parameters:
@@ -96,3 +126,17 @@ class ArraysSameSize:
     def __init__(self, size, parameters_list):
         self.size = size
         self.parameters_list = parameters_list
+        self.decisive_param_name = None
+
+    def check_for_decisive_in_param(self):
+        """
+        This method checks if there is an IN parameter of a certain size.
+        If there is an IN parameter, there is a possibility to initialize OUT parameter
+        of the same declared size, using len(in_param) expression
+        """
+        for param in self.parameters_list:
+            if param.is_in:
+                self.decisive_param_name = param.name
+
+    def object_contains_param(self, parameter):
+        return parameter in self.parameters_list
