@@ -62,16 +62,15 @@ class VariousParametersTest(unittest.TestCase):
         os.chdir(self.destination_path.joinpath('sources'))
 
     # /**
-    #   * Case 1: there are two IN arrays of the same size - parameter
-    #   * The function sums the values of two separate arrays and returns it
+    #   * Case 1: there is only one IN array
+    #   * The function returns sum of one array
     #   * @param[in]   n         number of elements in array
-    #   * @param[in]   in_arr1   sample array (array of size n)
-    #   * @param[in]   in_arr2   sample array (array of size n)
+    #   * @param[in]   in_arr   sample array (array of size n)
     #   * @return                sum of elements
     #   */
     #
-    # int sum_of_two_arrays(int n, int* in_arr1, int* in_arr2);
+    # int sum_of_array(int n, int* in_arr);
     def test_single_array_sum_of_two_arrays_correct(self):
         from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
-        return_value = sa.sum_of_two_arrays([1, 2, 3], [1, 2, 3])
-        self.assertEqual(return_value, 12)
+        return_value = sa.sum_of_array([1, 2, 3])
+        self.assertEqual(return_value, 6)
