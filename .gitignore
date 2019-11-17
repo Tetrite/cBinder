@@ -1,4 +1,5 @@
 .idea/
 venv/
-test_library/Release/
+*Release/
+*generated/
 __pycache__/
