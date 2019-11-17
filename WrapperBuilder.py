@@ -1,6 +1,7 @@
 import platform
 import re
 from WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
+from WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
 
 unique_identifier_suffix = '__internal'
 
@@ -183,8 +184,7 @@ class WrapperBuilder:
         relevant_parameters = self._get_relevant_parameters(function.parameters)
         # Regex used to get a parameter name from a doxygen comment line:
         REGEX_ANY_PARAM_NAME = r'@param\[.*\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-        # Regex used to get an '(array of size x)' string from a doxygen comment line:
-        REGEX_ARR_SIZE = r'(\(array of size [A-Za-z0-9_]*\))'
+
         if function.doxygen is not None:
             lines.append(f'\t\"\"\"')
             for line in function.doxygen.splitlines():
@@ -194,8 +194,6 @@ class WrapperBuilder:
                 if line.startswith('*') and line[1:]:
                     # Check if a line has a parameter description
                     parameter_name_matches = re.findall(REGEX_ANY_PARAM_NAME, line)
-                    # Check if a line has '(array of size x)' definition
-                    array_of_size_matches = re.findall(REGEX_ARR_SIZE, line)
 
                     # Do not include unnecessary parameters inside a python doc
                     if len(parameter_name_matches) > 0:
@@ -203,10 +201,6 @@ class WrapperBuilder:
                         if name not in relevant_parameters:
                             continue
 
-                    # Do not include information about array size in a python doc
-                    if len(array_of_size_matches) > 0:
-                        character_sequence = array_of_size_matches[0]
-                        line = line.replace(character_sequence, '')
                     lines.append('\t' + line[1:].strip())
             lines.append(f'\t\"\"\"')
 
@@ -223,3 +217,5 @@ class WrapperBuilder:
     def _add_series_of_array_arguments_checks(self, parameters, lines):
         # Check 1:
         _check_if_every_in_array_is_not_empty(parameters, lines)
+        # Check 2:
+        _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, lines)

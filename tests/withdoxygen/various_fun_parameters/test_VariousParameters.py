@@ -10,6 +10,7 @@ import os
 
     I) Only one array as a function parameter (IN/OUT/BOTH)
        - wrapper will assume that argument passed to function has proper size
+       - but it will check if it is not empty
 
     II) More than one array as a parameter:
 
