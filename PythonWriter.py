@@ -15,7 +15,6 @@ class PythonWriter:
     class Indent:
         def __init__(self, writer):
             self.writer = writer
-            pass
 
         def __enter__(self):
             self.writer._indent_level += 1
@@ -28,7 +27,6 @@ class PythonWriter:
             self.writer = writer
             self.what = what
             self._in = _in
-            pass
 
         def __enter__(self):
             self.writer.write_line(f'for {self.what} in {self._in}:')
@@ -41,7 +39,6 @@ class PythonWriter:
         def __init__(self, writer, cond):
             self.writer = writer
             self.cond = cond
-            pass
 
         def __enter__(self):
             self.writer.write_line(f'while {self.cond}:')
@@ -54,10 +51,45 @@ class PythonWriter:
         def __init__(self, writer, cond):
             self.writer = writer
             self.cond = cond
-            pass
 
         def __enter__(self):
             self.writer.write_line(f'if {self.cond}:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+
+    class Class:
+        def __init__(self, writer, name, inherits=[]):
+            self.writer = writer
+            self.name = name
+            self.inherits = inherits
+
+        def __enter__(self):
+            if len(self.inherits) == 0:
+                self.writer.write_line(f'class {self.name}:')
+            else:
+                inherited_s = ', '.join(self.inherits)
+                self.writer.write_line(f'class {self.name}({inherited_s}):')
+
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+
+    class Def:
+        def __init__(self, writer, name, params=[]):
+            self.writer = writer
+            self.name = name
+            self.params = params
+
+        def __enter__(self):
+            if len(self.params) == 0:
+                self.writer.write_line(f'def {self.name}:')
+            else:
+                params_s = ', '.join(self.params)
+                self.writer.write_line(f'def {self.name}({params_s}):')
+
             self.writer._indent_level += 1
 
         def __exit__(self, exc_type, exc_value, traceback):
@@ -85,6 +117,12 @@ class PythonWriter:
 
     def write_while(self, cond):
         return PythonWriter.While(self, cond)
+
+    def write_class(self, name, inherits=[]):
+        return PythonWriter.Class(self, name, inherits)
+
+    def write_def(self, name, params=[]):
+        return PythonWriter.Def(self, name, params)
 
     def escaped(self, text):
         return _escape_string(text)

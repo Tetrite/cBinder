@@ -31,3 +31,28 @@ class PythonWriterTest(unittest.TestCase):
         writer.write_line(f'x="{s}"')
         self.assertEqual(writer.get_string(), 'x="\\\"\\\"\\\"\\\""')
 
+    def test_writer_while(self):
+        writer = PythonWriter()
+        with writer.write_while('i==10'):
+            writer.write_line('i=i+1')
+        self.assertEqual(writer.get_string(), 'while i==10:\n\ti=i+1')
+
+    def test_writer_if(self):
+        writer = PythonWriter()
+        with writer.write_if('i==10'):
+            writer.write_line('j=i+1')
+        self.assertEqual(writer.get_string(), 'if i==10:\n\tj=i+1')
+
+    def test_writer_for(self):
+        writer = PythonWriter()
+        with writer.write_for('i', 'range(10)'):
+            writer.write_line('j=i+1')
+        self.assertEqual(writer.get_string(), 'for i in range(10):\n\tj=i+1')
+
+    def test_writer_class_def(self):
+        writer = PythonWriter()
+        with writer.write_class('a'):
+            with writer.write_def('__init__', ['self', 'i']):
+                writer.write_line('self.i=i')
+        self.assertEqual(writer.get_string(), 'class a:\n\tdef __init__(self, i):\n\t\tself.i=i')
+
