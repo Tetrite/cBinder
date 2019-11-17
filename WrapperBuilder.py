@@ -135,7 +135,7 @@ class WrapperBuilder:
                         self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
                     else:
                         writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
+                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
                 else:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'

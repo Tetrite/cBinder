@@ -27,6 +27,19 @@ class SimpleStructsTest(unittest.TestCase):
         s.b = 123.0
         s.c = b'a'
 
+    def test_generate_bindings_to_simple_function_with_struct_array(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s0 = struct.simple_struct()
+        s0.a = 123
+        s0.b = 123.0
+        s0.c = b'a'
+        s1 = struct.simple_struct()
+        s1.a = 123
+        s1.b = 321.0
+        s1.c = b'a'
+        b = struct.get_b_sum([s0, s1])
+        self.assertAlmostEqual(b, s0.b+s1.b, places=6)
+
     def test_generate_bindings_to_simple_function_with_struct(self):
         from tests.simplecases.simplestructs.generated.sources import struct
         s = struct.simple_struct()
@@ -34,6 +47,15 @@ class SimpleStructsTest(unittest.TestCase):
         s.b = 123.0
         s.c = b'a'
         b = struct.get_b([s])
+        self.assertEqual(b, s.b)
+
+    def test_generate_bindings_to_simple_function_with_struct_value(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s = struct.simple_struct()
+        s.a = 123
+        s.b = 123.0
+        s.c = b'a'
+        b = struct.get_b_value(s)
         self.assertEqual(b, s.b)
 
     def test_generate_bindings_to_simple_function_with_struct2(self):
