@@ -9,9 +9,23 @@ def _check_if_every_in_array_is_not_empty(parameters, lines):
 
 def _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, lines):
     array_in_params = [param for param in parameters if param.is_array and param.is_in]
+    _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(array_in_params, lines, True)
+
+
+def _check_array_sizes_consistency_when_there_are_only_out_arrays(parameters, lines):
+    # Check if there are only out array parameters:
+    for param in parameters:
+        if param.is_array and param.is_in:
+            return
+    array_out_params = [param for param in parameters if param.is_array and param.is_out]
+    _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(array_out_params, lines, False)
+
+
+def _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(array_parameters, lines, is_in_type):
+    type = 'IN' if is_in_type else 'OUT'
     # Variable used to store all possible array sizes inside a function
     arrays_same_sizes_list = []
-    for param in array_in_params:
+    for param in array_parameters:
         size = param.sizes[0]
         if not _size_in_list(arrays_same_sizes_list, size):
             arrays_same_sizes_list.append(ArraysSameSize(size, [param]))
@@ -24,7 +38,7 @@ def _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, l
         param_list = arr_same_size_object.parameters_list
         if len(param_list) < 2:
             continue
-        _add_checking_procedure_for_one_array_size(lines, size, arr_same_size_object.parameters_list)
+        _add_checking_procedure_for_one_array_size(lines, size, arr_same_size_object.parameters_list, type)
 
 
 def _size_in_list(same_arr_size_list, size):
@@ -41,8 +55,8 @@ def _get_arr_same_size_object(same_arr_size_list, size):
     return None
 
 
-def _add_checking_procedure_for_one_array_size(lines, size, arr_param_list):
-    lines.append('\t# Procedure to check if every IN array of the same declared size, has indeed same size:')
+def _add_checking_procedure_for_one_array_size(lines, size, arr_param_list, type):
+    lines.append('\t# Procedure to check if every ' + type + ' array of the same declared size, has indeed same size:')
     lines.append('\t# For arrays of declared size: ' + str(size))
     declared_arr_size_variable_name = 'declared_in_arr_param_size__' + str(size)
     lines.append('\t' + declared_arr_size_variable_name + ' = len(' + arr_param_list[0].name + ')')

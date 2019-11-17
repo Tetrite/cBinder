@@ -2,6 +2,7 @@ import platform
 import re
 from WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 from WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
+from WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
 
 unique_identifier_suffix = '__internal'
 
@@ -138,15 +139,19 @@ class WrapperBuilder:
             if parameter.struct:
                 if parameter.is_array:
                     size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                    lines.append(f'\t{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
-                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
+                    lines.append(
+                        f'\t{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                    lines.append(
+                        f'\t{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
                     lines += self._build_array_copy_struct_to_cffi(parameter.name, unique_identifier_suffix, '')
                 else:
-                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
+                    lines.append(
+                        f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
             else:
                 if parameter.is_out and parameter.is_array:
                     size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                    lines.append(f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+                    lines.append(
+                        f'\t{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                     lines += self._build_array_copy(parameter.name, unique_identifier_suffix, '')
                 else:
                     lines.append(f'\t{parameter.name}{unique_identifier_suffix} = {parameter.name}')
@@ -219,3 +224,5 @@ class WrapperBuilder:
         _check_if_every_in_array_is_not_empty(parameters, lines)
         # Check 2:
         _check_if_every_in_array_of_the_same_size_has_indeed_same_size(parameters, lines)
+        # Check 3:
+        _check_array_sizes_consistency_when_there_are_only_out_arrays(parameters, lines)
