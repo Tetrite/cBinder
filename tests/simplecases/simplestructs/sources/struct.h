@@ -9,3 +9,4 @@ void increment_b(simple_struct*);
 double get_b_value(simple_struct);
 double get_b_sum(simple_struct[]);
 void print(simple_struct*);
+simple_struct make_simple_struct(int a, double b, char c);

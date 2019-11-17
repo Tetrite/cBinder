@@ -170,6 +170,11 @@ class WrapperBuilder:
                 + ','.join([x.name + unique_identifier_suffix for x in function.parameters])
                 + ')')
 
+            if function.returns.struct and not function.returns.is_void:
+                writer.write_line(f'ret_ = {function.returns.struct}()')
+                writer.write_line('ret_.from_cffi(ret)')
+                writer.write_line('ret = ret_')
+
             for parameter in function.parameters:
                 if parameter.struct:
                     if parameter.is_array and parameter.is_out:

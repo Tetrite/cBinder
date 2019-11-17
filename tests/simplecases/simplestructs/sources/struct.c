@@ -29,3 +29,12 @@ void print(simple_struct* s)
 {
     printf("%d %g %c\n", s->a, s->b, s->c);
 }
+
+simple_struct make_simple_struct(int a, double b, char c)
+{
+    simple_struct s;
+    s.a = a;
+    s.b = b;
+    s.c = c;
+    return s;
+}

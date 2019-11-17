@@ -7,6 +7,11 @@ double get_b(simple_struct* s)
     return s->b;
 }
 
+void increment_b(simple_struct* s)
+{
+    s->b += 1.0;
+}
+
 double get_b_value(simple_struct s)
 {
     return s.b;
@@ -23,4 +28,13 @@ double get_b_sum(simple_struct s[])
 void print(simple_struct* s)
 {
     printf("%d %g %c\n", s->a, s->b, s->c);
+}
+
+simple_struct make_simple_struct(int a, double b, char c)
+{
+    simple_struct s;
+    s.a = a;
+    s.b = b;
+    s.c = c;
+    return s;
 }

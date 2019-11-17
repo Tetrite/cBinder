@@ -74,3 +74,11 @@ class SimpleStructsTest(unittest.TestCase):
         s.c = b'a'
         struct.increment_b(s)
         self.assertAlmostEqual(s.b, 124.0, places=6)
+
+    def test_struct_return(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s = struct.make_simple_struct(123, 321.0, b'a')
+        self.assertEqual(type(s), struct.simple_struct)
+        self.assertEqual(s.a, 123)
+        self.assertEqual(s.b, 321.0)
+        self.assertEqual(s.c, b'a')
