@@ -63,6 +63,31 @@ class PythonWriter:
             self.writer._indent_level -= 1
             self.writer.write_line('')
 
+    class Elif:
+        def __init__(self, writer, cond):
+            self.writer = writer
+            self.cond = cond
+
+        def __enter__(self):
+            self.writer.write_line(f'elif {cond}:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+            self.writer.write_line('')
+
+    class Else:
+        def __init__(self, writer):
+            self.writer = writer
+
+        def __enter__(self):
+            self.writer.write_line('else:')
+            self.writer._indent_level += 1
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.writer._indent_level -= 1
+            self.writer.write_line('')
+
     class Class:
         def __init__(self, writer, name, inherits=[]):
             self.writer = writer
@@ -123,6 +148,12 @@ class PythonWriter:
 
     def write_while(self, cond):
         return PythonWriter.While(self, cond)
+
+    def write_elif(self, cond):
+        return PythonWriter.Elif(self, cond)
+
+    def write_else(self):
+        return PythonWriter.Else(self)
 
     def write_class(self, name, inherits=[]):
         return PythonWriter.Class(self, name, inherits)

@@ -140,12 +140,18 @@ class WrapperBuilder:
             for parameter in function.parameters:
                 if parameter.struct:
                     if parameter.is_array:
-                        size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
-                        self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+                        with writer.write_if(f'hasattr({parameter.name}, \'__len__\')'):
+                            size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
+                            self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+
+                        with writer.write_else():
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
+                            writer.write_line(f'{parameter.name}.to_cffi_out({parameter.name}{unique_identifier_suffix}[0], __keepalive)')
                     else:
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
@@ -167,8 +173,11 @@ class WrapperBuilder:
             for parameter in function.parameters:
                 if parameter.struct:
                     if parameter.is_array and parameter.is_out:
-                        self._build_array_copy_struct_from_cffi(writer, parameter.name, '', unique_identifier_suffix + '_')
-                        pass
+                        with writer.write_if(f'hasattr({parameter.name}, \'__len__\')'):
+                            self._build_array_copy_struct_from_cffi(writer, parameter.name, '', unique_identifier_suffix + '_')
+
+                        with writer.write_else():
+                            writer.write_line(f'{parameter.name}.from_cffi({parameter.name}{unique_identifier_suffix}[0])')
                     else:
                         # this shouldn't happen, only parameters passed by pointer/array can be out
                         pass

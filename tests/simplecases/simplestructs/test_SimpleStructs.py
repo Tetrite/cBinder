@@ -46,7 +46,7 @@ class SimpleStructsTest(unittest.TestCase):
         s.a = 123
         s.b = 123.0
         s.c = b'a'
-        b = struct.get_b([s])
+        b = struct.get_b(s)
         self.assertEqual(b, s.b)
 
     def test_generate_bindings_to_simple_function_with_struct_value(self):
@@ -64,7 +64,7 @@ class SimpleStructsTest(unittest.TestCase):
         s.a = 123
         s.b = 123.0
         s.c = b'a'
-        struct.print([s])
+        struct.print(s)
 
     def test_struct_out_param(self):
         from tests.simplecases.simplestructs.generated.sources import struct
@@ -72,5 +72,5 @@ class SimpleStructsTest(unittest.TestCase):
         s.a = 123
         s.b = 123.0
         s.c = b'a'
-        struct.increment_b([s])
+        struct.increment_b(s)
         self.assertAlmostEqual(s.b, 124.0, places=6)
