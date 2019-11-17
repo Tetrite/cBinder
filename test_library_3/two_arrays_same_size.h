@@ -63,7 +63,7 @@ int reverse_array_order(int n, int* in_order, int* reverse_order );
   * The function takes values from IN array and writes it into OUT array in reversed order
   * it also reverses an order of IN,OUT array
   * @param[in]   n   size of an array
-  * @param[in]   in_order   sample array (array of size n)
+  * @param[in,out]   in_order   sample array (array of size n)
   * @param[out]  reverse_order    sample reversed array (array of size n)
   * @return                status
   */

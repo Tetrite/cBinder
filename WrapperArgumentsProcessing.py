@@ -28,7 +28,11 @@ def _initialize_out_array_if_necessary(lines, arr_out_param, decisive_param_name
     lines.append('\t\twarnings.warn(\"Warning: OUT array parameter ' + arr_out_param.name +
                  ' was passed with incorrect size. Wrapper initializes it with a correct value ' +
                  'based on an IN array parameter of the same declared size' + '\")')
-    lines.append('\t\t' + arr_out_param.name + ' = list(range(len(' + decisive_param_name + ')))')
+    # lines.append('\t\t' + arr_out_param.name + ' = list(range(len(' + decisive_param_name + ')))')
+    lines.append('\t\t' + arr_out_param.name + '.clear()')
+    lines.append('\t\tfor i in range(len(' + decisive_param_name + ')):')
+    lines.append('\t\t\t' + arr_out_param.name + '.append(1)')
+
 
 
 def _check_if_every_in_array_is_not_empty(parameters, lines):
