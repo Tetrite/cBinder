@@ -7,6 +7,11 @@ double get_b(simple_struct* s)
     return s->b;
 }
 
+void increment_b(simple_struct* s)
+{
+    s->b += 1.0;
+}
+
 double get_b_value(simple_struct s)
 {
     return s.b;

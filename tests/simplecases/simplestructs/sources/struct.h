@@ -5,6 +5,7 @@ typedef struct {
 } simple_struct;
 
 double get_b(simple_struct*);
+void increment_b(simple_struct*);
 double get_b_value(simple_struct);
 double get_b_sum(simple_struct[]);
 void print(simple_struct*);
