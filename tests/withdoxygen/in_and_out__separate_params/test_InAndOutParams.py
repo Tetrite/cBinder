@@ -23,9 +23,8 @@ class SimpleFunctionsTest(unittest.TestCase):
 
     def test_generate_bindings_to_function_with_doxygen(self):
         from tests.withdoxygen.in_and_out__separate_params.generated.sources import ex_doxygen as ex
-        n = 5
         in_array = [1,2,3,4,5]
         out_array = list(range(5))
-        return_value = ex.reverse_array_order(n, in_array, out_array)
+        return_value = ex.reverse_array_order(in_array, out_array)
         self.assertEqual(return_value, 0)
         self.assertEqual(out_array, [5,4,3,2,1])
