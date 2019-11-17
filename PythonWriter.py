@@ -21,6 +21,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     class For:
         def __init__(self, writer, what, _in):
@@ -34,6 +35,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     class While:
         def __init__(self, writer, cond):
@@ -46,6 +48,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     class If:
         def __init__(self, writer, cond):
@@ -58,6 +61,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     class Class:
         def __init__(self, writer, name, inherits=[]):
@@ -76,6 +80,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     class Def:
         def __init__(self, writer, name, params=[]):
@@ -94,6 +99,7 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
+            self.writer.write_line('')
 
     def __init__(self):
         self._lines = []
