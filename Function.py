@@ -62,6 +62,7 @@ class FunctionReturn:
         self.type = t
         self.c_type = get_c_type_for_type(t)
         self.is_void = t == 'void'
+        self.struct = t if not self.is_void and self.c_type is None else None
 
 
 class FunctionDeclaration:

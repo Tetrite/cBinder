@@ -74,13 +74,18 @@ class WrapperBuilder:
         self._build_python_wrapper_for_function(writer, header_name, function)
 
     def _build_array_copy(self, writer, name, _to, _from):
-        with writer.write_for('i,v', f'enumerate({name})'):
-            writer.write_line(f'{name}{_to}[i] = {name}{_from}[i]')
+        with writer.write_for('i,v', f'enumerate({name}{_from})'):
+            writer.write_line(f'{name}{_to}[i] = v')
 
     def _build_array_copy_struct_to_cffi(self, writer, name, _to, _from):
-        with writer.write_for('i,v', f'enumerate({name})'):
+        with writer.write_for('i', f'range(len({name}{_from}))'):
             # __keepalive must be in the scope
             writer.write_line(f'{name}{_from}[i].to_cffi_out({name}{_to}[i], __keepalive)')
+
+    def _build_array_copy_struct_from_cffi(self, writer, name, _to, _from):
+        with writer.write_for('i', f'range(len({name}{_from}))'):
+            # __keepalive must be in the scope
+            writer.write_line(f'{name}{_to}[i].from_cffi({name}{_from}[i])')
 
     def _build_python_wrapper_for_struct(self, writer, module_name, struct):
         with writer.write_class(struct.name):
@@ -99,6 +104,14 @@ class WrapperBuilder:
                     writer.write_line(f's.{member.name}=self.{member.name}')
 
                 writer.write_line(f'return s')
+
+            with writer.write_def('from_cffi', ['self', 'ffi_struct']):
+                for member in struct.members:
+                    if member.struct:
+                        # TODO: handle nested structs, use keepalive
+                        pass
+
+                    writer.write_line(f'self.{member.name}=ffi_struct.{member.name}')
 
             with writer.write_def('to_cffi_out', ['self', 'out', 'keepalive']):
                 for member in struct.members:
@@ -127,15 +140,21 @@ class WrapperBuilder:
             for parameter in function.parameters:
                 if parameter.struct:
                     if parameter.is_array:
-                        size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
-                        self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+                        with writer.write_if(f'hasattr({parameter.name}, \'__len__\')'):
+                            size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
+                            self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+
+                        with writer.write_else():
+                            writer.write_line(
+                                f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
+                            writer.write_line(f'{parameter.name}.to_cffi_out({parameter.name}{unique_identifier_suffix}[0], __keepalive)')
                     else:
                         writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)')
+                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
                 else:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
@@ -151,10 +170,21 @@ class WrapperBuilder:
                 + ','.join([x.name + unique_identifier_suffix for x in function.parameters])
                 + ')')
 
+            if function.returns.struct and not function.returns.is_void:
+                writer.write_line(f'ret_ = {function.returns.struct}()')
+                writer.write_line('ret_.from_cffi(ret)')
+                writer.write_line('ret = ret_')
+
             for parameter in function.parameters:
                 if parameter.struct:
                     if parameter.is_array and parameter.is_out:
-                        # TODO: from_cffi
+                        with writer.write_if(f'hasattr({parameter.name}, \'__len__\')'):
+                            self._build_array_copy_struct_from_cffi(writer, parameter.name, '', unique_identifier_suffix + '_')
+
+                        with writer.write_else():
+                            writer.write_line(f'{parameter.name}.from_cffi({parameter.name}{unique_identifier_suffix}[0])')
+                    else:
+                        # this shouldn't happen, only parameters passed by pointer/array can be out
                         pass
                 else:
                     if not parameter.is_out:
@@ -162,6 +192,7 @@ class WrapperBuilder:
                     if parameter.is_array:
                         self._build_array_copy(writer, parameter.name, '', unique_identifier_suffix)
                     else:
+                        # TODO: evaluate, can this actually even happen? Similar to struct case
                         writer.write_line(f'{parameter.name} = {parameter.name}{unique_identifier_suffix}')
 
             if not function.returns.is_void:

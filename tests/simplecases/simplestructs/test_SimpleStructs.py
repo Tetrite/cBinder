@@ -27,13 +27,35 @@ class SimpleStructsTest(unittest.TestCase):
         s.b = 123.0
         s.c = b'a'
 
+    def test_generate_bindings_to_simple_function_with_struct_array(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s0 = struct.simple_struct()
+        s0.a = 123
+        s0.b = 123.0
+        s0.c = b'a'
+        s1 = struct.simple_struct()
+        s1.a = 123
+        s1.b = 321.0
+        s1.c = b'a'
+        b = struct.get_b_sum([s0, s1])
+        self.assertAlmostEqual(b, s0.b+s1.b, places=6)
+
     def test_generate_bindings_to_simple_function_with_struct(self):
         from tests.simplecases.simplestructs.generated.sources import struct
         s = struct.simple_struct()
         s.a = 123
         s.b = 123.0
         s.c = b'a'
-        b = struct.get_b([s])
+        b = struct.get_b(s)
+        self.assertEqual(b, s.b)
+
+    def test_generate_bindings_to_simple_function_with_struct_value(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s = struct.simple_struct()
+        s.a = 123
+        s.b = 123.0
+        s.c = b'a'
+        b = struct.get_b_value(s)
         self.assertEqual(b, s.b)
 
     def test_generate_bindings_to_simple_function_with_struct2(self):
@@ -42,4 +64,21 @@ class SimpleStructsTest(unittest.TestCase):
         s.a = 123
         s.b = 123.0
         s.c = b'a'
-        struct.print([s])
+        struct.print(s)
+
+    def test_struct_out_param(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s = struct.simple_struct()
+        s.a = 123
+        s.b = 123.0
+        s.c = b'a'
+        struct.increment_b(s)
+        self.assertAlmostEqual(s.b, 124.0, places=6)
+
+    def test_struct_return(self):
+        from tests.simplecases.simplestructs.generated.sources import struct
+        s = struct.make_simple_struct(123, 321.0, b'a')
+        self.assertEqual(type(s), struct.simple_struct)
+        self.assertEqual(s.a, 123)
+        self.assertEqual(s.b, 321.0)
+        self.assertEqual(s.c, b'a')
