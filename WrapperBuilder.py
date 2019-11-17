@@ -5,11 +5,10 @@ from WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size
 from WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
 from WrapperArgumentsProcessing import _initialize_array_size_params_inside_wrapper
 from WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary
+from PythonWriter import *
 
 unique_identifier_suffix = '__internal'
 
-
-# TODO: better tool for indendation
 # TODO: handle escaping when creating sorce that may contains trings
 
 class WrapperBuilder:
@@ -29,35 +28,43 @@ class WrapperBuilder:
         self.dynamic_lib_ext = '.so' if platform.system() == 'Linux' else '.dll'
 
     def build_wrapper_for_header(self, header_name, header):
-        """Creates wrapper file for given HeaderFile"""
-        with open(header_name + '.py', 'w+') as f:
-            if not self.wrap_dynamic_lib:
-                f.write("import warnings\n")
-                f.write("from .lib import _" + header_name + "\n")
-                f.write(f'from cffi import FFI\nffi = _{header_name}.ffi\n\n')
-            else:
-                f.write("import warnings\n")
-                f.write("from cffi import FFI\nffi = FFI()\n\n")
-                decl = '\n'.join(decl.declaration_string for decl in header.structs)
-                f.write(f'ffi.cdef("""{decl}""")\n')
-                f.write("ffi.cdef(\"" + "\\\n".join([x.declaration_string for x in header.functions]) + "\")\n\n")
-                f.write("import os\n\n")
+        self.build_wrapper_for_structs_and_functions(header_name, header.structs, header.functions)
 
-            self._build_wrapper_for_header(header_name, f, header)
-
-    def build_wrapper_for_functions(self, header_name, functions):
+    # TODO: maybe remove, doesn't work correctly and is unused
+    def build_wrapper_for_structs_and_functions(self, header_name, structs, functions):
         """Creates wrapper file for given list of FunctionDeclaration objects"""
         with open(header_name + '.py', 'w+') as f:
-            f.write("from .lib import _" + header_name + "\rfrom cffi import FFI\rffi = FFI()\r\n\n")
+            writer = PythonWriter()
+            if not self.wrap_dynamic_lib:
+                writer.write_line('import warnings')
+                writer.write_line('from .lib import _' + header_name)
+                writer.write_line('from cffi import FFI')
+                writer.write_line(f'ffi = _{header_name}.ffi')
+                writer.write_line('')
+            else:
+                writer.write_line('import warnings')
+                writer.write_line('from cffi import FFI')
+                writer.write_line('ffi = FFI()')
+                writer.write_line('')
 
-            for decl in functions:
-                self._build_wrapper_for_function(header_name, f, decl)
+                struct_decls = writer.escaped('\n'.join(decl.declaration_string for decl in structs))
+                func_decls = writer.escaped('\n'.join(decl.declaration_string for decl in functions))
+                writer.write_line(f'ffi.cdef("""{struct_decls}""")')
+                writer.write_line(f'ffi.cdef("""{func_decls}""")')
+                writer.write_line('import os')
+                writer.write_line('')
 
-    def _build_wrapper_for_header(self, header_name, f, header):
-        for struct in header.structs:
+            writer.write_line('')
+
+            f.write(writer.get_string())
+
+            self._build_wrapper_for_structs_and_functions(header_name, f, structs, functions)
+
+    def _build_wrapper_for_structs_and_functions(self, header_name, f, structs, functions):
+        for struct in structs:
             self._build_wrapper_for_struct(header_name, f, struct)
 
-        for decl in header.functions:
+        for decl in functions:
             self._build_wrapper_for_function(header_name, f, decl)
 
     def _build_wrapper_for_struct(self, header_name, f, struct):

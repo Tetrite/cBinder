@@ -29,7 +29,7 @@ class PythonWriter:
         self._indent_level = 0
 
     def get_string(self):
-        return '\n'.join(self._lines) + '\n'
+        return '\n'.join(self._lines)
 
     def write_line(self, line):
         if self._indent_level > 0:
