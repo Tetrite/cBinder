@@ -15,9 +15,10 @@ class SourceFile:
         List of include directives strings scraped from source
     """
 
-    def __init__(self, src_path):
+    def __init__(self, src_path, dir_path):
         d = ScrapedData(src_path)
         self.filepath = src_path
+        self.relativepath = src_path.relative_to(dir_path)
         self.includes = d.includes
         self.enums = d.enums
         self.structs = d.structs
@@ -48,5 +49,5 @@ def get_source_files(dirpath):
     for path, subdirs, files in os.walk(dirpath):
         for name in files:
             if name.endswith('.c'):
-                sources.append(SourceFile(pathlib.Path(path, name)))
+                sources.append(SourceFile(pathlib.Path(path, name), dirpath))
     return sources

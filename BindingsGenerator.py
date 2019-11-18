@@ -113,7 +113,7 @@ class BindingsGenerator:
          """
         sources_combined = []
         for header, source in pairs:
-            sources_combined.append(source.filepath)
+            sources_combined.append(source.relativepath)
         """ Temporary measure - end """
 
         for header, source in pairs:
