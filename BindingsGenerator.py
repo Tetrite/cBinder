@@ -64,6 +64,8 @@ class BindingsGenerator:
         self._copy_needed_files_to_output_dir(headers)
         self._copy_needed_files_to_output_dir(sources)
 
+        self._copy_passed_dynamic_libraries()
+
         preprocess_headers('.')
         headers = get_header_files('.')
 
@@ -128,7 +130,8 @@ class BindingsGenerator:
             ffibuilder.cdef(header.read())
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,#instead of '[source.filepath]'
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
+                                  library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args,
+                                  extra_link_args=["-Wl,-rpath=$ORIGIN"])
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_header(name, header)
 
@@ -155,7 +158,7 @@ class BindingsGenerator:
             ffibuilder.cdef(all_declaration_strings)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir)
+                                  library_dirs=self.args.lib_dir, extra_link_args=["-Wl,-rpath=$ORIGIN"])
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_structs_and_functions(name, structs, functions)
 
@@ -165,6 +168,32 @@ class BindingsGenerator:
         for file in files:
             if not os.path.isfile('./' + file.filepath.name):
                 shutil.copy2(str(file.filepath), '.')
+
+    def _copy_passed_dynamic_libraries(self):
+        if not (hasattr(self.args, "lib_dir") and self.args.lib_dir):
+            return
+        package_dir = os.path.join(self.args.dest, self.args.package_name)
+        libs = os.path.join(package_dir, 'lib')
+        os.makedirs(libs, exist_ok=True)
+        dir_contents = [os.listdir(lib_dir) for lib_dir in self.args.lib_dir]
+        for libname in self.args.library:
+            for dir_content, lib_dir in zip(dir_contents, self.args.lib_dir):
+                if 'lib' + libname + '.so' in dir_content:
+                    libpath = os.path.join(lib_dir, 'lib' + libname + '.so')
+                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
+                    # if name contains more than one number after .so (.so.25.0.0)
+                    # if should be stiped (.so.25)
+                    so_index = libpath.find(".so")
+                    libpath = libpath[:libpath.find(".", so_index + 4)]
+                    libpath = os.path.join(lib_dir, libpath)
+                    shutil.copy2(libpath, libs)
+                    break
+                elif 'lib' + libname + '.dll' in dir_content:
+                    libpath = os.path.join(lib_dir, 'lib' + libname + '.dll')
+                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
+                    shutil.copy2(libpath, libs)
+                    break
+
 
     def _cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""
