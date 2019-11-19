@@ -182,7 +182,7 @@ class BindingsGenerator:
                     libpath = os.path.join(lib_dir, 'lib' + libname + '.so')
                     libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
                     # if name contains more than one number after .so (.so.25.0.0)
-                    # if should be stiped (.so.25)
+                    # it should be shortened (.so.25)
                     so_index = libpath.find(".so")
                     libpath = libpath[:libpath.find(".", so_index + 4)]
                     libpath = os.path.join(lib_dir, libpath)
