@@ -69,7 +69,7 @@ class PythonWriter:
             self.cond = cond
 
         def __enter__(self):
-            self.writer.write_line(f'elif {cond}:')
+            self.writer.write_line(f'elif {self.cond}:')
             self.writer._indent_level += 1
 
         def __exit__(self, exc_type, exc_value, traceback):
