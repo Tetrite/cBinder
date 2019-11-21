@@ -15,11 +15,16 @@ def _initialize_out_arrays_if_necessary(writer, parameters):
         arr_same_size_obj.check_for_decisive_in_param()
 
     array_out_params = [param for param in parameters if param.is_array and param.is_out and not param.is_in]
+    arrays_out_to_check_size_consistency = []
     for arr_out in array_out_params:
         same_arr_size_obj = _get_object_for_given_param(arrays_same_sizes_list, arr_out)
         decisive_parameter_name = same_arr_size_obj.decisive_param_name
         if decisive_parameter_name is not None:
             _initialize_out_array_if_necessary(writer, arr_out, decisive_parameter_name)
+        else:
+            arrays_out_to_check_size_consistency.append(arr_out)
+    if len(arrays_out_to_check_size_consistency) > 0:
+        _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(writer, arrays_out_to_check_size_consistency, False)
 
 
 def _initialize_out_array_if_necessary(writer, arr_out_param, decisive_param_name):
