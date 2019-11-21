@@ -95,16 +95,14 @@ class MultipleArraysTest(unittest.TestCase):
             array_result_2 = [0, 0]
             ma.get_first_n_elems(array_1, array_2, array_result_1, array_result_2)
 
-    # TODO: implement corner case below
-    #  (check if OUT arrays have the same size, when there is no IN array of a given size)
-    # def test_get_first_n_elems_error2(self):
-    #     from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
-    #     with self.assertRaises(ValueError):
-    #         array_1 = [1, 2, 3, 4]
-    #         array_2 = [5, 6, 7, 8]
-    #         array_result_1 = [0, 0]
-    #         array_result_2 = [0, 0, 0]
-    #         ma.get_first_n_elems(array_1, array_2, array_result_1, array_result_2)
+    def test_get_first_n_elems_error2(self):
+        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        with self.assertRaises(ValueError):
+            array_1 = [1, 2, 3, 4]
+            array_2 = [5, 6, 7, 8]
+            array_result_1 = [0, 0]
+            array_result_2 = [0, 0, 0]
+            ma.get_first_n_elems(array_1, array_2, array_result_1, array_result_2)
 
     def test_get_first_n_elems_error3(self):
         from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma

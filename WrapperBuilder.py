@@ -4,7 +4,7 @@ from WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 from WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
 from WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
 from WrapperArgumentsProcessing import _initialize_array_size_params_inside_wrapper
-from WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary
+from WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary_and_check_sizes
 from PythonWriter import *
 
 unique_identifier_suffix = '__internal'
@@ -242,6 +242,6 @@ class WrapperBuilder:
         _check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters)
 
         # Initialize OUT arrays if necessary:
-        _initialize_out_arrays_if_necessary(writer, parameters)
+        _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters)
         # Array sizes variables initialization:
         _initialize_array_size_params_inside_wrapper(writer, parameters)
