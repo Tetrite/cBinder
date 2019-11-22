@@ -11,7 +11,8 @@ class ArgumentTypesTest(unittest.TestCase):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.sources_path = self.current_working_directory_path.joinpath('sources')
         self.destination_path = self.current_working_directory_path.joinpath('generated')
-        shutil.rmtree(self.destination_path)
+        if os.path.exists(str(self.destination_path)):
+            shutil.rmtree(self.destination_path)
         os.makedirs(str(self.destination_path))
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
