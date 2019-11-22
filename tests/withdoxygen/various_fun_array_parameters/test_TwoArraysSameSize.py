@@ -33,7 +33,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int sum_of_two_arrays(int n, int* in_arr1, int* in_arr2);
     def test_sum_of_two_arrays_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         return_value = tw.sum_of_two_arrays([1, 2, 3], [1, 2, 3])
         self.assertEqual(return_value, 12)
 
@@ -42,7 +42,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         In this test, there are two in arrays of the same size,
         but the user passes two arrays of different size
         """
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.sum_of_two_arrays([1, 2], [1, 2, 3])
 
@@ -51,7 +51,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         In this test, there are two in arrays of the same size,
         but the user passes one empty array
         """
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.sum_of_two_arrays([], [1, 2, 3])
 
@@ -65,12 +65,12 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int sum_of_two_arrays_constant_size(int* in_arr1, int* in_arr2);
     def test_sum_of_two_arrays_constant_size_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         return_value = tw.sum_of_two_arrays_constant_size([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
         self.assertEqual(return_value, 30)
 
     def test_sum_of_two_arrays_constant_size_err(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.sum_of_two_arrays_constant_size([1, 2], [1, 2, 3])
 
@@ -85,7 +85,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int double_the_values_inside_two_arrays(int n, int* in_out_arr1, int* in_out_arr2);
     def test_double_the_values_inside_two_arrays_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         arr_1 = [1, 2, 3]
         arr_2 = [1, 2, 3]
         return_value = tw.double_the_values_inside_two_arrays(arr_1, arr_2)
@@ -94,7 +94,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         self.assertEqual(arr_2, [2, 4, 6])
 
     def test_double_the_values_inside_two_arrays_err(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.double_the_values_inside_two_arrays([1, 2, 3], [1, 2, 3, 4])
 
@@ -109,7 +109,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int fill_two_arrays_with_twos(int n, int* out_arr1, int* out_arr2);
     def test_fill_two_arrays_with_twos_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         arr_1 = [1, 2, 3]
         arr_2 = [1, 2, 3]
         return_value = tw.fill_two_arrays_with_twos(arr_1, arr_2)
@@ -118,7 +118,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         self.assertEqual(arr_2, [2, 2, 2])
 
     def test_fill_two_arrays_with_twos_err(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.fill_two_arrays_with_twos([1, 2], [1, 2, 3, 4])
 
@@ -134,7 +134,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int reverse_array_order(int n, int* in_order, int* reverse_order );
     def test_reverse_array_order_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         in_order = [1, 2, 3]
         reverse_order = [1, 2, 3]
         return_value = tw.reverse_array_order(in_order, reverse_order)
@@ -142,7 +142,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         self.assertEqual(reverse_order, [3, 2, 1])
 
     def test_reverse_array_order_correct_with_warning1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertWarns(Warning):
             in_order = [1, 2, 3]
             reverse_order = []
@@ -151,7 +151,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
             self.assertEqual(reverse_order, [3, 2, 1])
 
     def test_reverse_array_order_correct_with_warning2(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertWarns(Warning):
             in_order = [1, 2, 3]
             reverse_order = [1, 2, 3, 4, 5, 6, 7]
@@ -160,7 +160,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
             self.assertEqual(reverse_order, [3, 2, 1])
 
     def test_reverse_array_order_err(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.reverse_array_order([], [1, 2, 3, 4])
 
@@ -176,7 +176,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     #
     # int reverse_both_arrays_order(int n, int* in_order, int* reverse_order );
     def test_reverse_both_arrays_order_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         in_order = [1, 2, 3]
         reverse_order = [4, 5, 6]
         return_value = tw.reverse_both_arrays_order(in_order, reverse_order)
@@ -185,7 +185,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         self.assertEqual(reverse_order, [3, 2, 1])
 
     def test_reverse_both_arrays_order_with_warning1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertWarns(Warning):
             in_order = [1, 2, 3]
             reverse_order = []
@@ -195,7 +195,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
             self.assertEqual(reverse_order, [3, 2, 1])
 
     def test_reverse_both_arrays_order_err(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.reverse_both_arrays_order([], [1, 2, 3, 4])
 
@@ -212,7 +212,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
     # int array_adding(int n, int* array_1, int* array_2);
 
     def test_array_adding_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         array_1 = [1, 2, 3]
         array_2 = [4, 5, 6]
         return_value = tw.array_adding(array_1, array_2)
@@ -220,11 +220,11 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         self.assertEqual(array_2, [5, 7, 9])
 
     def test_array_adding_err1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.array_adding([], [1, 2, 3, 4])
 
     def test_array_adding_err2(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import two_arrays_same_size as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
         with self.assertRaises(ValueError):
             tw.array_adding([1, 2], [1, 2, 3, 4])

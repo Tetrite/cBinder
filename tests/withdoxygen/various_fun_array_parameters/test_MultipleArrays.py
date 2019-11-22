@@ -33,14 +33,14 @@ class MultipleArraysTest(unittest.TestCase):
     #
     # int array_adding_result_in_separate(int n, int* a, int* b, int* c);
     def test_array_adding_result_in_separate_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         c = [0, 0, 0]
         return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6], c)
         self.assertEqual(return_value, 0)
         self.assertEqual(c, [5, 7, 9])
 
     def test_array_adding_result_in_separate_correct_warning(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertWarns(Warning):
             c = []
             return_value = ma.array_adding_result_in_separate([1, 2, 3], [4, 5, 6], c)
@@ -48,12 +48,12 @@ class MultipleArraysTest(unittest.TestCase):
             self.assertEqual(c, [5, 7, 9])
 
     def test_array_adding_result_in_separate_err1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as tw
         with self.assertRaises(ValueError):
             tw.array_adding_result_in_separate([1, 2], [1, 2, 3], [1, 2, 3])
 
     def test_array_adding_result_in_separate_err2(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as tw
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as tw
         with self.assertRaises(ValueError):
             tw.array_adding_result_in_separate([], [1, 2, 3], [1, 2, 3])
 
@@ -76,7 +76,7 @@ class MultipleArraysTest(unittest.TestCase):
     #                 int* array_1, int* array_2,
     #                 int* array_result_1, int* array_result_2);
     def test_get_first_n_elems_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         array_1 = [1, 2, 3, 4]
         array_2 = [5, 6, 7, 8]
         array_result_1 = [0, 0]
@@ -87,7 +87,7 @@ class MultipleArraysTest(unittest.TestCase):
         self.assertEqual(array_result_2, [5, 6])
 
     def test_get_first_n_elems_error1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertRaises(ValueError):
             array_1 = [1, 2, 3, 4]
             array_2 = [5, 6, 7]
@@ -96,7 +96,7 @@ class MultipleArraysTest(unittest.TestCase):
             ma.get_first_n_elems(array_1, array_2, array_result_1, array_result_2)
 
     def test_get_first_n_elems_error2(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertRaises(ValueError):
             array_1 = [1, 2, 3, 4]
             array_2 = [5, 6, 7, 8]
@@ -105,7 +105,7 @@ class MultipleArraysTest(unittest.TestCase):
             ma.get_first_n_elems(array_1, array_2, array_result_1, array_result_2)
 
     def test_get_first_n_elems_error3(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertRaises(ValueError):
             array_1 = []
             array_2 = [5, 6, 7, 8]
@@ -129,7 +129,7 @@ class MultipleArraysTest(unittest.TestCase):
     #
     # int combine_arrays(int n_1, int n_2, int* array_in_1, int* array_out, int* array_in_2);
     def test_combine_arrays_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         array_in_1 = [1, 2, 3, 4]
         array_out = [0, 0, 0, 0]
         array_in_2 = [1, 2]
@@ -138,7 +138,7 @@ class MultipleArraysTest(unittest.TestCase):
         self.assertEqual(array_out, [4, 5, 6, 7])
 
     def test_combine_arrays_error1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertRaises(ValueError):
             array_in_1 = []
             array_out = [0, 0, 0, 0]
@@ -148,7 +148,7 @@ class MultipleArraysTest(unittest.TestCase):
             self.assertEqual(array_out, [4, 5, 6, 7])
 
     def test_combine_arrays_warning_1(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertWarns(Warning):
             array_in_1 = [1, 2, 3, 4]
             array_out = []
@@ -158,7 +158,7 @@ class MultipleArraysTest(unittest.TestCase):
             self.assertEqual(array_out, [4, 5, 6, 7])
 
     def test_combine_arrays_warning_2(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import multiple_arrays as ma
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertWarns(Warning):
             array_in_1 = [1, 2, 3, 4]
             array_out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

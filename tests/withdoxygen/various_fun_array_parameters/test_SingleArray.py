@@ -31,12 +31,12 @@ class SingleArrayTest(unittest.TestCase):
     #
     # int sum_of_array(int n, int* in_arr);
     def test_single_sum_of_array_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         return_value = sa.sum_of_array([1, 2, 3])
         self.assertEqual(return_value, 6)
 
     def test_single_array_sum_of_array_empty_list(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         with self.assertRaises(ValueError):
             sa.sum_of_array([])
 
@@ -49,12 +49,12 @@ class SingleArrayTest(unittest.TestCase):
     #
     # int sum_of_array_constant(int* in_arr);
     def test_sum_of_array_constant_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         return_value = sa.sum_of_array_constant([2, 2, 2, 2, 2])
         self.assertEqual(return_value, 10)
 
     def test_sum_of_array_constant_empty_list(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         with self.assertRaises(ValueError):
             sa.sum_of_array_constant([])
 
@@ -68,14 +68,14 @@ class SingleArrayTest(unittest.TestCase):
     #
     # int double_the_values_inside_array(int n, int* in_out_arr);
     def test_double_the_values_inside_array_correct(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         in_out_array = [1, 2, 3]
         return_value = sa.double_the_values_inside_array(in_out_array)
         self.assertEqual(return_value, 0)
         self.assertEqual(in_out_array, [2, 4, 6])
 
     def test_double_the_values_inside_array_empty_list(self):
-        from tests.withdoxygen.various_fun_parameters.generated.sources import single_array as sa
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         with self.assertRaises(ValueError):
             sa.double_the_values_inside_array([])
 
