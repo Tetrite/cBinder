@@ -19,8 +19,9 @@ class SourceFile:
         d = ScrapedData(src_path)
         self.filepath = src_path
         self.includes = d.includes
-        self.functions = d.functions
+        self.enums = d.enums
         self.structs = d.structs
+        self.functions = d.functions
 
     def __str__(self):
         return 'Source file path: ' + self.filepath.as_posix()

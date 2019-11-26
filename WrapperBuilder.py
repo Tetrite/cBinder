@@ -28,10 +28,10 @@ class WrapperBuilder:
         self.dynamic_lib_ext = '.so' if platform.system() == 'Linux' else '.dll'
 
     def build_wrapper_for_header(self, header_name, header):
-        self.build_wrapper_for_structs_and_functions(header_name, header.structs, header.functions)
+        self.build_wrapper_for_structs_and_functions(header_name, header.enums, header.structs, header.functions)
 
     # TODO: maybe remove, doesn't work correctly and is unused
-    def build_wrapper_for_structs_and_functions(self, header_name, structs, functions):
+    def build_wrapper_for_structs_and_functions(self, header_name, enums, structs, functions):
         """Creates wrapper file for given list of FunctionDeclaration objects"""
         with open(header_name + '.py', 'w+') as f:
             writer = PythonWriter()
@@ -45,6 +45,7 @@ class WrapperBuilder:
                 writer.write_line('from cffi import FFI')
                 writer.write_line('ffi = FFI()')
 
+                enum_decls = writer.escaped('\n'.join(decl.declaration_string for decl in enums))
                 struct_decls = writer.escaped('\n'.join(decl.declaration_string for decl in structs))
                 func_decls = writer.escaped('\n'.join(decl.declaration_string for decl in functions))
                 writer.write_line(f'ffi.cdef("""{struct_decls}""")')
@@ -54,18 +55,27 @@ class WrapperBuilder:
 
             writer.write_line('')
 
-            self._build_wrapper_for_structs_and_functions(writer, header_name, structs, functions)
+            self._build_wrapper_for_structs_and_functions(writer, header_name, enums, structs, functions)
 
             writer.write_line('')
 
             f.write(writer.get_string())
 
-    def _build_wrapper_for_structs_and_functions(self, writer, header_name, structs, functions):
+    def _build_wrapper_for_structs_and_functions(self, writer, header_name, enums, structs, functions):
+        if enums:
+            writer.write_line('from enum import Enum\n')
+
+        for enum in enums:
+            self._build_wrapper_for_enum(writer, header_name, enum)
+
         for struct in structs:
             self._build_wrapper_for_struct(writer, header_name, struct)
 
         for decl in functions:
             self._build_wrapper_for_function(writer, header_name, decl)
+
+    def _build_wrapper_for_enum(self, writer, header_name, enum):
+        self._build_python_wrapper_for_enum(writer, header_name, enum)
 
     def _build_wrapper_for_struct(self, writer, header_name, struct):
         self._build_python_wrapper_for_struct(writer, header_name, struct)
@@ -77,6 +87,14 @@ class WrapperBuilder:
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = v')
 
+    def _build_array_copy_enum_to_cffi(self, writer, name, _to, _from):
+        with writer.write_for('i,v', f'enumerate({name}{_from})'):
+            writer.write_line(f'{name}{_to}[i] = v.value')
+
+    def _build_array_copy_enum_from_cffi(self, writer, enum, name, _to, _from):
+        with writer.write_for('i,v', f'enumerate({name}{_from})'):
+            writer.write_line(f'{name}{_to}[i] = {enum}(v)')
+
     def _build_array_copy_struct_to_cffi(self, writer, name, _to, _from):
         with writer.write_for('i', f'range(len({name}{_from}))'):
             # __keepalive must be in the scope
@@ -86,6 +104,9 @@ class WrapperBuilder:
         with writer.write_for('i', f'range(len({name}{_from}))'):
             # __keepalive must be in the scope
             writer.write_line(f'{name}{_to}[i].from_cffi({name}{_from}[i])')
+
+    def _build_python_wrapper_for_enum(self, writer, module_name, enum):
+        writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{enum.name}\').relements)')
 
     def _build_python_wrapper_for_struct(self, writer, module_name, struct):
         with writer.write_class(struct.name):
@@ -155,6 +176,14 @@ class WrapperBuilder:
                     else:
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
+                elif parameter.enum:
+                    if parameter.is_out and parameter.is_array:
+                        size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                        writer.write_line(
+                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
+                        self._build_array_copy_enum_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
+                    else:
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.value')
                 else:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
@@ -186,6 +215,15 @@ class WrapperBuilder:
                     else:
                         # this shouldn't happen, only parameters passed by pointer/array can be out
                         pass
+                elif parameter.enum:
+                    if not parameter.is_out:
+                        # this shouldn't happen, only parameters passed by pointer/array can be out
+                        continue
+                    if parameter.is_array:
+                        self._build_array_copy_enum_from_cffi(writer, parameter.enum, parameter.name, '', unique_identifier_suffix)
+                    else:
+                        # TODO: evaluate, can this actually even happen? Similar to struct case
+                        writer.write_line(f'{parameter.name} = {parameter.enum}({parameter.name}{unique_identifier_suffix})')
                 else:
                     if not parameter.is_out:
                         continue

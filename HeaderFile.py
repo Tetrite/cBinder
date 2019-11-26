@@ -24,6 +24,7 @@ class HeaderFile:
     def __init__(self, h_path):
         d = ScrapedData(h_path)
         self.filepath = h_path
+        self.enums = d.enums
         self.functions = d.functions
         self.structs = d.structs
         self.includes = d.includes
