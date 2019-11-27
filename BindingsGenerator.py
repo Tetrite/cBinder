@@ -6,8 +6,19 @@ from WheelGenerator import WheelGenerator
 from MiniPreprocessing import preprocess_headers
 from cffi import FFI
 import os
+import sys
 import shutil
 
+def get_soname_path(libpath, lib_dir):
+    """
+    if name contains more than one number after .so (.so.25.0.0)
+    it should be shortened (.so.25)
+    """
+    if sys.platform in ("win32", "cygwin"):
+        return
+    so_index = libpath.find(".so")
+    libpath = libpath[:libpath.find(".", so_index + 4)]
+    return os.path.join(lib_dir, libpath)
 
 def _get_pairs_and_remainder(headers, sources):
     """
@@ -170,30 +181,31 @@ class BindingsGenerator:
                 shutil.copy2(str(file.filepath), '.')
 
     def _copy_passed_dynamic_libraries(self):
-        if not (hasattr(self.args, "lib_dir") and self.args.lib_dir):
+        lib_dirs = getattr(self.args, "lib_dir", None)
+        if not lib_dirs:
             return
         package_dir = os.path.join(self.args.dest, self.args.package_name)
-        libs = os.path.join(package_dir, 'lib')
-        os.makedirs(libs, exist_ok=True)
-        dir_contents = [os.listdir(lib_dir) for lib_dir in self.args.lib_dir]
-        for libname in self.args.library:
-            for dir_content, lib_dir in zip(dir_contents, self.args.lib_dir):
-                if 'lib' + libname + '.so' in dir_content:
-                    libpath = os.path.join(lib_dir, 'lib' + libname + '.so')
-                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
-                    # if name contains more than one number after .so (.so.25.0.0)
-                    # it should be shortened (.so.25)
-                    so_index = libpath.find(".so")
-                    libpath = libpath[:libpath.find(".", so_index + 4)]
-                    libpath = os.path.join(lib_dir, libpath)
-                    shutil.copy2(libpath, libs)
-                    break
-                elif 'lib' + libname + '.dll' in dir_content:
-                    libpath = os.path.join(lib_dir, 'lib' + libname + '.dll')
-                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
-                    shutil.copy2(libpath, libs)
-                    break
+        package_lib_dir = os.path.join(package_dir, 'lib')
+        os.makedirs(package_lib_dir, exist_ok=True)
+        # interested only in unique libnames
+        ext = ".dll" if sys.platform in ("win32", "cygwin") else ".so"
+        full_libnames = set("lib" + libname + ext for libname in self.args.library)
 
+        found_libs = set()
+        for lib_dir in lib_dirs:
+            full_libnames.difference_update(found_libs)
+            found_libs.clear()
+            dir_content = os.listdir(lib_dir)
+            for fullname in full_libnames:
+                if fullname in dir_content:
+                    libpath = os.path.join(lib_dir, fullname)
+                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
+                    libpath = get_soname_path(libpath, lib_dir)
+                    shutil.copy2(libpath, package_lib_dir)
+                    found_libs.add(fullname)
+        # if lib not found
+        if full_libnames:
+            print(f"Libraries not found: {full_libnames}")
 
     def _cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""
