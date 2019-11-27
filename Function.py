@@ -28,7 +28,7 @@ class FunctionParameter:
         Python object type used to hold this parameter in wrapper
     """
 
-    def __init__(self, param):
+    def __init__(self, param, enums):
         self.name = param['name']
         self.type = param['type']
         self.c_type = get_c_type_for_type(self.type)
@@ -38,7 +38,9 @@ class FunctionParameter:
         self.is_out = self.is_array and not self.is_const
         self.is_in = not self.is_out
         self.struct = param['class']['name'] if param['class'] != 0 else None
+        self.enum = self.type if self.type in enums else None
         self.is_array_size = False
+
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
@@ -58,11 +60,12 @@ class FunctionReturn:
         True if return type is void
     """
 
-    def __init__(self, t):
+    def __init__(self, t, enums):
         self.type = t
         self.c_type = get_c_type_for_type(t)
         self.is_void = t == 'void'
         self.struct = t if not self.is_void and self.c_type is None else None
+        self.enum = t if t in enums else None
 
 
 class FunctionDeclaration:
@@ -83,12 +86,12 @@ class FunctionDeclaration:
         FunctionReturn object
     """
 
-    def __init__(self, function):
+    def __init__(self, function, enums):
         self.doxygen = function['doxygen'] if 'doxygen' in function.keys() else None
         self.name = function['name']
         self.declaration_string = function['debug']
-        self.parameters = [FunctionParameter(param) for param in function['parameters']]
-        self.returns = FunctionReturn(function['rtnType'])
+        self.parameters = [FunctionParameter(param, enums) for param in function['parameters']]
+        self.returns = FunctionReturn(function['rtnType'], enums)
 
         self.set_parameters_names_if_empty()
 
