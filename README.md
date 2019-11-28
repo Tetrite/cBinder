@@ -37,14 +37,16 @@ C bindings and wrapper generator for Python using CFFI library
     ```python main.py my_lib -f./my_lib -d./my_lib/out compile```
 
 - Now go to ```my_lib/out``` directory. In ```dist``` directory you will find distribution packages ready to be pushed to PyPi. \
-Wrapper for test functions lies in ```my_lib``` directory so open up Python terminal in there
+Wrapper for test functions lies in ```my_lib``` directory
+
+- Open up Python terminal in ```my_lib/out``` directory
 
 - Test generated wrapper
 
     ```
-    >>>import test
-    >>>test.add(1,2)
+    >>>import my_lib.test
+    >>>my_lib.test.add(1,2)
     3
-    >>>test.addF(1.0,2.0)
+    >>>my_lib.test.addF(1.0,2.0)
     3.0
     ```
