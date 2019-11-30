@@ -3,3 +3,5 @@ venv/
 *Release/
 *generated/
 __pycache__/
+tests/**/generated
+tests/**/dependencies
