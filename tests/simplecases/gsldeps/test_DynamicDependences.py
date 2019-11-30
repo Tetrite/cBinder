@@ -14,7 +14,10 @@ class DynamicDependences(unittest.TestCase):
         os.makedirs(self.deps_path, exist_ok=True)
         os.chdir(self.deps_path)
         # get gsl - dependency of source
-        os.system(r'apt download libgsl-dev libgsl2 && dpkg -x libgsl-dev* . && dpkg -x libgsl2* .')
+        os.system(r'curl "http://cz.archive.ubuntu.com/ubuntu/pool/universe/g/gsl/libgsl-dev_2.5+dfsg-6_amd64.deb" --output libgsl-dev.deb')
+        os.system(r'curl "http://cz.archive.ubuntu.com/ubuntu/pool/universe/g/gsl/libgsl23_2.5+dfsg-6_amd64.deb" --output libgsl.deb')
+        os.system(r'curl "http://cz.archive.ubuntu.com/ubuntu/pool/universe/g/gsl/libgslcblas0_2.5+dfsg-6_amd64.deb" --output libgslcblas.deb')
+        os.system(r'dpkg -x libgsl-dev.deb . && dpkg -x libgsl.deb . && dpkg -x libgslcblas.deb .')
         self.sources_path = self.current_working_directory_path.joinpath('sources')
         self.include_path = self.current_working_directory_path.joinpath('dependencies/usr/include')
         self.libs_main_dir = self.current_working_directory_path.joinpath('dependencies/usr/lib')
