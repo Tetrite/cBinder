@@ -12,7 +12,7 @@ def _check_if_every_in_array_is_not_empty(writer, parameters):
         writer.write_line('# Procedure to check if an IN array is empty:')
         with writer.write_for('in_array_argument', '[' + ','.join(array_in_params) + ']'):
             with writer.write_if('not in_array_argument'):
-                writer.write_line('raise ValueError(\"You passed an empty list as an IN parameter.\")')
+                writer.write_line('warnings.warn(\"You passed an empty list as an IN parameter.\")')
 
 
 def _check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters):

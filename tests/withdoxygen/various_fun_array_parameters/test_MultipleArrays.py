@@ -137,16 +137,6 @@ class MultipleArraysTest(unittest.TestCase):
         self.assertEqual(return_value, 0)
         self.assertEqual(array_out, [4, 5, 6, 7])
 
-    def test_combine_arrays_error1(self):
-        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
-        with self.assertRaises(ValueError):
-            array_in_1 = []
-            array_out = [0, 0, 0, 0]
-            array_in_2 = [1, 2]
-            return_value = ma.combine_arrays(array_in_1, array_out, array_in_2)
-            self.assertEqual(return_value, 0)
-            self.assertEqual(array_out, [4, 5, 6, 7])
-
     def test_combine_arrays_warning_1(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
         with self.assertWarns(Warning):
@@ -166,3 +156,11 @@ class MultipleArraysTest(unittest.TestCase):
             return_value = ma.combine_arrays(array_in_1, array_out, array_in_2)
             self.assertEqual(return_value, 0)
             self.assertEqual(array_out, [4, 5, 6, 7])
+
+    def test_combine_arrays_warning_3(self):
+        from tests.withdoxygen.various_fun_array_parameters.generated.sources import multiple_arrays as ma
+        with self.assertWarns(Warning):
+            array_in_1 = []
+            array_out = [0, 0, 0, 0]
+            array_in_2 = [1, 2]
+            ma.combine_arrays(array_in_1, array_out, array_in_2)

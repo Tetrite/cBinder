@@ -159,9 +159,9 @@ class TwoArraysSameSizeTest(unittest.TestCase):
             self.assertEqual(return_value, 0)
             self.assertEqual(reverse_order, [3, 2, 1])
 
-    def test_reverse_array_order_err(self):
+    def test_reverse_array_order_warning(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             tw.reverse_array_order([], [1, 2, 3, 4])
 
     # /**
@@ -194,9 +194,9 @@ class TwoArraysSameSizeTest(unittest.TestCase):
             self.assertEqual(in_order, [3, 2, 1])
             self.assertEqual(reverse_order, [3, 2, 1])
 
-    def test_reverse_both_arrays_order_err(self):
+    def test_reverse_both_arrays_order_warning(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import two_arrays_same_size as tw
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             tw.reverse_both_arrays_order([], [1, 2, 3, 4])
 
     # /**
