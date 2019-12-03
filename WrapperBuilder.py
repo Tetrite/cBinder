@@ -237,27 +237,15 @@ class WrapperBuilder:
                 writer.write_line(f'return ret')
 
     def _add_documentation_to_a_function(self, writer, function):
-        """ Add documentation to a function, based on doxygen comment """
-        relevant_parameters = self._get_relevant_parameters(function.parameters)
-        # Regex used to get a parameter name from a doxygen comment line:
-        REGEX_ANY_PARAM_NAME = r'@param\[.*\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-
+        """ Add documentation to a function, based on a doxygen comment """
         if function.doxygen is not None:
             writer.write_line(f'\"\"\"')
+            writer.write_line(f'Wrapping function generated for C language function documented as follows:')
             for line in function.doxygen.splitlines():
-                # Discard unnecessary char sequence
+                line = line.replace("\"\"\"", "")  # To prevent SQL-injection-like error
                 if line.startswith('/**') or line.startswith('*/'):
                     continue
                 if line.startswith('*') and line[1:]:
-                    # Check if a line has a parameter description
-                    parameter_name_matches = re.findall(REGEX_ANY_PARAM_NAME, line)
-
-                    # Do not include unnecessary parameters inside a python doc
-                    if len(parameter_name_matches) > 0:
-                        name = parameter_name_matches[0]
-                        if name not in relevant_parameters:
-                            continue
-
                     writer.write_line(line[1:].strip())
             writer.write_line(f'\"\"\"')
 
