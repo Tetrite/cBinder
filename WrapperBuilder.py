@@ -9,6 +9,7 @@ from PythonWriter import *
 
 unique_identifier_suffix = '__internal'
 
+
 # TODO: handle escaping when creating sorce that may contains trings
 
 class WrapperBuilder:
@@ -72,6 +73,9 @@ class WrapperBuilder:
             self._build_wrapper_for_struct(writer, header_name, struct)
 
         for decl in functions:
+            # Procedure to eliminate case of parameter names that are keywords in Python
+            for parameter in decl.parameters:
+                parameter.name = 'p_' + parameter.name
             self._build_wrapper_for_function(writer, header_name, decl)
 
     def _build_wrapper_for_enum(self, writer, header_name, enum):
@@ -163,6 +167,10 @@ class WrapperBuilder:
                     if parameter.is_array:
                         with writer.write_if(f'hasattr({parameter.name}, \'__len__\')'):
                             size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                            # If size is defined as a function parameter, in a wrapper it has to be named with prefix
+                            # to avoid case when a function parameter name is a keyword in Python
+                            if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
+                                size = 'p_' + size
                             writer.write_line(
                                 f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
                             writer.write_line(
@@ -170,8 +178,7 @@ class WrapperBuilder:
                             self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
 
                         with writer.write_else():
-                            writer.write_line(
-                                f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
+                            writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
                             writer.write_line(f'{parameter.name}.to_cffi_out({parameter.name}{unique_identifier_suffix}[0], __keepalive)')
                     else:
                         writer.write_line(
@@ -179,6 +186,10 @@ class WrapperBuilder:
                 elif parameter.enum:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                        # If size is defined as a function parameter, in a wrapper it has to be named with prefix
+                        # to avoid case when a function parameter name is a keyword in Python
+                        if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
+                            size = 'p_' + size
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
                         self._build_array_copy_enum_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
@@ -187,6 +198,10 @@ class WrapperBuilder:
                 else:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
+                        # If size is defined as a function parameter, in a wrapper it has to be named with prefix
+                        # to avoid case when a function parameter name is a keyword in Python
+                        if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
+                            size = 'p_' + size
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')

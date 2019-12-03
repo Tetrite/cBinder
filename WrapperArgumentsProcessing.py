@@ -155,7 +155,7 @@ def _initialize_array_size_params_inside_wrapper(writer, parameters):
     arrays_same_sizes_list = _get_arrays_of_same_size_list(array_params)
     writer.write_line('# Array sizes variables initialization:')
     for arr_same_sizes_obj in arrays_same_sizes_list:
-        size = str(arr_same_sizes_obj.size)
+        size = 'p_' + str(arr_same_sizes_obj.size)
         first_available_param = arr_same_sizes_obj.parameters_list[0]
         writer.write_line(size + ' = len(' + first_available_param.name + ')')
 
