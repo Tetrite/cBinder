@@ -37,7 +37,7 @@ class SingleArrayTest(unittest.TestCase):
 
     def test_single_array_sum_of_array_empty_list(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             sa.sum_of_array([])
 
     # /**
@@ -55,7 +55,7 @@ class SingleArrayTest(unittest.TestCase):
 
     def test_sum_of_array_constant_empty_list(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             sa.sum_of_array_constant([])
 
     # /**
@@ -76,7 +76,7 @@ class SingleArrayTest(unittest.TestCase):
 
     def test_double_the_values_inside_array_empty_list(self):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             sa.double_the_values_inside_array([])
 
 
