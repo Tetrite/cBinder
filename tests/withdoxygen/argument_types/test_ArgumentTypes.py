@@ -53,6 +53,14 @@ class ArgumentTypesTest(unittest.TestCase):
     #     b = 3.0
     #     self.assertEqual(st.add_long_double(a, b), 8.0)
 
+    def test_array_types_different(self):
+        from tests.withdoxygen.argument_types.generated.sources import array_different as ad
+        in_array = [1, 2, 3]
+        out_array = []
+        return_value = ad.reverse_array_diff(in_array, out_array)
+        self.assertEqual(return_value, 0)
+        self.assertEqual(out_array, [3, 2, 1])
+
     def test_array_types_double(self):
         from tests.withdoxygen.argument_types.generated.sources import array_types as at
         in_array = [1.0, 2.0, 3.0]
