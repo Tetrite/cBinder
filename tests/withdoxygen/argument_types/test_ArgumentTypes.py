@@ -34,6 +34,24 @@ class ArgumentTypesTest(unittest.TestCase):
         self.assertEqual(st.add_signed(a, b), 8)
         self.assertEqual(st.add_unsigned(a, b), 8)
         self.assertEqual(st.add_unsigned_int(a, b), 8)
+        self.assertEqual(st.add_long_int(a, b), 8)
+        self.assertEqual(st.add_signed_long(a, b), 8)
+        self.assertEqual(st.add_signed_long_int(a, b), 8)
+        self.assertEqual(st.add_unsigned_long(a, b), 8)
+        self.assertEqual(st.add_unsigned_long_int(a, b), 8)
+        self.assertEqual(st.add_long_long(a, b), 8)
+        self.assertEqual(st.add_long_long_int(a, b), 8)
+        self.assertEqual(st.add_signed_long_long(a, b), 8)
+        self.assertEqual(st.add_signed_long_long_int(a, b), 8)
+        self.assertEqual(st.add_unsigned_long_long(a, b), 8)
+        self.assertEqual(st.add_unsigned_long_long_int(a, b), 8)
+
+    #TODO: Solve long double problem
+    # def test_standard_types_long_double(self):
+    #     from tests.withdoxygen.argument_types.generated.sources import standard_types as st
+    #     a = 5.0
+    #     b = 3.0
+    #     self.assertEqual(st.add_long_double(a, b), 8.0)
 
     def test_array_types_double(self):
         from tests.withdoxygen.argument_types.generated.sources import array_types as at
@@ -58,6 +76,15 @@ class ArgumentTypesTest(unittest.TestCase):
         return_value = at.reverse_array_order_float(in_array, out_array)
         self.assertEqual(return_value, 0)
         self.assertEqual(out_array, [3.0, 2.0, 1.0])
+
+    # TODO: Solve long double problem
+    # def test_array_types_long_double(self):
+    #     from tests.withdoxygen.argument_types.generated.sources import array_types as at
+    #     in_array = [1.0, 2.0, 3.0]
+    #     out_array = []
+    #     return_value = at.reverse_array_order_long_double(in_array, out_array)
+    #     self.assertEqual(return_value, 0)
+    #     self.assertEqual(out_array, [3.0, 2.0, 1.0])
 
     def test_array_types_int_alike(self):
         from tests.withdoxygen.argument_types.generated.sources import array_types as at
@@ -91,4 +118,37 @@ class ArgumentTypesTest(unittest.TestCase):
         self.assertEqual(out_array, [3, 2, 1])
         out_array = [5, 6, 7]
         at.reverse_array_order_unsigned_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_long_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_signed_long(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_signed_long_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_unsigned_long(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_unsigned_long_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_long_long(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_long_long_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_signed_long_long(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_signed_long_long_int(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_unsigned_long_long(in_array, out_array)
+        self.assertEqual(out_array, [3, 2, 1])
+        out_array = [5, 6, 7]
+        at.reverse_array_order_unsigned_long_long_int(in_array, out_array)
         self.assertEqual(out_array, [3, 2, 1])
