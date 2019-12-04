@@ -149,7 +149,7 @@ class BindingsGenerator:
             libraries = []
             if sys.platform in ("win32", "cygwin") and self.args.library:
                 libraries = list(str(libs_path / (libname + ".lib")) for libname in self.args.library)
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined, extra_objects=libraries, #instead of '[source.filepath]'
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir,
                                   extra_link_args=extra_link_args)
@@ -221,14 +221,9 @@ class BindingsGenerator:
                         libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
                         libpath = get_soname_path(libpath, lib_dir)
                         lib_path_dict[libname].set_path(libpath)
-
         for libpath in lib_path_dict.values():
             if libpath.dynamic_path:
                 shutil.copy2(libpath.dynamic_path, package_lib_dir)
-
-        if sys.platform in ("win32", "cygwin"):
-            # either linking static lib, or providing import information for dll
-            self.args.library = [libname + '.lib' for libname in self.args.library]
 
         for libname, libpath in lib_path_dict.items():
             # print missing
