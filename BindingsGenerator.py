@@ -4,10 +4,24 @@ from LibraryFile import get_shared_library_files
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
 from MiniPreprocessing import preprocess_headers
+from LibPaths import LibPaths
+import pathlib
 from cffi import FFI
 import os
+import sys
 import shutil
+import re
 
+def get_soname_path(libpath, lib_dir):
+    """
+    if name contains more than one number after .so (.so.25.0.0)
+    it should be shortened (.so.25)
+    """
+    if sys.platform in ("win32", "cygwin"):
+        return libpath
+    so_index = libpath.find(".so")
+    libpath = libpath[:libpath.find(".", so_index + 4)]
+    return os.path.join(lib_dir, libpath)
 
 def _get_pairs_and_remainder(headers, sources):
     """
@@ -64,6 +78,8 @@ class BindingsGenerator:
         self._copy_needed_files_to_output_dir(headers)
         self._copy_needed_files_to_output_dir(sources)
 
+        self._handle_passed_dynamic_libraries()
+
         preprocess_headers('.')
         headers = get_header_files('.')
 
@@ -113,7 +129,7 @@ class BindingsGenerator:
          """
         sources_combined = []
         for header, source in pairs:
-            sources_combined.append(source.filepath)
+            sources_combined.append(source.relativepath)
         """ Temporary measure - end """
 
         for header, source in pairs:
@@ -126,9 +142,17 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(header.read())
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,#instead of '[source.filepath]'
+            win_args = [f'/LIBPATH:./{self.args.package_name}/lib/']
+            linux_args = ["-Wl,-rpath=$ORIGIN"]
+            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
+            libs_path = pathlib.Path(f"./{self.args.package_name}/lib")
+            libraries = []
+            if sys.platform in ("win32", "cygwin") and self.args.library:
+                libraries = list(str(libs_path / (libname + ".lib")) for libname in self.args.library)
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args)
+                                  library_dirs=self.args.lib_dir,
+                                  extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_header(name, header)
 
@@ -153,9 +177,12 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
             ffibuilder.cdef(all_declaration_strings)
+            win_args = [f'/LIBPATH ../{self.args.package_name}/lib/']
+            linux_args = ["-Wl,-rpath=$ORIGIN"]
+            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir)
+                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_structs_and_functions(name, structs, functions)
 
@@ -165,6 +192,44 @@ class BindingsGenerator:
         for file in files:
             if not os.path.isfile('./' + file.filepath.name):
                 shutil.copy2(str(file.filepath), '.')
+
+
+    def _handle_passed_dynamic_libraries(self):
+        lib_dirs = getattr(self.args, "lib_dir", None)
+        if not lib_dirs or not self.args.library:
+            return
+        package_dir = os.path.join(self.args.dest, self.args.package_name)
+        package_lib_dir = os.path.join(package_dir, 'lib')
+        os.makedirs(package_lib_dir, exist_ok=True)
+
+        if sys.platform in ("win32", "cygwin"):
+            exts = (".dll", ".lib")
+            prefix = ""
+        else:
+            exts = (".so", ".a")
+            prefix = "lib"
+        libnames = set(self.args.library)
+
+        lib_path_dict = {libname:LibPaths() for libname in libnames}
+        for lib_dir in lib_dirs:
+            dir_content = os.listdir(lib_dir)
+            for libname in libnames:
+                for ext in exts:
+                    fullname = prefix + libname + ext
+                    if fullname in dir_content:
+                        libpath = os.path.join(lib_dir, fullname)
+                        libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
+                        libpath = get_soname_path(libpath, lib_dir)
+                        lib_path_dict[libname].set_path(libpath)
+        for libpath in lib_path_dict.values():
+            if libpath.dynamic_path:
+                shutil.copy2(libpath.dynamic_path, package_lib_dir)
+
+        for libname, libpath in lib_path_dict.items():
+            # print missing
+            if not libpath:
+                print(f"Library not found: {libname}")
+        print("Assuming libs not found are system's")
 
     def _cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""
