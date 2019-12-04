@@ -144,11 +144,12 @@ class BindingsGenerator:
             linux_args = ["-Wl,-rpath=$ORIGIN"]
             extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
             libs_path = pathlib.Path(f"./{self.args.package_name}/lib")
+            libraries = []
             if sys.platform in ("win32", "cygwin"):
                 libraries = list(str(libs_path / (libname + ".lib")) for libname in self.args.library)
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined, extra_objects=libraries, #instead of '[source.filepath]'
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_compile_args=["/DEBUG:FULL"],
+                                  library_dirs=self.args.lib_dir,
                                   extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_header(name, header)
