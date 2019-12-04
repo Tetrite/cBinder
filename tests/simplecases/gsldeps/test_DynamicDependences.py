@@ -1,14 +1,15 @@
 import unittest
 import os
+import sys
+import platform
 import pathlib
 
 from tests._util.folder_clearing import clear_folder_contents
 
 
-class DynamicDependences(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(self):
+class DynamicDependencesOnLinux64(unittest.TestCase):
+    @unittest.skipIf(sys.platform in ("win32", "cygwin") or platform.architecture()[0] != "64bit", "Test linux x64 specific")
+    def test_generate_bindings_to_simple_add_function_integer(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.deps_path = self.current_working_directory_path / 'dependencies'
         os.makedirs(self.deps_path, exist_ok=True)
@@ -33,7 +34,6 @@ class DynamicDependences(unittest.TestCase):
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
-    def test_generate_bindings_to_simple_add_function_integer(self):
         from tests.simplecases.gsldeps.generated.sources import example
         # c function return 0 if call was succesful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)

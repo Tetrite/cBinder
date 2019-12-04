@@ -4,6 +4,7 @@ from LibraryFile import get_shared_library_files
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
 from MiniPreprocessing import preprocess_headers
+import pathlib
 from cffi import FFI
 import os
 import sys
@@ -15,7 +16,7 @@ def get_soname_path(libpath, lib_dir):
     it should be shortened (.so.25)
     """
     if sys.platform in ("win32", "cygwin"):
-        return
+        return libpath
     so_index = libpath.find(".so")
     libpath = libpath[:libpath.find(".", so_index + 4)]
     return os.path.join(lib_dir, libpath)
@@ -139,10 +140,16 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(header.read())
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,#instead of '[source.filepath]'
+            win_args = [f'/LIBPATH:./{self.args.package_name}/lib/']
+            linux_args = ["-Wl,-rpath=$ORIGIN"]
+            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
+            libs_path = pathlib.Path(f"./{self.args.package_name}/lib")
+            if sys.platform in ("win32", "cygwin"):
+                libraries = list(str(libs_path / (libname + ".lib")) for libname in self.args.library)
+            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined, extra_objects=libraries, #instead of '[source.filepath]'
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_compile_args=self.args.extra_args,
-                                  extra_link_args=["-Wl,-rpath=$ORIGIN"])
+                                  library_dirs=self.args.lib_dir, extra_compile_args=["/DEBUG:FULL"],
+                                  extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_header(name, header)
 
@@ -167,9 +174,12 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
             ffibuilder.cdef(all_declaration_strings)
+            win_args = [f'/LIBPATH ../{self.args.package_name}/lib/']
+            linux_args = ["-Wl,-rpath=$ORIGIN"]
+            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=["-Wl,-rpath=$ORIGIN"])
+                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_structs_and_functions(name, structs, functions)
 
@@ -182,14 +192,18 @@ class BindingsGenerator:
 
     def _copy_passed_dynamic_libraries(self):
         lib_dirs = getattr(self.args, "lib_dir", None)
-        if not lib_dirs:
+        if not lib_dirs or not self.args.library:
             return
         package_dir = os.path.join(self.args.dest, self.args.package_name)
         package_lib_dir = os.path.join(package_dir, 'lib')
         os.makedirs(package_lib_dir, exist_ok=True)
         # interested only in unique libnames
-        ext = ".dll" if sys.platform in ("win32", "cygwin") else ".so"
-        full_libnames = set("lib" + libname + ext for libname in self.args.library)
+        exts = (".dll", ".lib") if sys.platform in ("win32", "cygwin") else (".so", ".a")
+        full_libnames = set()
+        for ext in exts:
+            full_libnames.update(set("lib" + libname + ext for libname in self.args.library))
+        for ext in exts:
+            full_libnames.update(set(libname + ext for libname in self.args.library))
 
         found_libs = set()
         for lib_dir in lib_dirs:
@@ -204,6 +218,7 @@ class BindingsGenerator:
                     shutil.copy2(libpath, package_lib_dir)
                     found_libs.add(fullname)
         # if lib not found
+        full_libnames.difference_update(found_libs)
         if full_libnames:
             print(f"Libraries not found: {full_libnames}")
 
