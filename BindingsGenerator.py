@@ -4,11 +4,13 @@ from LibraryFile import get_shared_library_files
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
 from MiniPreprocessing import preprocess_headers
+from LibPaths import LibPaths
 import pathlib
 from cffi import FFI
 import os
 import sys
 import shutil
+import re
 
 def get_soname_path(libpath, lib_dir):
     """
@@ -76,7 +78,7 @@ class BindingsGenerator:
         self._copy_needed_files_to_output_dir(headers)
         self._copy_needed_files_to_output_dir(sources)
 
-        self._copy_passed_dynamic_libraries()
+        self._handle_passed_dynamic_libraries()
 
         preprocess_headers('.')
         headers = get_header_files('.')
@@ -191,37 +193,48 @@ class BindingsGenerator:
             if not os.path.isfile('./' + file.filepath.name):
                 shutil.copy2(str(file.filepath), '.')
 
-    def _copy_passed_dynamic_libraries(self):
+
+    def _handle_passed_dynamic_libraries(self):
         lib_dirs = getattr(self.args, "lib_dir", None)
         if not lib_dirs or not self.args.library:
             return
         package_dir = os.path.join(self.args.dest, self.args.package_name)
         package_lib_dir = os.path.join(package_dir, 'lib')
         os.makedirs(package_lib_dir, exist_ok=True)
-        # interested only in unique libnames
-        exts = (".dll", ".lib") if sys.platform in ("win32", "cygwin") else (".so", ".a")
-        full_libnames = set()
-        for ext in exts:
-            full_libnames.update(set("lib" + libname + ext for libname in self.args.library))
-        for ext in exts:
-            full_libnames.update(set(libname + ext for libname in self.args.library))
 
-        found_libs = set()
+        if sys.platform in ("win32", "cygwin"):
+            exts = (".dll", ".lib")
+            prefix = ""
+        else:
+            exts = (".so", ".a")
+            prefix = "lib"
+        libnames = set(self.args.library)
+
+        lib_path_dict = {libname:LibPaths() for libname in libnames}
         for lib_dir in lib_dirs:
-            full_libnames.difference_update(found_libs)
-            found_libs.clear()
             dir_content = os.listdir(lib_dir)
-            for fullname in full_libnames:
-                if fullname in dir_content:
-                    libpath = os.path.join(lib_dir, fullname)
-                    libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
-                    libpath = get_soname_path(libpath, lib_dir)
-                    shutil.copy2(libpath, package_lib_dir)
-                    found_libs.add(fullname)
-        # if lib not found
-        full_libnames.difference_update(found_libs)
-        if full_libnames:
-            print(f"Libraries not found: {full_libnames}")
+            for libname in libnames:
+                for ext in exts:
+                    fullname = prefix + libname + ext
+                    if fullname in dir_content:
+                        libpath = os.path.join(lib_dir, fullname)
+                        libpath = os.readlink(libpath) if os.path.islink(libpath) else libpath
+                        libpath = get_soname_path(libpath, lib_dir)
+                        lib_path_dict[libname].set_path(libpath)
+
+        for libpath in lib_path_dict.values():
+            if libpath.dynamic_path:
+                shutil.copy2(libpath.dynamic_path, package_lib_dir)
+
+        if sys.platform in ("win32", "cygwin"):
+            # either linking static lib, or providing import information for dll
+            self.args.library = [libname + '.lib' for libname in self.args.library]
+
+        for libname, libpath in lib_path_dict.items():
+            # print missing
+            if not libpath:
+                print(f"Library not found: {libname}")
+        print("Assuming libs not found are system's")
 
     def _cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""
