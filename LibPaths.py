@@ -15,7 +15,7 @@ class LibPaths:
         if '.so' in path or 'dll' in path:
             self.dynamic_path = path
         if '.a' in path or '.lib' in path:
-            self.static_path = import_path
+            self.static_path = self.import_path
 
     def get_path(self):
         return self.static_path or self.dynamic_path
