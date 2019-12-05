@@ -145,7 +145,6 @@ class BindingsGenerator:
             win_args = [f'/LIBPATH:./{self.args.package_name}/lib/']
             linux_args = ["-Wl,-rpath=$ORIGIN"]
             extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
-            libs_path = pathlib.Path(f"./{self.args.package_name}/lib")
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)

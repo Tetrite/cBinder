@@ -56,15 +56,13 @@ class StaticDependencesOnWin64(unittest.TestCase):
             zip_ref.extractall('.')
         self.sources_path = self.current_working_directory_path.joinpath('sources/gsl_dependent')
         self.include_path = self.current_working_directory_path.joinpath('dependencies/msvc2017_64/include')
-        self.libs_main_dir = self.current_working_directory_path.joinpath('dependencies/msvc2017_64/lib')
-        # there is one thing in "libs_main_dir" directory containing libs
-        # name of this dir can vary, hence below line
-        self.libs_path = self.libs_main_dir.joinpath('gsl')
+        self.libs_path = self.current_working_directory_path.joinpath('dependencies/msvc2017_64/lib/gsl')
         self.destination_path = self.current_working_directory_path.joinpath('generated')
         if not os.path.exists(str(self.destination_path)):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
+
         print(r'python main.py sources -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
