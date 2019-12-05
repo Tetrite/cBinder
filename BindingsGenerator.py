@@ -184,7 +184,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
-            WrapperBuilder().build_wrapper_for_structs_and_functions(name, structs, functions)
+            WrapperBuilder().build_wrapper_for_structs_and_functions(name, [], structs, functions)
 
     def _copy_needed_files_to_output_dir(self, files):
         """Copies all header or source files to output directory given in arguments"""
