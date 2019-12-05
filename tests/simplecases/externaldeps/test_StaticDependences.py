@@ -11,7 +11,7 @@ from tests._util.folder_clearing import clear_folder_contents
 
 class StaticDependencesOnLinux64(unittest.TestCase):
     @unittest.skipIf(sys.platform in ("win32", "cygwin") or platform.architecture()[0] != "64bit", "Test linux x64 specific")
-    def test_generate_bindings_to_simple_add_function_integer(self):
+    def test_generate_bindings_to_gsl_sf_bessel_J(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.deps_path = self.current_working_directory_path / 'dependencies'
         os.makedirs(self.deps_path, exist_ok=True)
@@ -19,7 +19,7 @@ class StaticDependencesOnLinux64(unittest.TestCase):
         # get gsl - dependency of source
         os.system(r'curl "http://cz.archive.ubuntu.com/ubuntu/pool/universe/g/gsl/libgsl-dev_2.5+dfsg-6_amd64.deb" --output libgsl-dev.deb')
         os.system(r'dpkg -x libgsl-dev.deb .')
-        self.sources_path = self.current_working_directory_path.joinpath('sources')
+        self.sources_path = self.current_working_directory_path.joinpath('sources/gsl_dependent')
         self.include_path = self.current_working_directory_path.joinpath('dependencies/usr/include')
         self.libs_main_dir = self.current_working_directory_path.joinpath('dependencies/usr/lib')
         # there is one thing in "libs_main_dir" directory containing libs
@@ -37,13 +37,13 @@ class StaticDependencesOnLinux64(unittest.TestCase):
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
-        from tests.simplecases.gsldeps.generated.sources import example
+        from tests.simplecases.externaldeps.generated.sources import example
         # c function return 0 if call was succesful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)
 
 class StaticDependencesOnWin64(unittest.TestCase):
     @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test linux x64 specific")
-    def test_generate_bindings_to_simple_add_function_integer(self):
+    def test_generate_bindings_to_gsl_sf_bessel_J(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.deps_path = self.current_working_directory_path / 'dependencies'
         os.makedirs(self.deps_path, exist_ok=True)
@@ -54,7 +54,7 @@ class StaticDependencesOnWin64(unittest.TestCase):
             shutil.copyfileobj(response, out_file)
         with zipfile.ZipFile(zipped_lib_name, 'r') as zip_ref:
             zip_ref.extractall('.')
-        self.sources_path = self.current_working_directory_path.joinpath('sources')
+        self.sources_path = self.current_working_directory_path.joinpath('sources/gsl_dependent')
         self.include_path = self.current_working_directory_path.joinpath('dependencies/msvc2017_64/include')
         self.libs_main_dir = self.current_working_directory_path.joinpath('dependencies/msvc2017_64/lib')
         # there is one thing in "libs_main_dir" directory containing libs
@@ -76,6 +76,6 @@ class StaticDependencesOnWin64(unittest.TestCase):
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
-        from tests.simplecases.gsldeps.generated.sources import example
+        from tests.simplecases.externaldeps.generated.sources import example
         # c function return 0 if call was succesful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)
