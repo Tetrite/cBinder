@@ -49,22 +49,22 @@ class DynamicDependencesOnWin64(unittest.TestCase):
         self.sources_path = self.current_working_directory_path.joinpath('sources/return_n_dependent')
         self.include_path = self.current_working_directory_path.joinpath('dependencies')
         self.libs_path = self.current_working_directory_path.joinpath('dependencies')
-        self.destination_path = self.current_working_directory_path.joinpath('generated')
+        self.destination_path = self.current_working_directory_path.joinpath('generated/example2')
         if not os.path.exists(str(self.destination_path)):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        print(r'python main.py sources -f ' + str(self.sources_path)
+        print(r'python main.py sources2 -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l return_n ')
-        os.system(r'python main.py sources -f ' + str(self.sources_path)
+        os.system(r'python main.py sources2 -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l return_n ')
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
-        from tests.simplecases.externaldeps.generated.sources import example2
+        from tests.simplecases.externaldeps.generated.example2.sources2 import example2
         # c function return 0 if call was succesful
         self.assertEqual(example2.print_and_return_n(1), 1)

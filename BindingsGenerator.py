@@ -142,9 +142,9 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(header.read())
-            win_args = [f'/LIBPATH:./{self.args.package_name}/lib/']
-            linux_args = ["-Wl,-rpath=$ORIGIN"]
-            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
+            extra_link_args = []
+            if not sys.platform in ("win32", "cygwin"):
+                extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
@@ -172,9 +172,9 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
             ffibuilder.cdef(all_declaration_strings)
-            win_args = [f'/LIBPATH ../{self.args.package_name}/lib/']
-            linux_args = ["-Wl,-rpath=$ORIGIN"]
-            extra_link_args = win_args if sys.platform in ("win32", "cygwin") else linux_args
+            extra_link_args = []
+            if not sys.platform in ("win32", "cygwin"):
+                extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
