@@ -6,7 +6,7 @@ from Enum import EnumDeclaration
 
 class ScrapedData:
     def __init__(self, filepath, export_symbols):
-        header = CppHeaderParser.CppHeader(filepath)
+        header = CppHeaderParser.CppHeader(filepath, encoding='UTF-8')
         self.enums = _get_enum_declarations(header, export_symbols)
         enum_names = set(e.name for e in self.enums)
         self.structs = _get_struct_declarations(header, enum_names, export_symbols)
