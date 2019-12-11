@@ -11,9 +11,7 @@ def main():
     required_args.add_argument('-f', '--files_path', action='append', required=True, help='path to C files',metavar='PATH')
     required_args.add_argument('-d', '--dest', action='store', required=True, help='path to destination directory',metavar='PATH')
     optional_args.add_argument('-v', '--verbose', action='store_true', help='output verbosity')
-    optional_args.add_argument('-ef', '--export_functions', action='store',help='path to list of functions to be wrapped')
-    optional_args.add_argument('-es', '--export_structs', action='store', help='path to list of structs to be wrapped')
-    optional_args.add_argument('-ee', '--export_enums', action='store', help='path to list of enums to be wrapped')
+    optional_args.add_argument('-es', '--export_settings', action='store', help='settings file with declarations to be wrapped')
     arg_parser._action_groups.append(optional_args)
     subparsers = arg_parser.add_subparsers(title='mode', dest='mode')
 
@@ -31,6 +29,13 @@ def main():
         return
 
     args.dest = os.path.abspath(args.dest)
+    if args.export_settings:
+        args.export_settings = os.path.abspath(args.export_settings)
+        if not os.path.isfile(args.export_settings):
+            print('Error: No file found at given path')
+        with open(args.export_settings) as setts:
+            args.export_settings = setts.readlines()
+            args.export_settings = [x.strip("\n") for x in args.export_settings if x.strip("\n") != ""]
     for i, path in enumerate(args.files_path):
         args.files_path[i] = os.path.abspath(path)
     if args.mode == 'compile':
