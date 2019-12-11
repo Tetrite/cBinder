@@ -3,18 +3,22 @@ from Function import FunctionDeclaration
 from Struct import StructDeclaration
 from Enum import EnumDeclaration
 
+
 class ScrapedData:
-    def __init__(self, filepath):
+    def __init__(self, filepath, export_symbols):
+        export_functions = export_symbols['functions'] if export_symbols and 'functions' in export_symbols else None
+        export_structs = export_symbols['structs'] if export_symbols and 'structs' in export_symbols else None
+        export_enums = export_symbols['enums'] if export_symbols and 'enums' in export_symbols else None
         header = CppHeaderParser.CppHeader(filepath)
-        self.enums = _get_enum_declarations(header)
+        self.enums = _get_enum_declarations(header, export_enums)
         enum_names = set(e.name for e in self.enums)
-        self.structs = _get_struct_declarations(header, enum_names)
-        self.functions = _get_function_declarations(header, enum_names)
+        self.structs = _get_struct_declarations(header, enum_names, export_structs)
+        self.functions = _get_function_declarations(header, enum_names, export_functions)
         self.includes = _get_includes(header)
         self.defines = _get_defines(header)
 
 
-def _get_struct_declarations(header, enums):
+def _get_struct_declarations(header, enums, export_structs):
     """
     Return declarations attribute with StructDeclaration objects
 
@@ -30,11 +34,14 @@ def _get_struct_declarations(header, enums):
     """
     declarations = []
     for _, struct in header.classes.items():
-        declarations.append(StructDeclaration(struct, enums))
-
+        if 'name' not in struct:
+            continue
+        if export_structs is None or struct['name'] in export_structs:
+            declarations.append(StructDeclaration(struct, enums))
     return declarations
 
-def _get_function_declarations(header, enums):
+
+def _get_function_declarations(header, enums, export_functions):
     """
     Return declarations attribute with FunctionDeclaration objects
 
@@ -50,12 +57,14 @@ def _get_function_declarations(header, enums):
     """
     declarations = []
     for fun in header.functions:
-        declarations.append(FunctionDeclaration(fun, enums))
-
+        if 'name' not in fun:
+            continue
+        if export_functions is None or fun['name'] in export_functions:
+            declarations.append(FunctionDeclaration(fun, enums))
     return declarations
 
 
-def _get_enum_declarations(header):
+def _get_enum_declarations(header, export_enums):
     """
     Return declarations attribute with EnumDeclaration objects
 
@@ -71,8 +80,10 @@ def _get_enum_declarations(header):
     """
     declarations = []
     for e in header.enums:
-        declarations.append(EnumDeclaration(e))
-
+        if 'name' not in e:
+            continue
+        if export_enums is None or e['name'] in export_enums:
+            declarations.append(EnumDeclaration(e))
     return declarations
 
 

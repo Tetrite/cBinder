@@ -9,6 +9,7 @@ import zipfile
 
 from tests._util.folder_clearing import clear_folder_contents
 
+
 class StaticDependencesOnLinux64(unittest.TestCase):
     @unittest.skipIf(sys.platform in ("win32", "cygwin") or platform.architecture()[0] != "64bit", "Test linux x64 specific")
     def test_generate_bindings_to_gsl_sf_bessel_J(self):
@@ -41,8 +42,9 @@ class StaticDependencesOnLinux64(unittest.TestCase):
         # c function return 0 if call was succesful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)
 
+
 class StaticDependencesOnWin64(unittest.TestCase):
-    @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test linux x64 specific")
+    @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test windows x64 specific")
     def test_generate_bindings_to_gsl_sf_bessel_J(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.deps_path = self.current_working_directory_path / 'dependencies'
