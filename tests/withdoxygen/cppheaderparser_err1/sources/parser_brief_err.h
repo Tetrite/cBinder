@@ -1,6 +1,3 @@
-/**
- * @brief CppHeaderParser brief error
- */
 
 /**
   * @param[in]   a          first number
@@ -9,4 +6,5 @@
   */
 
 int sum(int a, int b);
+int sum2(int a, int b);
 
