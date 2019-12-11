@@ -21,5 +21,5 @@ class ArgumentTypesTest(unittest.TestCase):
         os.chdir(self.destination_path.joinpath('sources'))
 
     def test_standard_types(self):
-        from tests.withdoxygen.cppheaderparser_err1.generated.sources import parser_brief_err2 as par
+        from tests.withdoxygen.cppheaderparser_err2.generated.sources import parser_err_2 as par
         self.assertEqual(par.sum(2, 3), 5)

@@ -41,7 +41,6 @@ class FunctionParameter:
         self.enum = self.type if self.type in enums else None
         self.is_array_size = False
 
-
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
 
@@ -95,8 +94,11 @@ class FunctionDeclaration:
 
         self.set_parameters_names_if_empty()
 
-        if self.doxygen:
+        if self.doxygen and self._is_valid_doxygen(self.doxygen):
             self.imbue_with_doxygen(self.doxygen)
+
+    def _is_valid_doxygen(self, doxygen):
+        return doxygen.find("/**") >= 0 and doxygen.find("*/") >= 0 and doxygen.find("@brief") < 0
 
     def set_parameters_names_if_empty(self):
         i = 0
@@ -117,7 +119,7 @@ class FunctionDeclaration:
                 parameter.is_array = False
 
             parameter.is_out = doxygen_function_param.param_type == ParameterType.OUT or \
-                              doxygen_function_param.param_type == ParameterType.IN_AND_OUT
+                               doxygen_function_param.param_type == ParameterType.IN_AND_OUT
 
             parameter.is_in = doxygen_function_param.param_type == ParameterType.IN or \
                               doxygen_function_param.param_type == ParameterType.IN_AND_OUT

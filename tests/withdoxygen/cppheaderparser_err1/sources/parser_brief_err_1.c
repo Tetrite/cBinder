@@ -2,7 +2,7 @@
  * @brief CppHeaderParser brief error
  */
 
-#include "parser_brief_err.h"
+#include "parser_brief_err_1.h"
 
 int sum(int a, int b){
     return a+b;
