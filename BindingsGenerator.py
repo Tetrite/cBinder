@@ -142,8 +142,9 @@ class BindingsGenerator:
 
             ffibuilder = FFI()
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in header.enums)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
-            ffibuilder.cdef(header.read())
+            ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
             if not sys.platform in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
@@ -170,8 +171,10 @@ class BindingsGenerator:
 
             functions = source.functions
             structs = source.structs
+            enums = source.enums
             ffibuilder = FFI()
             all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in enums)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
