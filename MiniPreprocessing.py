@@ -17,7 +17,7 @@ def get_definitions_pairs(defines_list):
     def_pairs = {}
     for define_statement_string in defines_list:
         elems = re.split(" ", define_statement_string)
-        if len(elems) > 3:  # When define statement is not a simple NAME <--> VALUE PAIR
+        if len(elems) != 3:  # When define statement is not a simple NAME <--> VALUE PAIR
             continue  # Do not preprocess this
         name = elems[1]
         value = elems[2]
