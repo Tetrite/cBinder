@@ -22,7 +22,7 @@ class SimpleFunctionsTest(unittest.TestCase):
         os.chdir(self.destination_path.joinpath('sources'))
 
     def test_generate_bindings_to_function_with_doxygen(self):
-        from tests.withdoxygen.in_and_out_single_param.generated.sources import ex_doxygen as ex
+        from tests.withdoxygen.different_param_def.generated.sources import ex_doxygen as ex
         array = [1,2,3,4,5]
         return_value = ex.reverse_array_order(array)
         self.assertEqual(return_value, 0)
