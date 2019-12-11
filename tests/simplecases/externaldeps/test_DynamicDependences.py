@@ -38,8 +38,9 @@ class DynamicDependencesOnLinux64(unittest.TestCase):
         # c function return 0 if call was succesful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)
 
+
 class DynamicDependencesOnWin64(unittest.TestCase):
-    @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test linux x64 specific")
+    @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test windows x64 specific")
     def test_generate_bindings_to_function_return1(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
         self.deps_path = self.current_working_directory_path / 'dependencies'
