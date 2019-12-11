@@ -21,8 +21,8 @@ class HeaderFile:
         List of define directives strings scraped from header
     """
 
-    def __init__(self, h_path):
-        d = ScrapedData(h_path)
+    def __init__(self, h_path, export_symbols):
+        d = ScrapedData(h_path, export_symbols)
         self.filepath = h_path
         self.enums = d.enums
         self.functions = d.functions
@@ -38,7 +38,7 @@ class HeaderFile:
             return h.read()
 
 
-def get_header_files(dirpath):
+def get_header_files(dirpath, export_symbols=None):
     """
     Gets paths to all header files in directory (recursively)
 
@@ -46,6 +46,8 @@ def get_header_files(dirpath):
     ---------
     dirpath : str
         Library directory path string
+    export_symbols: dict
+        Dict containing lists of export symbols
 
     Returns
     -------
@@ -56,5 +58,5 @@ def get_header_files(dirpath):
     for path, subdirs, files in os.walk(dirpath):
         for name in files:
             if name.endswith('.h'):
-                headers.append(HeaderFile(pathlib.Path(path, name)))
+                headers.append(HeaderFile(pathlib.Path(path, name), export_symbols))
     return headers

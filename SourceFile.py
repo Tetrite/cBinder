@@ -15,8 +15,8 @@ class SourceFile:
         List of include directives strings scraped from source
     """
 
-    def __init__(self, src_path, dir_path):
-        d = ScrapedData(src_path)
+    def __init__(self, src_path, dir_path, export_symbols):
+        d = ScrapedData(src_path, export_symbols)
         self.filepath = src_path
         self.relativepath = src_path.relative_to(dir_path)
         self.includes = d.includes
@@ -31,7 +31,7 @@ class SourceFile:
         return self.functions
 
 
-def get_source_files(dirpath):
+def get_source_files(dirpath, export_symbols):
     """
     Gets paths to all source files in directory (recursively)
 
@@ -39,6 +39,8 @@ def get_source_files(dirpath):
     ---------
     dirpath : str
         Library directory path string
+    export_symbols: dict
+        Dict containing lists of export symbols
 
     Returns
     -------
@@ -49,5 +51,5 @@ def get_source_files(dirpath):
     for path, subdirs, files in os.walk(dirpath):
         for name in files:
             if name.endswith('.c'):
-                sources.append(SourceFile(pathlib.Path(path, name), dirpath))
+                sources.append(SourceFile(pathlib.Path(path, name), dirpath, export_symbols))
     return sources
