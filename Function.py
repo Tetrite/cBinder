@@ -98,7 +98,7 @@ class FunctionDeclaration:
             self.imbue_with_doxygen(self.doxygen)
 
     def _is_valid_doxygen(self, doxygen):
-        return doxygen.find("/**") >= 0 and doxygen.find("*/") >= 0 and doxygen.find("@brief") < 0
+        return doxygen.find("/**") >= 0 and doxygen.find("*/") >= 0 and doxygen.find("@param") >0
 
     def set_parameters_names_if_empty(self):
         i = 0
