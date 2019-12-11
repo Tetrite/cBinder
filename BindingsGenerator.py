@@ -65,14 +65,12 @@ class BindingsGenerator:
         paths = self.args.files_path
         verbosity = self.args.verbose
 
-        export_symbols = self._get_symbol_names_from_args()
-
         headers = []
         sources = []
         for path in paths:
-            headers.extend(get_header_files(path, export_symbols))
+            headers.extend(get_header_files(path, self.args.export_settings))
             if self.args.mode == 'compile':
-                sources.extend(get_source_files(path, export_symbols))
+                sources.extend(get_source_files(path, self.args.export_settings))
             else:
                 sources.extend(get_shared_library_files(path))
 
@@ -85,7 +83,7 @@ class BindingsGenerator:
         self._handle_passed_dynamic_libraries()
 
         preprocess_headers('.')
-        headers = get_header_files('.', export_symbols)
+        headers = get_header_files('.', self.args.export_settings)
 
         pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
 
@@ -238,31 +236,3 @@ class BindingsGenerator:
                     os.remove(os.path.join(root, file))
             for dirname in dirs:
                 os.rmdir(os.path.join(root, dirname))
-
-    def _get_symbol_names_from_args(self):
-        """
-            Retrieves dict consisting of:
-            'functions' -> list of functions to be wrapped
-            'structs' -> list of structs to be wrapped
-            'enums' -> list of enums to be wrapped
-        """
-        export_symbols = {}
-        export_symbols['functions'] = \
-            self._get_symbol_names_from_path(self.args.export_functions) \
-                if self.args.export_functions else None
-        export_symbols['structs'] = \
-            self._get_symbol_names_from_path(self.args.export_structs) \
-                if self.args.export_structs else None
-        export_symbols['enums'] = \
-            self._get_symbol_names_from_path(self.args.export_enums) \
-                if self.args.export_enums else None
-        return export_symbols
-
-    def _get_symbol_names_from_path(self, path):
-        """
-            Retrieves list of symbol names to be wrapped in a wrapper.
-            It could be a list of: functions, enums, structs.
-        """
-        with open(path) as f:
-            lines = f.readlines()
-            return [line.strip() for line in lines]

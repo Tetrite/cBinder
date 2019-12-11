@@ -21,7 +21,7 @@ class SimpleFunctionsTest(unittest.TestCase):
         call_string = r'python main.py sources ' + \
                   r'-f ' + str(self.sources_path) + \
                   r' -d ' + str(self.destination_path) + \
-                  r' -ef ' + str(self.export_fun_path) + \
+                  r' -es ' + str(self.export_fun_path) + \
                   r' compile'
         print(call_string)
         os.system(call_string)
