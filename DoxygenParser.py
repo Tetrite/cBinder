@@ -31,7 +31,11 @@ class DoxygenParser:
         The rest - just like in REGEX_IN_PARAM_NAME
     """
     REGEX_IN_AND_OUT_PARAM_NAME = r'@param\[in,out\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-    """ REGEX_OUT_PARAM_NAME 
+    """ REGEX_IN_AND_OUT_PARAM_NAME 
+        Regex used to retrieve IN&OUT parameter name from doxygen comment line
+    """
+    REGEX_IN_PARAM_NAME_SIMPLIFIED = r'@param[\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
+    """ REGEX_IN_PARAM_NAME_SIMPLIFIED 
         Regex used to retrieve IN&OUT parameter name from doxygen comment line
     """
     REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9_]*)\)'
@@ -92,6 +96,8 @@ class DoxygenParser:
             return ParameterType.OUT
         if len(re.findall("@param\[in,out\]", line)) > 0:
             return ParameterType.IN_AND_OUT
+        if len(re.findall("@param", line)) > 0:
+            return ParameterType.IN
         return None
 
     def _get_size_of_array(self, line):
@@ -104,7 +110,10 @@ class DoxygenParser:
         return size
 
     def _get_input_parameter_name(self, line):
-        return self._get_parameter_name(line, self.REGEX_IN_PARAM_NAME)
+        in_parameter_name = self._get_parameter_name(line, self.REGEX_IN_PARAM_NAME)
+        if in_parameter_name is None:
+            in_parameter_name = self._get_parameter_name(line, self.REGEX_IN_PARAM_NAME_SIMPLIFIED)
+        return in_parameter_name
 
     def _get_output_parameter_name(self, line):
         return self._get_parameter_name(line, self.REGEX_OUT_PARAM_NAME)
