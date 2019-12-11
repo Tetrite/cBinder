@@ -82,7 +82,7 @@ class BindingsGenerator:
 
         self._handle_passed_dynamic_libraries()
 
-        preprocess_headers('.')
+        preprocess_headers('.', self.args.export_settings)
         headers = get_header_files('.', self.args.export_settings)
 
         pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
