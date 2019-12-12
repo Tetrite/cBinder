@@ -31,3 +31,9 @@ class SimpleEnumsTest(unittest.TestCase):
         self.assertEqual(enum.some_enum_to_int(enum.SomeEnum.A), 0)
         self.assertEqual(enum.some_enum_to_int(enum.SomeEnum.B), 1)
         self.assertEqual(enum.some_enum_to_int(enum.SomeEnum.C), 123)
+
+    def test_unnamed_enum(self):
+        from tests.simplecases.simpleenums.generated.sources import enum
+        self.assertEqual(enum.UNNAMED_0, 0)
+        self.assertEqual(enum.UNNAMED_1, 1)
+        enum.print_unnamed_enum_value(enum.UNNAMED_0)
