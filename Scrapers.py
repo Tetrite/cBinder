@@ -79,8 +79,8 @@ def _get_enum_declarations(header, export_symbols):
     declarations = []
     for e in header.enums:
         if 'name' not in e:
-            continue
-        if export_symbols is None or e['name'] in export_symbols:
+            declarations.append(EnumDeclaration(e))
+        elif export_symbols is None or e['name'] in export_symbols:
             declarations.append(EnumDeclaration(e))
     return declarations
 

@@ -141,8 +141,8 @@ class BindingsGenerator:
                 print(f'Compiling and creating bindings for {name}')
 
             ffibuilder = FFI()
-            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.structs)
-            all_declaration_strings += ' '.join(decl.declaration_string for decl in header.enums)
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in header.enums)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []

@@ -110,7 +110,13 @@ class WrapperBuilder:
             writer.write_line(f'{name}{_to}[i].from_cffi({name}{_from}[i])')
 
     def _build_python_wrapper_for_enum(self, writer, module_name, enum):
-        writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{enum.name}\').relements)')
+        if enum.name:
+            writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{enum.name}\').relements)')
+        else:
+            for e in enum.values:
+                name = e['name']
+                value = e['value']
+                writer.write_line(f'{name}={value}')
 
     def _build_python_wrapper_for_struct(self, writer, module_name, struct):
         with writer.write_class(struct.name):
