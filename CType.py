@@ -15,6 +15,12 @@ def get_c_type_for_type(t):
 
 class CType(Enum):
     """Enum describing C language types"""
+    CHAR = 'char'
+    CHAR_POINTER = 'char *'
+    SIGNED_CHAR = 'signed char'
+    SIGNED_CHAR_POINTER = 'signed char *'
+    UNSIGNED_CHAR = 'unsigned char'
+    UNSIGNED_CHAR_POINTER = 'unsigned char *'
     SHORT = 'short'
     SHORT_POINTER = 'short *'
     SHORT_INT = 'short int'

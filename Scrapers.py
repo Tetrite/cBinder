@@ -33,9 +33,8 @@ def _get_struct_declarations(header, enums, export_symbols):
     for _, struct in header.classes.items():
         if 'name' not in struct:
             continue
-        # Export structs not yet provided for libamtrack
-        # if export_symbols is None or struct['name'] in export_symbols:
-        declarations.append(StructDeclaration(struct, enums))
+        if export_symbols is None or struct['name'] in export_symbols:
+            declarations.append(StructDeclaration(struct, enums))
     return declarations
 
 
