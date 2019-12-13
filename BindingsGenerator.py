@@ -25,25 +25,6 @@ def get_soname_path(libpath, lib_dir):
     return os.path.join(lib_dir, libpath)
 
 
-def _get_pairs_and_remainder(headers, sources):
-    """
-    Pairs header and source files if possible.
-    Unpaired sources are returned separately.
-    """
-    pairs = []
-    lone_sources = []
-
-    for source in sources:
-        for header in headers:
-            if header.filepath.stem == source.filepath.stem:
-                pairs.append((header, source))
-                break
-        else:
-            lone_sources.append(source)
-
-    return pairs, lone_sources
-
-
 class BindingsGenerator:
     """
     Class used to generate bindings for each source file using cffi library
@@ -85,7 +66,7 @@ class BindingsGenerator:
         preprocess_headers('.', self.args.export_settings)
         headers = get_header_files('.', self.args.export_settings)
 
-        pairs, lone_sources = _get_pairs_and_remainder(headers, sources)
+        pairs, lone_sources = self._get_pairs_and_remainder(headers, sources)
 
         if self.args.mode == 'compile':
             self._generate_bindings_for_pairs(pairs)
@@ -185,6 +166,26 @@ class BindingsGenerator:
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_structs_and_functions(name, [], structs, functions)
+
+    def _get_pairs_and_remainder(self, headers, sources):
+        """
+        Pairs header and source files if possible.
+        Unpaired sources are returned separately.
+        """
+        pairs = []
+        lone_sources = []
+
+        for source in sources:
+            for header in headers:
+                if header.filepath.stem == source.filepath.stem or (len(sources) == 1 and self.args.mode == 'shared'):
+                    # pair files if their names match or if source library is compiled
+                    # into single object then add it to every header
+                    pairs.append((header, source))
+                    break
+            else:
+                lone_sources.append(source)
+
+        return pairs, lone_sources
 
     def _copy_needed_files_to_output_dir(self, files):
         """Copies all header or source files to output directory given in arguments"""
