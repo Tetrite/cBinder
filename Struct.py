@@ -49,11 +49,10 @@ class StructDeclaration:
 
     def _build_declaration_string(self, struct):
         parts = ['typedef struct{']
-        for member in self.members:
-            parts.append(member.type + ' ' + member.name)
-            if member.is_array:
-                parts.append('*')
-            parts.append(';')
+        for member, member_info in zip(self.members, struct['properties']['public']):
+            asterisks = '*' * member_info['pointer']
+            arrays = '[]' * (member_info['array'] + member_info.get('multi_dimensional_array', 0))
+            parts.append(member.type + ' ' + asterisks + member.name + arrays + ';')
         parts += ['}', self.name, ';\n']
 
         return ''.join(parts)
