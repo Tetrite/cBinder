@@ -111,7 +111,8 @@ class WrapperBuilder:
 
     def _build_python_wrapper_for_enum(self, writer, module_name, enum):
         if enum.name:
-            writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{enum.name}\').relements)')
+            td = 'enum ' if not enum.typedef else ''
+            writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{td}{enum.name}\').relements)')
         else:
             for e in enum.values:
                 name = e['name']
