@@ -16,7 +16,8 @@ class WheelGenerator:
 		Name of package to be generated
 	"""
 
-	def __init__(self, path, pkg_name):
+	def __init__(self, args, path, pkg_name):
+		self.args = args
 		self.lib_path = os.path.abspath(path)
 		self.package_name = pkg_name
 
@@ -28,6 +29,11 @@ class WheelGenerator:
 
 	def create_lib_structure(self):
 		"""Creates necessary library structure and files"""
+
+		verbosity = self.args.verbose
+
+		if verbosity:
+			print(f'Adjusting library structure')
 
 		os.chdir(self.lib_path)
 		files = [f for f in os.listdir(self.lib_path)]
@@ -45,11 +51,17 @@ class WheelGenerator:
 	def create_necessary_files(self):
 		"""Creates necessary files for package e.g. setup.py"""
 
+		verbosity = self.args.verbose
+
 		package_dir = os.path.join(self.lib_path, self.package_name)
 		libs_dir = os.path.join(package_dir, 'lib')
 		if os.path.exists(libs_dir):
 			open(os.path.join(libs_dir, '__init__.py'), 'a').close()
 		open(os.path.join(package_dir, '__init__.py'), 'a').close()
+
+		if verbosity:
+			print('Creating setup.py')
+
 		with open('setup.py', 'w+') as f:
 			conf_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setup.config")
 			with open(conf_file_path, 'r') as conf:
@@ -58,4 +70,14 @@ class WheelGenerator:
 
 	def run_wheel_command(self):
 		"""Runs wheel command"""
-		subprocess.run([sys.executable, "setup.py", "sdist", "bdist_wheel"])
+
+		verbosity = self.args.verbose
+
+		if verbosity:
+			print(f'Creating wheel package')
+
+		additional_params = []
+		if not verbosity:
+			additional_params.append("-q")
+
+		subprocess.run([sys.executable, "setup.py"] + additional_params + ["sdist", "bdist_wheel"])

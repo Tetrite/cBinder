@@ -95,7 +95,7 @@ class BindingsGenerator:
             print('Cleaning up output dir before wheel generation')
         # Cleaning up a directory causes imports to fail in some test cases under linux
         # self.cleanup_output_dir()
-        WheelGenerator('.', self.args.package_name).generate_wheel()
+        WheelGenerator(self.args, '.', self.args.package_name).generate_wheel()
 
     def _generate_bindings_for_dynamic_libraries(self, pairs):
         """Generates bindings and wrapper for each pair of shared/dynamic library and header files"""
@@ -108,7 +108,9 @@ class BindingsGenerator:
 
         for header, source in pairs:
             name = header.filepath.stem
-            WrapperBuilder(wrap_dynamic_lib=True).build_wrapper_for_header(name, header)
+            if verbosity:
+                print(f'Compiling and creating bindings for pair of .h, .c files: {name}')
+            WrapperBuilder(self.args, wrap_dynamic_lib=True).build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_pairs(self, pairs):
         """Generates bindings and wrapper for each pair of source and header files"""
@@ -136,12 +138,17 @@ class BindingsGenerator:
             name = header.filepath.stem
 
             if verbosity:
-                print(f'Compiling and creating bindings for {name}')
+                print(f'Compiling and creating bindings for pair of .h, .c files: {name}')
 
             ffibuilder = FFI()
             all_declaration_strings = ' '.join(decl.declaration_string for decl in header.enums)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in header.functions)
+
+            if verbosity:
+                print(f'Declarations for which wrappers will be created:')
+                print(all_declaration_strings)
+
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
             if not sys.platform in ("win32", "cygwin"):
@@ -150,7 +157,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
-            WrapperBuilder().build_wrapper_for_header(name, header)
+            WrapperBuilder(self.args).build_wrapper_for_header(name, header)
 
     def _generate_bindings_monolith(self, name, headers, sources):
         """Generates bindings and wrapper in one module"""
@@ -169,7 +176,7 @@ class BindingsGenerator:
                 includes.add(include)
 
         if verbosity:
-            print(f'Compiling and creating bindings for {name}')
+            print(f'Compiling and creating bindings for monolithic module: {name}')
 
         ffibuilder = FFI()
         all_declaration_strings_parts = []
@@ -187,6 +194,17 @@ class BindingsGenerator:
 
         all_declaration_strings = '\n'.join(all_declaration_strings_parts)
         ffibuilder.cdef(all_declaration_strings)
+
+        if verbosity:
+            print(f'Header files:')
+            print([header.filepath for header in headers])
+
+            print(f'Source files:')
+            print(sources_paths)
+
+            print(f'Declarations for which wrappers will be created:')
+            print(all_declaration_strings)
+
         extra_link_args = []
         if not sys.platform in ("win32", "cygwin"):
             extra_link_args = ["-Wl,-rpath=$ORIGIN"]
@@ -194,7 +212,7 @@ class BindingsGenerator:
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
         ffibuilder.compile(verbose=verbosity)
-        WrapperBuilder().build_wrapper_for_structs_and_functions(name, enums, structs, functions)
+        WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
     def _generate_bindings_for_remainder(self, sources):
         """Generates bindings and wrapper the remainder of source files"""
@@ -209,7 +227,7 @@ class BindingsGenerator:
         for source in sources:
             name = source.filepath.stem
             if verbosity:
-                print(f'Compiling and creating bindings for {name}')
+                print(f'Compiling and creating bindings for source without an acompanying header file: {name}')
 
             functions = source.functions
             structs = source.structs
@@ -218,6 +236,12 @@ class BindingsGenerator:
             all_declaration_strings = ' '.join(decl.declaration_string for decl in enums)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
+
+            if verbosity:
+                print(f'Declarations for which wrappers will be created:')
+                print(all_declaration_strings)
+
+
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
             if not sys.platform in ("win32", "cygwin"):
@@ -226,7 +250,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
-            WrapperBuilder().build_wrapper_for_structs_and_functions(name, enums, structs, functions)
+            WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
     def _get_pairs_and_remainder(self, headers, sources):
         """
@@ -289,8 +313,8 @@ class BindingsGenerator:
         for libname, libpath in lib_path_dict.items():
             # print missing
             if not libpath:
-                print(f"Library not found: {libname}")
-        print("Assuming libs not found are system's")
+                print(f"WARNING: Library not found: {libname}")
+        print("INFO: Assuming libs that were not found are system's")
 
     def _cleanup_output_dir(self):
         """Cleans output directory leaving only .pyd and .py files"""

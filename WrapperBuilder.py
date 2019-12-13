@@ -24,7 +24,8 @@ class WrapperBuilder:
         .so if running os is Linux, .dll if Windows
     """
 
-    def __init__(self, wrap_dynamic_lib=False):
+    def __init__(self, args, wrap_dynamic_lib=False):
+        self.args = args
         self.wrap_dynamic_lib = wrap_dynamic_lib
         self.dynamic_lib_ext = '.so' if platform.system() == 'Linux' else '.dll'
 
@@ -63,16 +64,24 @@ class WrapperBuilder:
             f.write(writer.get_string())
 
     def _build_wrapper_for_structs_and_functions(self, writer, header_name, enums, structs, functions):
+        verbosity = self.args.verbose
+
         if enums:
             writer.write_line('from enum import Enum\n')
 
         for enum in enums:
+            if verbosity:
+                print(f'Building wrapper in module {header_name} for enum: {enum.declaration_string}')
             self._build_wrapper_for_enum(writer, header_name, enum)
 
         for struct in structs:
+            if verbosity:
+                print(f'Building wrapper in module {header_name} for struct: {struct.declaration_string}')
             self._build_wrapper_for_struct(writer, header_name, struct)
 
         for decl in functions:
+            if verbosity:
+                print(f'Building wrapper in module {header_name} for function: {decl.declaration_string}')
             # Procedure to eliminate case of parameter names that are keywords in Python
             for parameter in decl.parameters:
                 parameter.name = 'p_' + parameter.name
