@@ -1,6 +1,6 @@
-from HeaderFile import get_header_files
-from SourceFile import get_source_files
-from LibraryFile import get_shared_library_files
+from HeaderFile import *
+from SourceFile import *
+from LibraryFile import *
 from WrapperBuilder import WrapperBuilder
 from WheelGenerator import WheelGenerator
 from MiniPreprocessing import preprocess_headers
@@ -49,6 +49,14 @@ class BindingsGenerator:
         headers = []
         sources = []
         for path in paths:
+            if os.path.isfile(path):
+                path_obj = pathlib.Path(path)
+                if path.endswith('.h'):
+                    headers.append(HeaderFile(path_obj, self.args.export_settings))
+                elif path.endswith('.c'):
+                    sources.append(SourceFile(path_obj, path_obj.parent.as_posix(), self.args.export_settings))
+                else:
+                    sources.append(LibraryFile(path_obj))
             headers.extend(get_header_files(path, self.args.export_settings))
             if self.args.mode == 'compile':
                 sources.extend(get_source_files(path, self.args.export_settings))
