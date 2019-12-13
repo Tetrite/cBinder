@@ -61,6 +61,7 @@ libgsl
 libgslcblas  
 
 Use this call:  
+python main.py   
 libamtrack                                {name of output folder}   
 -f    
 /some-path..../libamtrack/library/src     {.c files}   
