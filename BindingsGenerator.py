@@ -57,11 +57,12 @@ class BindingsGenerator:
                     sources.append(SourceFile(path_obj, path_obj.parent.as_posix(), self.args.export_settings))
                 else:
                     sources.append(LibraryFile(path_obj))
-            headers.extend(get_header_files(path, self.args.export_settings))
-            if self.args.mode == 'compile':
-                sources.extend(get_source_files(path, self.args.export_settings))
             else:
-                sources.extend(get_shared_library_files(path))
+                headers.extend(get_header_files(path, self.args.export_settings))
+                if self.args.mode == 'compile':
+                    sources.extend(get_source_files(path, self.args.export_settings))
+                else:
+                    sources.extend(get_shared_library_files(path))
 
         if verbosity:
             print(f'Copying needed files to destination directory')
