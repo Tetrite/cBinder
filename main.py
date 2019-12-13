@@ -12,6 +12,7 @@ def main():
     required_args.add_argument('-d', '--dest', action='store', required=True, help='path to destination directory',metavar='PATH')
     optional_args.add_argument('-v', '--verbose', action='store_true', help='output verbosity')
     optional_args.add_argument('-es', '--export_settings', action='store', help='settings file with declarations to be wrapped')
+    optional_args.add_argument('-mono', '--monolith', action='store', help='if this is specified then all sources are compiled into one module')
     arg_parser._action_groups.append(optional_args)
     subparsers = arg_parser.add_subparsers(title='mode', dest='mode')
 

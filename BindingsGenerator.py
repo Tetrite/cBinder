@@ -45,6 +45,7 @@ class BindingsGenerator:
         """
         paths = self.args.files_path
         verbosity = self.args.verbose
+        monolith = self.args.monolith
 
         headers = []
         sources = []
@@ -75,13 +76,20 @@ class BindingsGenerator:
         preprocess_headers('.', self.args.export_settings)
         headers = get_header_files('.', self.args.export_settings)
 
-        pairs, lone_sources = self._get_pairs_and_remainder(headers, sources)
-
-        if self.args.mode == 'compile':
-            self._generate_bindings_for_pairs(pairs)
-            self._generate_bindings_for_remainder(lone_sources)
+        if monolith:
+            if self.args.mode == 'compile':
+                self._generate_bindings_monolith(monolith, headers, sources)
+            else:
+                # TODO:
+                pass
         else:
-            self._generate_bindings_for_dynamic_libraries(pairs)
+            pairs, lone_sources = self._get_pairs_and_remainder(headers, sources)
+
+            if self.args.mode == 'compile':
+                self._generate_bindings_for_pairs(pairs)
+                self._generate_bindings_for_remainder(lone_sources)
+            else:
+                self._generate_bindings_for_dynamic_libraries(pairs)
 
         if verbosity:
             print('Cleaning up output dir before wheel generation')
@@ -144,6 +152,50 @@ class BindingsGenerator:
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder().build_wrapper_for_header(name, header)
 
+    def _generate_bindings_monolith(self, name, headers, sources):
+        """Generates bindings and wrapper in one module"""
+
+        verbosity = self.args.verbose
+
+        if len(sources) == 0:
+            if verbosity:
+                print(f'No source files to process')
+            return
+
+        sources_paths = [source.filepath for source in sources]
+        includes = set()
+        for source in sources:
+            for include in source.includes:
+                includes.add(include)
+
+        if verbosity:
+            print(f'Compiling and creating bindings for {name}')
+
+        ffibuilder = FFI()
+        all_declaration_strings_parts = []
+        enums = []
+        structs = []
+        functions = []
+        for header in headers:
+            enums += header.enums
+            structs += header.structs
+            functions += header.functions
+
+        all_declaration_strings_parts += [decl.declaration_string for decl in enums]
+        all_declaration_strings_parts += [decl.declaration_string for decl in structs]
+        all_declaration_strings_parts += [decl.declaration_string for decl in functions]
+
+        all_declaration_strings = '\n'.join(all_declaration_strings_parts)
+        ffibuilder.cdef(all_declaration_strings)
+        extra_link_args = []
+        if not sys.platform in ("win32", "cygwin"):
+            extra_link_args = ["-Wl,-rpath=$ORIGIN"]
+        ffibuilder.set_source('_' + name, '\n'.join(includes), sources=sources_paths,
+                              include_dirs=self.args.include, libraries=self.args.library,
+                              library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
+        ffibuilder.compile(verbose=verbosity)
+        WrapperBuilder().build_wrapper_for_structs_and_functions(name, enums, structs, functions)
+
     def _generate_bindings_for_remainder(self, sources):
         """Generates bindings and wrapper the remainder of source files"""
 
@@ -163,8 +215,8 @@ class BindingsGenerator:
             structs = source.structs
             enums = source.enums
             ffibuilder = FFI()
-            all_declaration_strings = ' '.join(decl.declaration_string for decl in structs)
-            all_declaration_strings += ' '.join(decl.declaration_string for decl in enums)
+            all_declaration_strings = ' '.join(decl.declaration_string for decl in enums)
+            all_declaration_strings += ' '.join(decl.declaration_string for decl in structs)
             all_declaration_strings += ' '.join(decl.declaration_string for decl in functions)
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
@@ -174,7 +226,7 @@ class BindingsGenerator:
                                   include_dirs=self.args.include, libraries=self.args.library,
                                   library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
             ffibuilder.compile(verbose=verbosity)
-            WrapperBuilder().build_wrapper_for_structs_and_functions(name, [], structs, functions)
+            WrapperBuilder().build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
     def _get_pairs_and_remainder(self, headers, sources):
         """
