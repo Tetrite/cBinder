@@ -51,7 +51,18 @@ class StructDeclaration:
         parts = ['typedef struct{']
         for member, member_info in zip(self.members, struct['properties']['public']):
             asterisks = '*' * member_info['pointer']
-            arrays = '[]' * (member_info['array'] + member_info.get('multi_dimensional_array', 0))
+            if not member_info['array']:
+                arrays = ''
+            elif not member_info.get('multi_dimensional_array', 0):
+                arrays = f'[{member_info["array_size"]}]'
+            elif member_info['multi_dimensional_array_size']:
+                sizes_description = member_info['multi_dimensional_array_size']
+                arr_sizes = [int(arr_size) for arr_size in sizes_description.split('x')]
+                arrays = ''.join([f'[{arr_size}]' for arr_size in arr_sizes])
+            # because we go through this process twice, first time without minipreprocessing
+            # this alternative makes sure no error will be thrown
+            else:
+                arrays = '[]' * member_info.get['multi_dimensional_array']
             parts.append(member.type + ' ' + asterisks + member.name + arrays + ';')
         parts += ['}', self.name, ';\n']
 
