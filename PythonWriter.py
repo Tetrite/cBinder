@@ -115,7 +115,7 @@ class PythonWriter:
 
         def __enter__(self):
             if len(self.params) == 0:
-                self.writer.write_line(f'def {self.name}:')
+                self.writer.write_line(f'def {self.name}():')
             else:
                 params_s = ', '.join(self.params)
                 self.writer.write_line(f'def {self.name}({params_s}):')
