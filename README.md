@@ -50,3 +50,39 @@ Wrapper for test functions lies in ```my_lib``` directory
     >>>my_lib.test.addF(1.0,2.0)
     3.0
     ```
+
+# To use cBinder to compile libamtrack project on Unix:
+
+libamtrack with corrected doxygen comments:
+https://github.com/certaindividual/library
+
+Copy these external dependencies:  
+libgsl  
+libgslcblas  
+
+Use this call:  
+python main.py   
+libamtrack                                {name of output folder}   
+-f    
+/some-path..../libamtrack/library/src     {.c files}   
+-f   
+/some-path..../libamtrack/library/include  {.h files}   
+-d   
+some-results-path                           {path to folder with results}   
+-es   
+path-to-export symbols                      {path to export symbols list}   
+-mono                                       {create one file}  
+libAT                                       {name of final library}  
+compile                                     {compiling mode}  
+-i  
+path-to-external-dependencies-headers    (libgsl, libgslcblas)  
+-i  
+path-to-libamtrack-headers  
+-b  
+path-to-external-dependencies-libraries (libgsl, libgslcblas)  
+-l  
+gsl  
+-l  
+gslcblas  
+-l  
+m  
