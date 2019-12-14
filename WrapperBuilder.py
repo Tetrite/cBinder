@@ -22,17 +22,19 @@ class WrapperBuilder:
         True if wrapper should be created for dynamic library
     dynamic_lib_ext : str
         .so if running os is Linux, .dll if Windows
+    dynamic_lib_name : str
+        name of dll/so filename
     """
 
-    def __init__(self, args, wrap_dynamic_lib=False):
+    def __init__(self, args, wrap_dynamic_lib=False, dynamic_lib_name=None):
         self.args = args
         self.wrap_dynamic_lib = wrap_dynamic_lib
+        self.dynamic_lib_name = dynamic_lib_name
         self.dynamic_lib_ext = '.so' if platform.system() == 'Linux' else '.dll'
 
     def build_wrapper_for_header(self, header_name, header):
         self.build_wrapper_for_structs_and_functions(header_name, header.enums, header.structs, header.functions)
 
-    # TODO: maybe remove, doesn't work correctly and is unused
     def build_wrapper_for_structs_and_functions(self, header_name, enums, structs, functions):
         """Creates wrapper file for given list of FunctionDeclaration objects"""
         with open(header_name + '.py', 'w+') as f:
@@ -163,6 +165,8 @@ class WrapperBuilder:
                     writer.write_line(f'out.{member.name}=self.{member.name}')
 
     def _build_python_wrapper_for_function(self, writer, module_name, function):
+        if self.wrap_dynamic_lib:
+            module_name = self.dynamic_lib_name
         with writer.write_def(function.name, self._get_relevant_parameters(function.parameters)):
             if function.doxygen is not None:
                 self._add_documentation_to_a_function(writer, function)
