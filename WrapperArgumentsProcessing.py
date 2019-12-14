@@ -83,7 +83,7 @@ def _add_checking_procedure_for_one_array_size(writer, size, arr_param_list, typ
     declared_arr_size_variable_name = 'declared_in_arr_param_size__' + str(size)
     writer.write_line(declared_arr_size_variable_name + ' = len(' + arr_param_list[0].name + ')')
     with writer.write_for('in_array_argument', '[' + ','.join([param.name for param in arr_param_list]) + ']'):
-        with writer.write_if('(len(in_array_argument) != ' + declared_arr_size_variable_name + ')'):
+        with writer.write_if('len(in_array_argument) != ' + declared_arr_size_variable_name):
             writer.write_line('raise ValueError(\"You passed as parameters two or more lists ' +
                               'that should have the same size, with different sizes.\")')
 
@@ -135,12 +135,13 @@ def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """
     writer.write_line('# Procedure to check if OUT array ' + arr_out_param.name + ' is passed correctly:')
     with writer.write_if('len(' + arr_out_param.name + ') != len(' + decisive_param_name + ')'):
-        writer.write_line('warnings.warn(\"Warning: OUT array parameter ' + arr_out_param.name +
-                          ' was passed with incorrect size. Wrapper initializes it with a correct value ' +
-                          'based on an IN array parameter of the same declared size' + '\")')
-
+        writer.write_line('out_array_auto_init = \"\\nWarning: OUT array parameter ' + arr_out_param.name +
+                          ' was passed with incorrect size.\\n\" + \\')
+        writer.write_line('\t\"Wrapper initializes it with a correct value ' +
+                          'based on an IN array parameter of the same declared size\"')
+        writer.write_line('warnings.warn(out_array_auto_init)')
         writer.write_line(arr_out_param.name + '.clear()')
-        writer.write_line(arr_out_param.name + '+= [0]*' + 'len(' + decisive_param_name + ')')
+        writer.write_line(arr_out_param.name + ' += [0]*' + 'len(' + decisive_param_name + ')')
 
 
 def _initialize_array_size_params_inside_wrapper(writer, parameters):

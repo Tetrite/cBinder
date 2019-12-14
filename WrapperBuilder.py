@@ -175,7 +175,7 @@ class WrapperBuilder:
 
             for parameter in function.parameters:
                 if parameter.struct:
-                    writer.write_line(f'__keepalive=[]')
+                    writer.write_line(f'__keepalive = []')
                     break
 
             for parameter in function.parameters:
@@ -266,6 +266,9 @@ class WrapperBuilder:
 
             if not function.returns.is_void:
                 writer.write_line(f'return ret')
+
+            # PEP8 empty line after function
+            writer.write_line('')
 
     def _add_documentation_to_a_function(self, writer, function):
         """ Add documentation to a function, based on a doxygen comment """

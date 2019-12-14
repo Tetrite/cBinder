@@ -61,7 +61,8 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
-            self.writer.write_line('')
+            if self.writer._indent_level <= 1:
+                self.writer.write_line('')
 
     class Elif:
         def __init__(self, writer, cond):
@@ -95,6 +96,9 @@ class PythonWriter:
             self.inherits = inherits
 
         def __enter__(self):
+            # PEP8 two lines before class
+            self.writer.write_line('')
+            self.writer.write_line('')
             if len(self.inherits) == 0:
                 self.writer.write_line(f'class {self.name}:')
             else:
@@ -124,7 +128,8 @@ class PythonWriter:
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.writer._indent_level -= 1
-            self.writer.write_line('')
+            if self.writer._indent_level <= 1:
+                self.writer.write_line('')
 
     def __init__(self):
         self._lines = []
