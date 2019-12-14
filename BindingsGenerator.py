@@ -110,7 +110,8 @@ class BindingsGenerator:
             name = header.filepath.stem
             if verbosity:
                 print(f'Compiling and creating bindings for pair of .h, .c files: {name}')
-            WrapperBuilder(self.args, wrap_dynamic_lib=True).build_wrapper_for_header(name, header)
+            lib_name = source.filepath.stem
+            WrapperBuilder(self.args, wrap_dynamic_lib=True, dynamic_lib_name=lib_name).build_wrapper_for_header(name, header)
 
     def _generate_bindings_for_pairs(self, pairs):
         """Generates bindings and wrapper for each pair of source and header files"""
@@ -259,16 +260,18 @@ class BindingsGenerator:
         """
         pairs = []
         lone_sources = []
-
-        for source in sources:
-            for header in headers:
-                if header.filepath.stem == source.filepath.stem or (len(sources) == 1 and self.args.mode == 'shared'):
-                    # pair files if their names match or if source library is compiled
-                    # into single object then add it to every header
-                    pairs.append((header, source))
-                    break
-            else:
-                lone_sources.append(source)
+        if len(sources) == 1 and self.args.mode == 'shared':
+            # pair files if source library is compiled
+            # into single object then add it to every header
+            pairs.extend([(h, sources[0]) for h in headers])
+        else:
+            for source in sources:
+                for header in headers:
+                    if header.filepath.stem == source.filepath.stem:
+                        pairs.append((header, source))
+                        break
+                else:
+                    lone_sources.append(source)
 
         return pairs, lone_sources
 
