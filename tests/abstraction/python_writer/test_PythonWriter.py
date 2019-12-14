@@ -4,6 +4,7 @@ import os
 
 from PythonWriter import PythonWriter
 
+
 class PythonWriterTest(unittest.TestCase):
 
     @classmethod
@@ -54,5 +55,5 @@ class PythonWriterTest(unittest.TestCase):
         with writer.write_class('a'):
             with writer.write_def('__init__', ['self', 'i']):
                 writer.write_line('self.i=i')
-        self.assertEqual(writer.get_string(), 'class a:\n\tdef __init__(self, i):\n\t\tself.i=i\n\t\n')
+        self.assertEqual(writer.get_string(), '\n\nclass a:\n\tdef __init__(self, i):\n\t\tself.i=i\n\t\n')
 

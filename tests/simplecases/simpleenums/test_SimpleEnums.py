@@ -26,6 +26,12 @@ class SimpleEnumsTest(unittest.TestCase):
         self.assertEqual(enum.SomeEnum.B.value, 1)
         self.assertEqual(enum.SomeEnum.C.value, 123)
 
+    def test_generate_bindings_to_enum_not_typedef(self):
+        from tests.simplecases.simpleenums.generated.sources import enum
+        self.assertEqual(enum.ProblemEnum.D.value, 0)
+        self.assertEqual(enum.ProblemEnum.E.value, 1)
+        self.assertEqual(enum.ProblemEnum.F.value, 123)
+
     def test_generate_bindings_to_function_taking_enum(self):
         from tests.simplecases.simpleenums.generated.sources import enum
         self.assertEqual(enum.some_enum_to_int(enum.SomeEnum.A), 0)
