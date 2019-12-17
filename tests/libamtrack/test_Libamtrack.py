@@ -58,3 +58,7 @@ class ArgumentTypesTest(unittest.TestCase):
         from tests.libamtrack.generated.libamtrack import libAT
         a = libAT.AT_lambda_Landau_Mode()
         self.assertEqual(a, -0.2258)
+        average_A = []
+        libAT.AT_average_A_from_composition([1,16], [2./18.,16./18.], average_A)
+        self.assertEqual(len(average_A), 1)
+        self.assertAlmostEqual(average_A[0], 14.333333, places=6)
