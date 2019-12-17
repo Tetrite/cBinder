@@ -23,7 +23,23 @@ class SimpleFunctionsTest(unittest.TestCase):
 
     def test_generate_bindings_to_function_with_doxygen(self):
         from tests.withdoxygen.out_non_array.generated.sources import returnfive as rf
-        retval = []
+        retval = [1]
         return_value = rf.return_five(retval)
         self.assertEqual(return_value, 0)
         self.assertEqual(retval, [5])
+
+    def test_generate_bindings_to_function_with_doxygen_warn_1(self):
+        from tests.withdoxygen.out_non_array.generated.sources import returnfive as rf
+        with self.assertWarns(Warning):
+            retval = []
+            return_value = rf.return_five(retval)
+            self.assertEqual(return_value, 0)
+            self.assertEqual(retval, [5])
+
+    def test_generate_bindings_to_function_with_doxygen_warn_2(self):
+        from tests.withdoxygen.out_non_array.generated.sources import returnfive as rf
+        with self.assertWarns(Warning):
+            retval = [1,2,3,4,5]
+            return_value = rf.return_five(retval)
+            self.assertEqual(return_value, 0)
+            self.assertEqual(retval, [5])
