@@ -116,7 +116,13 @@ class FunctionDeclaration:
                 parameter.is_array = True
                 parameter.sizes = (doxygen_function_param.size,)
             else:
-                parameter.is_array = False
+                # Case when a parameter is OUT type, but is not an array
+                # according to doxygen comment. It is a pointer OUT type.
+                # It should be processed as array of size 1.
+                if not parameter.is_out:
+                    parameter.is_array = False
+                else:
+                    parameter.sizes = (1,)
 
             parameter.is_out = doxygen_function_param.param_type == ParameterType.OUT or \
                                doxygen_function_param.param_type == ParameterType.IN_AND_OUT

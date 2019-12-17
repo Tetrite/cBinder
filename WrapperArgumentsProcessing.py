@@ -130,6 +130,35 @@ def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
                                                                              arrays_out_to_check_size_consistency,
                                                                              False)
 
+def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
+    """
+    When user wants to return a value from a C language function not through return statement
+    but using OUT non-array parameter - that is, a pointer, the only option to actually
+    return a value from a wrapping function is to treat this parameter as an array of size 1.
+    (1)
+    Firstly, because such parameters have to be processed as arrays of size 1, user has to
+    pass it as array type in Python. Appropriate check is performed and error thrown in case
+    incorrect argument is passed
+    (2)
+    If user passed an array type, but it does not have size 1, warning is raised and
+    auto-initialization is done
+    """
+    # First, get every OUT parameter of size 1
+    non_array_out_params = [param for param in parameters if param.is_out and param.sizes[0] == 1]
+    # Add checking if every parameter is passed as an array
+    for param in non_array_out_params:
+        with writer.write_if('not isinstance(' + param.name + ', list)'):
+            writer.write_line('out_param_err = \"You passed OUT parameter not as an array.\"')
+            writer.write_line('raise ValueError(out_param_err)')
+    # Then add checking procedure with initialization
+    for param in non_array_out_params:
+        with writer.write_if('len(' + param.name + ') != 1'):
+            writer.write_line('out_param_auto_init = \"\\nWarning: OUT parameter (not an array)' +
+                              ' was passed with incorrect size.\\n\" + \\')
+            writer.write_line('\t\"Wrapper initializes it with size 1\"')
+            writer.write_line('warnings.warn(out_param_auto_init)')
+            writer.write_line(param.name + '.clear()')
+            writer.write_line(param.name + ' += [0]')
 
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """
