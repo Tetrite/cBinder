@@ -137,9 +137,9 @@ class WrapperBuilder:
 
     def _build_python_wrapper_for_struct(self, writer, module_name, struct):
         with writer.write_class(struct.name):
-            with writer.write_def('__init__', ['self']):
+            with writer.write_def('__init__', ['self'] + ['p_' + member.name + '=None' for member in struct.members]):
                 for member in struct.members:
-                    writer.write_line(f'self.{member.name}=None')
+                    writer.write_line(f'self.{member.name}=p_{member.name}')
 
             with writer.write_def('to_cffi', ['self', 'keepalive']):
                 writer.write_line(f's=ffi.new("{struct.name}*")')
