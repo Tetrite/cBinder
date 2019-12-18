@@ -159,6 +159,7 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
             writer.write_line('warnings.warn(out_param_auto_init)')
             writer.write_line(param.name + '.clear()')
             if 'char' in param.type:
+                # Char type has to be initialized with string
                 writer.write_line(param.name + ' += [\'\']')
             else:
                 writer.write_line(param.name + ' += [0]')

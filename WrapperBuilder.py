@@ -231,6 +231,8 @@ class WrapperBuilder:
                             f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
                     elif parameter.is_out and 'char' in parameter.type:
+                        # Unless it is a 2D char array (which needs separate wrapping),
+                        # add data repackaging script needed to pass char *
                         if not parameter.is_pointer_to_array:
                             writer.write_line(f'arg_keepalive = [ffi.new("char[]", 1)]')
                             writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')

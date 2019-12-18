@@ -122,6 +122,7 @@ class FunctionDeclaration:
                 # It should be processed as array of size 1.
                 if not parameter.is_out:
                     parameter.is_array = False
+                    # Below case is a 2D char array that needs separate handling
                     if parameter.is_pointer_to_array and 'char' in parameter.type:
                         continue
                 else:
