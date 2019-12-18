@@ -122,6 +122,8 @@ class FunctionDeclaration:
                 # It should be processed as array of size 1.
                 if not parameter.is_out:
                     parameter.is_array = False
+                    if parameter.is_pointer_to_array and 'char' in parameter.type:
+                        continue
                 else:
                     parameter.sizes = (1,)
 

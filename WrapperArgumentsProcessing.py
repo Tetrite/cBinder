@@ -158,7 +158,10 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
             writer.write_line('\t\"Wrapper initializes it with size 1\"')
             writer.write_line('warnings.warn(out_param_auto_init)')
             writer.write_line(param.name + '.clear()')
-            writer.write_line(param.name + ' += [0]')
+            if 'char' in param.type:
+                writer.write_line(param.name + ' += [\'\']')
+            else:
+                writer.write_line(param.name + ' += [0]')
 
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """

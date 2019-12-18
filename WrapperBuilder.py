@@ -103,6 +103,10 @@ class WrapperBuilder:
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = v')
 
+    def _build_array_copy_char(self, writer, name, _to, _from):
+        with writer.write_for('i,v', f'enumerate({name}{_from})'):
+            writer.write_line(f'{name}{_to}[i] = ffi.string(v).decode()')
+
     def _build_array_copy_enum_to_cffi(self, writer, name, _to, _from):
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = v.value')
@@ -217,7 +221,7 @@ class WrapperBuilder:
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.value')
                 else:
-                    if parameter.is_out and parameter.is_array:
+                    if parameter.is_out and parameter.is_array and not 'char' in parameter.type:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
                         # If size is defined as a function parameter, in a wrapper it has to be named with prefix
                         # to avoid case when a function parameter name is a keyword in Python
@@ -226,19 +230,33 @@ class WrapperBuilder:
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
+                    elif parameter.is_out and 'char' in parameter.type:
+                        if not parameter.is_pointer_to_array:
+                            writer.write_line(f'arg_keepalive = [ffi.new("char[]", 1)]')
+                            writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')
                     elif parameter.type == 'char * *' or (parameter.is_pointer_to_array and parameter.type == 'char *'):
                         writer.write_line(f'arg_keepalive = [ffi.new("char[]", x.encode() if type(x) is str else x) for x in {parameter.name}]')
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}')
 
+            parameter_list = []
+            for param in function.parameters:
+                if param.is_out and 'char' in param.type and not param.is_pointer_to_array:
+                    parameter_list.append(
+                            param.name + unique_identifier_suffix + '[0].encode() if ' +
+                            'type(' + param.name + unique_identifier_suffix + '[0]) is str ' +
+                            'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
+                else:
+                    parameter_list.append(
+                        param.name + unique_identifier_suffix + '.encode() if ' +
+                        'type(' + param.name + unique_identifier_suffix + ') is str ' +
+                        'else ' + param.name + unique_identifier_suffix + '\n\t\t\t')
+
             writer.write_line(
                 ('ret = ' if not function.returns.is_void else '')
                 + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
-                + ','.join([x.name + unique_identifier_suffix + '.encode() if ' +
-                            'type(' + x.name + unique_identifier_suffix + ') is str ' +
-                            'else ' + x.name + unique_identifier_suffix
-                            for x in function.parameters])
+                + ','.join(parameter_list)
                 + ')')
 
             if function.returns.struct and not function.returns.is_void:
@@ -269,8 +287,12 @@ class WrapperBuilder:
                 else:
                     if not parameter.is_out:
                         continue
-                    if parameter.is_array:
+                    if parameter.is_array and 'char' not in parameter.type:
                         self._build_array_copy(writer, parameter.name, '', unique_identifier_suffix)
+                        continue
+                    if parameter.is_out and 'char' in parameter.type:
+                        if not parameter.is_pointer_to_array:
+                            self._build_array_copy_char(writer, parameter.name, '', unique_identifier_suffix)
                     else:
                         # TODO: evaluate, can this actually even happen? Similar to struct case
                         writer.write_line(f'{parameter.name} = {parameter.name}{unique_identifier_suffix}')

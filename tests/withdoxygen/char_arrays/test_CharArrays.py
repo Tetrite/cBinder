@@ -52,4 +52,20 @@ class SimpleFunctionsTest(unittest.TestCase):
         arr_of_strings.append("three")
         self.assertEqual(11, cha.get_sum_of_string_lengths_mix(arr_of_strings, 3))
 
+    def test_fill_with_agh_pointer(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+        ex = ['']
+        cha.fill_with_agh_pointer(ex)
+        self.assertEqual('agh', ex[0])
+
+    def test_fill_with_agh_brackets(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+        ex = ['']
+        cha.fill_with_agh_brackets(ex)
+        self.assertEqual('agh', ex[0])
+
+    # def test_fill_with_a_2D(self):
+    #     from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+    #     arr_of_strings = ['bbbb', 'ccccccc', 'dddd']
+    #     self.assertEqual(11, cha.get_sum_of_string_lengths_mix(arr_of_strings, 3))
 
