@@ -21,14 +21,34 @@ class SimpleFunctionsTest(unittest.TestCase):
             r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
-    def test_generate_bindings_to_function_with_doxygen(self):
+    def test_get_string_length_pointer(self):
         from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
         string_ex = "example"
         self.assertEqual(7, cha.get_string_length_pointer(string_ex))
+
+
+    def test_get_string_length_braces(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+        string_ex = "example"
         self.assertEqual(7, cha.get_string_length_braces(string_ex))
+
+    def test_get_sum_of_string_lengths_pointers(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
         arr_of_strings = []
         arr_of_strings.append("one")
         arr_of_strings.append("two")
         arr_of_strings.append("three")
         self.assertEqual(11, cha.get_sum_of_string_lengths_pointers(arr_of_strings))
+
+    def test_get_sum_of_string_lengths_mix(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+        arr_of_strings = []
+        arr_of_strings.append("one")
+        arr_of_strings.append("two")
+        arr_of_strings.append("three")
         self.assertEqual(11, cha.get_sum_of_string_lengths_mix(arr_of_strings))
+
+    def test_get_string_length_pointer_single_quote(self):
+        from tests.withdoxygen.char_arrays.generated.sources import chararray as cha
+        string_ex = 'example'
+        self.assertEqual(7, cha.get_string_length_pointer(string_ex))
