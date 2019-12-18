@@ -226,13 +226,19 @@ class WrapperBuilder:
                         writer.write_line(
                             f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
+                    if parameter.type == 'char * *' or (parameter.is_pointer_to_array and parameter.type == 'char *'):
+                        writer.write_line(f'arg_keepalive = [ffi.new("char[]", x.encode() if type(x) is str else x) for x in {parameter.name}]')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}')
 
             writer.write_line(
                 ('ret = ' if not function.returns.is_void else '')
                 + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
-                + ','.join([x.name + unique_identifier_suffix for x in function.parameters])
+                + ','.join([x.name + unique_identifier_suffix + '.encode() if ' +
+                            'type(' + x.name + unique_identifier_suffix + ') is str ' +
+                            'else ' + x.name + unique_identifier_suffix
+                            for x in function.parameters])
                 + ')')
 
             if function.returns.struct and not function.returns.is_void:

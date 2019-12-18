@@ -40,6 +40,7 @@ class FunctionParameter:
         self.struct = param['class']['name'] if param['class'] != 0 else None
         self.enum = self.type if self.type in enums else None
         self.is_array_size = False
+        self.is_pointer_to_array = param['array'] != 0 and param['pointer'] != 0
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
