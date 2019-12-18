@@ -72,3 +72,18 @@ class ArgumentTypesTest(unittest.TestCase):
         a = libAT.AT_particle_name_from_particle_no_single(222, name)
         self.assertEqual(len(name), 1)
         self.assertEqual('222??', name[0])
+
+    def test_libamtrack_AT_Z_from_element_acronym_single(self):
+        from tests.libamtrack.generated.libamtrack import libAT
+        a = libAT.AT_Z_from_element_acronym_single('Ag')
+        self.assertEqual(a, 47)
+
+    def test_libamtrack_AT_Z_from_element_acronym(self):
+        from tests.libamtrack.generated.libamtrack import libAT
+        acronyms = ['Ag', 'Rh']
+        numbers = []
+        a = libAT.AT_Z_from_element_acronym(acronyms, numbers)
+        self.assertEqual(numbers[0], 47)
+        self.assertEqual(numbers[1], 45)
+
+
