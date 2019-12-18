@@ -237,6 +237,7 @@ class WrapperBuilder:
                             writer.write_line(f'arg_keepalive = [ffi.new("char[]", 1)]')
                             writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')
                     elif parameter.type == 'char * *' or (parameter.is_pointer_to_array and parameter.type == 'char *'):
+                        # 2D IN char arrays repackaging:
                         writer.write_line(f'arg_keepalive = [ffi.new("char[]", x.encode() if type(x) is str else x) for x in {parameter.name}]')
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("char* []", arg_keepalive)')
                     else:
