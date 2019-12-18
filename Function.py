@@ -40,6 +40,7 @@ class FunctionParameter:
         self.struct = param['class']['name'] if param['class'] != 0 else None
         self.enum = self.type if self.type in enums else None
         self.is_array_size = False
+        self.is_pointer_to_array = param['array'] != 0 and param['pointer'] != 0
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
@@ -121,6 +122,9 @@ class FunctionDeclaration:
                 # It should be processed as array of size 1.
                 if not parameter.is_out:
                     parameter.is_array = False
+                    # Below case is a 2D char array that needs separate handling
+                    if parameter.is_pointer_to_array and 'char' in parameter.type:
+                        continue
                 else:
                     parameter.sizes = (1,)
 

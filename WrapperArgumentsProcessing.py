@@ -158,7 +158,11 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
             writer.write_line('\t\"Wrapper initializes it with size 1\"')
             writer.write_line('warnings.warn(out_param_auto_init)')
             writer.write_line(param.name + '.clear()')
-            writer.write_line(param.name + ' += [0]')
+            if 'char' in param.type:
+                # Char type has to be initialized with string
+                writer.write_line(param.name + ' += [\'\']')
+            else:
+                writer.write_line(param.name + ' += [0]')
 
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """
@@ -183,6 +187,8 @@ def _initialize_array_size_params_inside_wrapper(writer, parameters):
     array_params = [param for param in parameters if param.is_array and not str(param.sizes[0]).isdigit()]
     # Get the list of parameters with the same size (list of ArraysSameSize objects)
     arrays_same_sizes_list = _get_arrays_of_same_size_list(array_params)
+    if len(arrays_same_sizes_list) < 1:
+        return
     writer.write_line('# Array sizes variables initialization:')
     for arr_same_sizes_obj in arrays_same_sizes_list:
         size = 'p_' + str(arr_same_sizes_obj.size)
