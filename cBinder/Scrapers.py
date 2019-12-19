@@ -1,7 +1,7 @@
 import CppHeaderParser
-from Function import FunctionDeclaration
-from Struct import StructDeclaration
-from Enum import EnumDeclaration
+from cBinder.Function import FunctionDeclaration
+from cBinder.Struct import StructDeclaration
+from cBinder.Enum import EnumDeclaration
 
 
 class ScrapedData:

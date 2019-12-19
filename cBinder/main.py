@@ -1,6 +1,6 @@
 import argparse
 import os
-from BindingsGenerator import BindingsGenerator
+from cBinder.BindingsGenerator import BindingsGenerator
 
 
 def main():

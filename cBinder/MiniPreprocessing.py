@@ -1,5 +1,5 @@
 import re
-from HeaderFile import get_header_files
+from cBinder.HeaderFile import get_header_files
 
 
 def preprocess_headers(path_to_directory, export_settings=None):
