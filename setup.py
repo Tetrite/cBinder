@@ -10,7 +10,7 @@ setup(
         "wheel==0.33.6",
         "setuptools==41.6.0",
     ],
-    extra_require={
+    extras_require={
         "dev": [
             "pytest==5.3.1",
         ]
