@@ -19,7 +19,7 @@ setup(
 
     # metadata to display on PyPI
     author="Tetrite",
-    author_email="",
+    author_email="tetrite19@gmail.com",
     description="Generates python wrapper for calling libraries in C",
     keywords="cbinder so dll wrapper shared",
     url="https://github.com/Tetrite/cBinder",
