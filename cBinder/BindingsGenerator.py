@@ -1,10 +1,10 @@
-from HeaderFile import *
-from SourceFile import *
-from LibraryFile import *
-from WrapperBuilder import WrapperBuilder
-from WheelGenerator import WheelGenerator
-from MiniPreprocessing import preprocess_headers
-from LibPaths import LibPaths
+from cBinder.HeaderFile import *
+from cBinder.SourceFile import *
+from cBinder.LibraryFile import *
+from cBinder.WrapperBuilder import WrapperBuilder
+from cBinder.WheelGenerator import WheelGenerator
+from cBinder.MiniPreprocessing import preprocess_headers
+from cBinder.LibPaths import LibPaths
 import pathlib
 from cffi import FFI
 import os

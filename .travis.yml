@@ -1,20 +1,26 @@
-language: python            # this works for Linux but is an error on macOS or Windows
+language: python
 jobs:
   include:
-    - name: "Python 3.8.0 on Xenial Linux"
-      python: 3.8           # this works for Linux but is ignored on macOS or Windows
-    - name: "Python 3.7.4 on Windows"
-      os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
-      before_install:
-        - choco install python
-        - python -m pip install --upgrade pip
-      env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
+  - name: Python 3.8.0 on Xenial Linux
+    python: 3.8
+  - name: Python 3.7.4 on Windows
+    os: windows
+    language: shell
+    before_install:
+    - choco install python
+    - python -m pip install --upgrade pip
+    env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
-  - pip3 install --upgrade pip
-  - pip3 install -r requirements.txt
-# all three OSes agree about 'pip3'
-# 'python' points to Python 2.7 on macOS but points to Python 3.8 on Linux and Windows
-# 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
+- pip3 install --upgrade pip
+- pip3 install -r requirements.txt
 script:
-  - python -m pytest
+- python -m pytest
+deploy:
+  distributions: sdist bdist_wheel
+  user: __token__
+  password:
+    secure: VA0DQlODY/KMlzy1KhFAIbufD7tHoGZZ7NoVlJipeoXRf7z3G75zGqCrfNu/qEQCJKBlZzzRJoyZIVklzLMDjQkk2z/7ImIXd1J1gLKvXq+5pmMXfWGDvl94XbFOaTYCUXcJefPFGhYpGXskMRsHnMmbznD6Rtr2Iuz6YgafZhlYEXtS6HlYgjpHraka84JB9rFH6DUyQ6rsGW2ENf3MX2SMl6dvUB08jHhcU8O9llHHoVuOTta9Slnu2M7JY8hr9KKNYSmwuQZvZ4Fs46CNQ/H/T4Pj4/fxVAF4JbJastjIJ0+RRZQnGvN5bXeKjgfDGf2D5EOs3VQ4Z8NaUAmgvWNcq1vOBCxmKRr0EmVUhL+/UMGHMKE0TeTjofDgusBTDh/nKkH9u3Ro5DS5OP27dXYIm0UwS9y+WCoDGUmeWy2BSpF7AIOYw/7uM1g8EfIztSw8vMsvxPISrPifcEBNzvbsQnJdvh/ewUyiwqA6HWfRrkeJf88ey8Zi0p6SP/r5Wi6DK5xyJaLnFHMAurbYw5ldtQhrzK3ECKuyjuLjPr8w+0kppqkvX21p9iHZEZwiUNapRATYJcOjXginiHPidVd0y091zll3tb+kpgIBVuulx1nmMD0VHYh0FHo11QEeIA/UK66co5BO7JrhMWkku+r1U7B06i2ZH1WMI6bp3HA=
+  on:
+    tags: true
+    branch: master
+  skip_existing: true

@@ -18,7 +18,7 @@ class MultipleArraysTest(unittest.TestCase):
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
         os.system(
-            r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+            r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     # /**

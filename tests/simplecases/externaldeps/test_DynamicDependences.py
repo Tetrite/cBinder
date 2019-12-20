@@ -30,7 +30,7 @@ class DynamicDependencesOnLinux64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        os.system(r'python main.py sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile ' + ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m ')
+        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile ' + ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m ')
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
@@ -55,11 +55,11 @@ class DynamicDependencesOnWin64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        print(r'python main.py sources2 -f ' + str(self.sources_path)
+        print(r'python cBinder sources2 -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l return_n ')
-        os.system(r'python main.py sources2 -f ' + str(self.sources_path)
+        os.system(r'python cBinder sources2 -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l return_n ')

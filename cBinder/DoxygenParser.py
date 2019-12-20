@@ -1,5 +1,5 @@
 import re
-from FunctionParameterTraits import ParameterType
+from cBinder.FunctionParameterTraits import ParameterType
 
 
 class DoxygenParser:
@@ -15,33 +15,33 @@ class DoxygenParser:
     """
 
     REGEX_IN_PARAM_NAME = r'@param\[in\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-    """ REGEX_IN_PARAM_NAME 
+    """ REGEX_IN_PARAM_NAME
         Regex used to retrieve IN parameter name from doxygen comment line
         @param\[in\]  <-- indicates IN parameter
         [s]* <-- any number of whitespace characters
         ([a-zA-Z_][a-zA-Z0-9_]*) <-- parameter name (starts with a character, not a number)
-        For example:        
+        For example:
         '* @param[in]   in_order   sample array (array of size n)'
         retrieves string 'in_order'
     """
     REGEX_OUT_PARAM_NAME = r'@param\[out\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-    """ REGEX_OUT_PARAM_NAME 
+    """ REGEX_OUT_PARAM_NAME
         Regex used to retrieve OUT parameter name from doxygen comment line
         @param\[out\]  <-- indicates OUT parameter
         The rest - just like in REGEX_IN_PARAM_NAME
     """
     REGEX_IN_AND_OUT_PARAM_NAME = r'@param\[in,out\][\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-    """ REGEX_IN_AND_OUT_PARAM_NAME 
+    """ REGEX_IN_AND_OUT_PARAM_NAME
         Regex used to retrieve IN&OUT parameter name from doxygen comment line
     """
     REGEX_IN_PARAM_NAME_SIMPLIFIED = r'@param[\s]*([a-zA-Z_][a-zA-Z0-9_]*)'
-    """ REGEX_IN_PARAM_NAME_SIMPLIFIED 
+    """ REGEX_IN_PARAM_NAME_SIMPLIFIED
         Regex used to retrieve IN&OUT parameter name from doxygen comment line
     """
     REGEX_ARRAY_SIZE = r'\(array of size ([A-Za-z0-9_]*)\)'
-    """ REGEX_ARRAY_SIZE 
+    """ REGEX_ARRAY_SIZE
         Regex used to retrieve size of an array
-        For example:        
+        For example:
         '* @param[in]   in_order   sample array (array of size n)'
         retrieves string 'n'
     """

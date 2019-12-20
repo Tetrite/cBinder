@@ -1,10 +1,10 @@
 import argparse
 import os
-from BindingsGenerator import BindingsGenerator
+from cBinder.BindingsGenerator import BindingsGenerator
 
 
 def main():
-    arg_parser = argparse.ArgumentParser(description='generate python bindings')
+    arg_parser = argparse.ArgumentParser(prog='cBinder', description='generate python bindings')
     optional_args = arg_parser._action_groups.pop()
     required_args = arg_parser.add_argument_group('required arguments')
     required_args.add_argument('package_name', action='store', help='name of package')
