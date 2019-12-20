@@ -28,7 +28,7 @@ class ArgumentTypesTest(unittest.TestCase):
         self.libamtrack_path = self.current_working_directory_path.joinpath('library')
         if os.path.exists(str(self.libamtrack_path)):
             shutil.rmtree(self.libamtrack_path)
-        os.system('git clone -b doxygen_comments_fix https://github.com/certaindividual/library.git')
+        os.system('git clone https://github.com/libamtrack/library.git')
         self.sources_path = self.current_working_directory_path.joinpath('library').joinpath('src')
         self.headers_path = self.current_working_directory_path.joinpath('library').joinpath('include')
         self.destination_path = self.current_working_directory_path.joinpath('generated')
