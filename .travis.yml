@@ -9,7 +9,6 @@ jobs:
     before_install:
     - choco install python
     - python -m pip install --upgrade pip
-    - python -m pip install setuptools wheel twine
     env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
 - pip3 install --upgrade pip
@@ -25,4 +24,5 @@ deploy:
   on:
     tags: true
     branch: master
+    condition: os = linux
   skip_existing: true
