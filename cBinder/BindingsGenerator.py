@@ -156,7 +156,8 @@ class BindingsGenerator:
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
+                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+                                  extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_header(name, header)
 
@@ -211,7 +212,8 @@ class BindingsGenerator:
             extra_link_args = ["-Wl,-rpath=$ORIGIN"]
         ffibuilder.set_source('_' + name, '\n'.join(includes), sources=sources_paths,
                               include_dirs=self.args.include, libraries=self.args.library,
-                              library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
+                              library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+                              extra_compile_args=self.args.extra_args)
         ffibuilder.compile(verbose=verbosity)
         WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
@@ -249,7 +251,8 @@ class BindingsGenerator:
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args)
+                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+                                  extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
