@@ -18,7 +18,7 @@ class TwoArraysSameSizeTest(unittest.TestCase):
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
         os.system(
-            r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+            r'python cBinder sources -v -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     # /* -------------------------  TWO ARRAYS OF THE SAME TYPE  ------------------------- */

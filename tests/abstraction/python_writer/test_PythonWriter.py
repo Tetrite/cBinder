@@ -1,8 +1,6 @@
 import unittest
-import pathlib
-import os
 
-from cBinder.PythonWriter import PythonWriter
+from cBinder.utils.PythonWriter import PythonWriter
 
 
 class PythonWriterTest(unittest.TestCase):

@@ -18,7 +18,7 @@ class SimpleFunctionsTest(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        call_string = r'python cBinder sources ' + \
+        call_string = r'python cBinder sources -v ' + \
                   r'-f ' + str(self.sources_path) + \
                   r' -d ' + str(self.destination_path) + \
                   r' -es ' + str(self.export_fun_path) + \

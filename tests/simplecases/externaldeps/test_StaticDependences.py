@@ -31,7 +31,7 @@ class StaticDependencesOnLinux64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        os.system(r'python cBinder sources -f ' + str(self.sources_path)
+        os.system(r'python cBinder sources -f -v ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m ')
@@ -65,11 +65,11 @@ class StaticDependencesOnWin64(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
 
-        print(r'python cBinder sources -f ' + str(self.sources_path)
+        print(r'python cBinder sources -f -v ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')
-        os.system(r'python cBinder sources -f ' + str(self.sources_path)
+        os.system(r'python cBinder sources -f -v ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
                   + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')

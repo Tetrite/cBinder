@@ -17,7 +17,7 @@ class DynamicLibraries(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' shared')
+        os.system(r'python cBinder sources -v -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' shared')
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 

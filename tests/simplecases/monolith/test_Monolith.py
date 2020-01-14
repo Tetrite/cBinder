@@ -17,7 +17,7 @@ class MonolitTest(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        os.system(r'python cBinder sources -mono mono -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.system(r'python cBinder sources -v -mono mono -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     def test_all(self):
