@@ -1,4 +1,4 @@
-def _check_if_every_in_array_is_not_empty(writer, parameters):
+def check_if_every_in_array_is_not_empty(writer, parameters):
     """
     This function checks, if every IN array argument is not empty.
     For example (part of doxygen comment):
@@ -15,7 +15,7 @@ def _check_if_every_in_array_is_not_empty(writer, parameters):
                 writer.write_line('warnings.warn(\"You passed an empty list as an IN parameter.\")')
 
 
-def _check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters):
+def check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters):
     """
     This function checks, if every IN array of the same declared size, is passed to a function properly
     For example, part of a doxygen comment:
@@ -30,7 +30,7 @@ def _check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, param
     _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(writer, array_in_params, True)
 
 
-def _check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters):
+def check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters):
     """
     When function is defined in such way, that there are only OUT array parameters, there is no way
     to initialize these OUT parameters based on IN arrays of the same size. Therefore, it is necessary
@@ -88,7 +88,7 @@ def _add_checking_procedure_for_one_array_size(writer, size, arr_param_list, typ
                               'that should have the same size, with different sizes.\")')
 
 
-def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
+def initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
     """
     (1)
     There is a possibility, that a function has multiple array parameters, both IN and OUT.
@@ -130,7 +130,8 @@ def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
                                                                              arrays_out_to_check_size_consistency,
                                                                              False)
 
-def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
+
+def initialize_non_array_out_parameters_if_necessary(writer, parameters):
     """
     When user wants to return a value from a C language function not through return statement
     but using OUT non-array parameter - that is, a pointer, the only option to actually
@@ -164,6 +165,7 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
             else:
                 writer.write_line(param.name + ' += [0]')
 
+
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """
     writer.write_line('# Procedure to check if OUT array ' + arr_out_param.name + ' is passed correctly:')
@@ -177,7 +179,7 @@ def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
         writer.write_line(arr_out_param.name + ' += [0]*' + 'len(' + decisive_param_name + ')')
 
 
-def _initialize_array_size_params_inside_wrapper(writer, parameters):
+def initialize_array_size_params_inside_wrapper(writer, parameters):
     """
     Every parameter in C language function, that indicates a certain size of an array
     is unnecessary - it is removed from Python wrapping function parameters list.

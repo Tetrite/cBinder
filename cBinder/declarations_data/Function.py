@@ -1,6 +1,6 @@
-from cBinder.DoxygenParser import DoxygenParser, DoxygenFunctionArrayParameter
-from cBinder.FunctionParameterTraits import ParameterType
-from cBinder.CType import CType, get_c_type_for_type
+from .DoxygenParser import DoxygenParser, DoxygenFunctionArrayParameter
+from .FunctionParameterTraits import ParameterType
+from .CType import get_c_type_for_type
 
 
 class FunctionParameter:

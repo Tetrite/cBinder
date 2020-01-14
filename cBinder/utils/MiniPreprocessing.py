@@ -1,11 +1,6 @@
-import re
-from cBinder.HeaderFile import get_header_files
-
-
-def preprocess_headers(path_to_directory, export_settings=None):
+def preprocess_headers(headers):
     """Method used to substitute every #define NAME ??? in header files in order to parse doxygen
     comments correctly"""
-    headers = get_header_files(path_to_directory, export_settings)
     for header_file in headers:
         path_to_header = header_file.filepath
         defines_list = header_file.defines

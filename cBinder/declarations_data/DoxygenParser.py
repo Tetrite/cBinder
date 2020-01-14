@@ -1,5 +1,5 @@
 import re
-from cBinder.FunctionParameterTraits import ParameterType
+from .FunctionParameterTraits import ParameterType
 
 
 class DoxygenParser:

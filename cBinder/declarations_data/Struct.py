@@ -1,4 +1,5 @@
-from cBinder.CType import CType, get_c_type_for_type
+from .CType import get_c_type_for_type
+
 
 class StructMember:
     """

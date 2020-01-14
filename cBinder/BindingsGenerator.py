@@ -1,16 +1,14 @@
-from cBinder.HeaderFile import *
-from cBinder.SourceFile import *
-from cBinder.LibraryFile import *
-from cBinder.WrapperBuilder import WrapperBuilder
-from cBinder.WheelGenerator import WheelGenerator
-from cBinder.MiniPreprocessing import preprocess_headers
-from cBinder.LibPaths import LibPaths
+from .files.HeaderFile import *
+from .files.SourceFile import *
+from .files.LibraryFile import *
+from .files.LibPaths import *
+from .WrapperBuilder import WrapperBuilder
+from .WheelGenerator import WheelGenerator
 import pathlib
 from cffi import FFI
 import os
 import sys
 import shutil
-import re
 
 
 def get_soname_path(libpath, lib_dir):
@@ -73,8 +71,7 @@ class BindingsGenerator:
 
         self._handle_passed_dynamic_libraries()
 
-        preprocess_headers('.', self.args.export_settings)
-        headers = get_header_files('.', self.args.export_settings)
+        headers = get_header_files_with_preprocessing('.', self.args.export_settings)
 
         if monolith:
             if self.args.mode == 'compile':

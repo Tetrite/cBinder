@@ -1,17 +1,11 @@
 import platform
-import re
-from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
-from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
-from cBinder.WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
-from cBinder.WrapperArgumentsProcessing import _initialize_array_size_params_inside_wrapper
-from cBinder.WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary_and_check_sizes
-from cBinder.WrapperArgumentsProcessing import _initialize_non_array_out_parameters_if_necessary
-from cBinder.PythonWriter import *
+from .utils.WrapperArgumentsProcessing import *
+from .utils.PythonWriter import *
 
 unique_identifier_suffix = '__internal'
 
 
-# TODO: handle escaping when creating sorce that may contains trings
+# TODO: handle escaping when creating source that may contain strings
 
 class WrapperBuilder:
     """
@@ -331,15 +325,15 @@ class WrapperBuilder:
 
     def _add_series_of_array_arguments_checks(self, writer, parameters):
         # Check 1:
-        _check_if_every_in_array_is_not_empty(writer, parameters)
+        check_if_every_in_array_is_not_empty(writer, parameters)
         # Check 2:
-        _check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters)
+        check_if_every_in_array_of_the_same_size_has_indeed_same_size(writer, parameters)
         # Check 3:
-        _check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters)
+        check_array_sizes_consistency_when_there_are_only_out_arrays(writer, parameters)
 
         # Initialize OUT arrays if necessary:
-        _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters)
+        initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters)
         # Initialize non-array OUT parameters if necessary:
-        _initialize_non_array_out_parameters_if_necessary(writer, parameters)
+        initialize_non_array_out_parameters_if_necessary(writer, parameters)
         # Array sizes variables initialization:
-        _initialize_array_size_params_inside_wrapper(writer, parameters)
+        initialize_array_size_params_inside_wrapper(writer, parameters)

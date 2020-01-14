@@ -1,7 +1,7 @@
 import os
 import pathlib
-from cBinder.Scrapers import ScrapedData
-
+from ..Scrapers import ScrapedData
+from ..utils.MiniPreprocessing import *
 
 class HeaderFile:
     """
@@ -60,3 +60,9 @@ def get_header_files(dirpath, export_symbols=None):
             if name.endswith('.h'):
                 headers.append(HeaderFile(pathlib.Path(path, name), export_symbols))
     return headers
+
+
+def get_header_files_with_preprocessing(dirpath, export_symbols=None):
+    headers = get_header_files(dirpath, export_symbols)
+    preprocess_headers(headers)
+    return get_header_files(dirpath, export_symbols)

@@ -1,6 +1,6 @@
 import os
 import pathlib
-from cBinder.Scrapers import ScrapedData
+from ..Scrapers import ScrapedData
 
 
 class SourceFile:
