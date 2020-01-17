@@ -208,16 +208,20 @@ class BindingsGenerator:
             print(all_declaration_strings)
 
         extra_link_args = []
-        if not sys.platform in ("win32", "cygwin"):
+        if sys.platform not in ("win32", "cygwin"):
             extra_link_args = ["-Wl,-rpath=$ORIGIN"]
         ffibuilder.set_source('_' + name, '\n'.join(includes), sources=sources_paths,
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
                               extra_compile_args=self.args.extra_args)
-        # use dedicated library name (i.e. _libAT.abi3.so instead of _libAT.cpython-36m-x86_64-linux-gnu.so)
-        # this should allow the code to run on multiple CPython versions
-        # see https://cffi.readthedocs.io/en/latest/cdef.html#preparing-and-distributing-modules for more details
-        ffibuilder.compile(verbose=verbosity, target='_' + name + '.abi3.*')
+        if os.name == 'nt':
+            # on Windows deduce library name using distutils
+            ffibuilder.compile(verbose=verbosity)
+        else:
+            # on Linux use dedicated name (i.e. _libAT.abi3.so instead of _libAT.cpython-36m-x86_64-linux-gnu.so)
+            # this should allow the code to run on multiple CPython versions
+            # see https://cffi.readthedocs.io/en/latest/cdef.html#preparing-and-distributing-modules for more details
+            ffibuilder.compile(verbose=verbosity, target='_' + name + '.abi3.*')
 
         WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
@@ -251,7 +255,7 @@ class BindingsGenerator:
 
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
-            if not sys.platform in ("win32", "cygwin"):
+            if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
                                   include_dirs=self.args.include, libraries=self.args.library,
