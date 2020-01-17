@@ -214,7 +214,11 @@ class BindingsGenerator:
                               include_dirs=self.args.include, libraries=self.args.library,
                               library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
                               extra_compile_args=self.args.extra_args)
-        ffibuilder.compile(verbose=verbosity)
+        # use dedicated library name (i.e. _libAT.abi3.so instead of _libAT.cpython-36m-x86_64-linux-gnu.so)
+        # this should allow the code to run on multiple CPython versions
+        # see https://cffi.readthedocs.io/en/latest/cdef.html#preparing-and-distributing-modules for more details
+        ffibuilder.compile(verbose=verbosity, target='_' + name + '.abi3.*')
+
         WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
 
     def _generate_bindings_for_remainder(self, sources):
