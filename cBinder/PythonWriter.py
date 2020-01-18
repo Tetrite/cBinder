@@ -1,11 +1,4 @@
-_trans = str.maketrans({
-            '\t': '\\t',
-            '\n': '\\n',
-            '\r': '\\r',
-            '\'': '\\\'',
-            '\\': '\\\\',
-            '\"': '\\\"'
-            })
+_trans = str.maketrans({'\t': '\\t', '\n': '\\n', '\r': '\\r', '\'': '\\\'', '\\': '\\\\', '\"': '\\\"'})
 
 
 def _escape_string(s):
@@ -13,7 +6,9 @@ def _escape_string(s):
 
 
 class PythonWriter:
+
     class Indent:
+
         def __init__(self, writer):
             self.writer = writer
 
@@ -25,6 +20,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class For:
+
         def __init__(self, writer, what, _in):
             self.writer = writer
             self.what = what
@@ -39,6 +35,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class While:
+
         def __init__(self, writer, cond):
             self.writer = writer
             self.cond = cond
@@ -52,6 +49,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class If:
+
         def __init__(self, writer, cond):
             self.writer = writer
             self.cond = cond
@@ -66,6 +64,7 @@ class PythonWriter:
                 self.writer.write_line('')
 
     class Elif:
+
         def __init__(self, writer, cond):
             self.writer = writer
             self.cond = cond
@@ -79,6 +78,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class Else:
+
         def __init__(self, writer):
             self.writer = writer
 
@@ -91,6 +91,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class Class:
+
         def __init__(self, writer, name, inherits=[]):
             self.writer = writer
             self.name = name
@@ -113,6 +114,7 @@ class PythonWriter:
             self.writer.write_line('')
 
     class Def:
+
         def __init__(self, writer, name, params=[]):
             self.writer = writer
             self.name = name

@@ -17,8 +17,7 @@ class SingleArrayTest(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        os.system(
-            r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     # /**
@@ -78,5 +77,3 @@ class SingleArrayTest(unittest.TestCase):
         from tests.withdoxygen.various_fun_array_parameters.generated.sources import single_array as sa
         with self.assertWarns(Warning):
             sa.double_the_values_inside_array([])
-
-

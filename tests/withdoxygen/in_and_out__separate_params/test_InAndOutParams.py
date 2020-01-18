@@ -17,14 +17,13 @@ class SimpleFunctionsTest(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        os.system(
-            r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     def test_generate_bindings_to_function_with_doxygen(self):
         from tests.withdoxygen.in_and_out__separate_params.generated.sources import ex_doxygen as ex
-        in_array = [1,2,3,4,5]
+        in_array = [1, 2, 3, 4, 5]
         out_array = list(range(5))
         return_value = ex.reverse_array_order(in_array, out_array)
         self.assertEqual(return_value, 0)
-        self.assertEqual(out_array, [5,4,3,2,1])
+        self.assertEqual(out_array, [5, 4, 3, 2, 1])

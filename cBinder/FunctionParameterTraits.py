@@ -6,4 +6,3 @@ class ParameterType(Enum):
     IN = 'in'
     OUT = 'out'
     IN_AND_OUT = 'in_and_out'
-

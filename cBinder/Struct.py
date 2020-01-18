@@ -1,5 +1,6 @@
 from cBinder.CType import CType, get_c_type_for_type
 
+
 class StructMember:
     """
     Class representing a single member of a struct
@@ -29,6 +30,7 @@ class StructMember:
 
     def __str__(self):
         return self.name + (':' + self.struct if self.struct else '')
+
 
 class StructDeclaration:
     """

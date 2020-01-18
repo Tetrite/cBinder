@@ -141,6 +141,7 @@ class DoxygenFunctionMetadata:
         List of DoxygenFunctionParameters - every element
         in a list contains description of a single parameter, that was read while parsing
     """
+
     def __init__(self, parameters):
         self.parameters = parameters
 
@@ -234,6 +235,7 @@ class DoxygenFunctionParameter:
     param_type: ParameterType
         Type of a parameter. It can be IN or OUT
     """
+
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type

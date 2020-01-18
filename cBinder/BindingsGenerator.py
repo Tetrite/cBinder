@@ -124,7 +124,6 @@ class BindingsGenerator:
             if verbosity:
                 print(f'No header source pairs to process')
             return
-
         """ Attention: temporary measure.
             To properly compile sources that have internal dependencies,
             (for example: including function defined in other .c file)
@@ -156,9 +155,13 @@ class BindingsGenerator:
             extra_link_args = []
             if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
-                                  include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+            ffibuilder.set_source('_' + name,
+                                  '\n'.join(source.includes),
+                                  sources=sources_combined,
+                                  include_dirs=self.args.include,
+                                  libraries=self.args.library,
+                                  library_dirs=self.args.lib_dir,
+                                  extra_link_args=extra_link_args,
                                   extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_header(name, header)
@@ -212,9 +215,13 @@ class BindingsGenerator:
         extra_link_args = []
         if sys.platform not in ("win32", "cygwin"):
             extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-        ffibuilder.set_source('_' + name, '\n'.join(includes), sources=sources_paths,
-                              include_dirs=self.args.include, libraries=self.args.library,
-                              library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+        ffibuilder.set_source('_' + name,
+                              '\n'.join(includes),
+                              sources=sources_paths,
+                              include_dirs=self.args.include,
+                              libraries=self.args.library,
+                              library_dirs=self.args.lib_dir,
+                              extra_link_args=extra_link_args,
                               extra_compile_args=self.args.extra_args)
         if os.name == 'nt':
             # on Windows deduce library name using distutils
@@ -254,14 +261,17 @@ class BindingsGenerator:
                 print(f'Declarations for which wrappers will be created:')
                 print(all_declaration_strings)
 
-
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
             if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
-                                  include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+            ffibuilder.set_source('_' + name,
+                                  '\n'.join(source.includes),
+                                  sources=[source.filepath],
+                                  include_dirs=self.args.include,
+                                  libraries=self.args.library,
+                                  library_dirs=self.args.lib_dir,
+                                  extra_link_args=extra_link_args,
                                   extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)

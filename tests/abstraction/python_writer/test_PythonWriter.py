@@ -13,8 +13,8 @@ class PythonWriterTest(unittest.TestCase):
 
     def test_writer_unindented(self):
         writer = PythonWriter()
-        writer.write_line('x=1');
-        writer.write_line('y=2');
+        writer.write_line('x=1')
+        writer.write_line('y=2')
         self.assertEqual(writer.get_string(), 'x=1\ny=2')
 
     def test_writer_indented(self):

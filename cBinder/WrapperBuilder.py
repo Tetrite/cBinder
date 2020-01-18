@@ -11,8 +11,8 @@ from cBinder.PythonWriter import *
 
 unique_identifier_suffix = '__internal'
 
-
 # TODO: handle escaping when creating source that may contains strings
+
 
 class WrapperBuilder:
     """
@@ -206,8 +206,7 @@ class WrapperBuilder:
                             # to avoid case when a function parameter name is a keyword in Python
                             if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                                 size = 'p_' + size
-                            writer.write_line(
-                                f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                            writer.write_line(f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
                             writer.write_line(
                                 f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
                             self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
@@ -216,8 +215,7 @@ class WrapperBuilder:
                             writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
                             writer.write_line(f'{parameter.name}.to_cffi_out({parameter.name}{unique_identifier_suffix}[0], __keepalive)')
                     else:
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
                 elif parameter.enum:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
@@ -225,8 +223,7 @@ class WrapperBuilder:
                         # to avoid case when a function parameter name is a keyword in Python
                         if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                             size = 'p_' + size
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
                         self._build_array_copy_enum_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.value')
@@ -237,8 +234,7 @@ class WrapperBuilder:
                         # to avoid case when a function parameter name is a keyword in Python
                         if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                             size = 'p_' + size
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
                     elif parameter.is_out and 'char' in parameter.type:
                         # Unless it is a 2D char array (which needs separate wrapping),
@@ -256,21 +252,14 @@ class WrapperBuilder:
             parameter_list = []
             for param in function.parameters:
                 if param.is_out and 'char' in param.type and not param.is_pointer_to_array:
-                    parameter_list.append(
-                            param.name + unique_identifier_suffix + '[0].encode() if ' +
-                            'type(' + param.name + unique_identifier_suffix + '[0]) is str ' +
-                            'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
+                    parameter_list.append(param.name + unique_identifier_suffix + '[0].encode() if ' + 'type(' + param.name + unique_identifier_suffix +
+                                          '[0]) is str ' + 'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
                 else:
-                    parameter_list.append(
-                        param.name + unique_identifier_suffix + '.encode() if ' +
-                        'type(' + param.name + unique_identifier_suffix + ') is str ' +
-                        'else ' + param.name + unique_identifier_suffix + '\n\t\t\t')
+                    parameter_list.append(param.name + unique_identifier_suffix + '.encode() if ' + 'type(' + param.name + unique_identifier_suffix +
+                                          ') is str ' + 'else ' + param.name + unique_identifier_suffix + '\n\t\t\t')
 
-            writer.write_line(
-                ('ret = ' if not function.returns.is_void else '')
-                + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
-                + ','.join(parameter_list)
-                + ')')
+            writer.write_line(('ret = ' if not function.returns.is_void else '') + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') +
+                              f'.{function.name}(' + ','.join(parameter_list) + ')')
 
             if function.returns.struct and not function.returns.is_void:
                 writer.write_line(f'ret_ = {function.returns.struct}()')

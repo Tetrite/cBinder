@@ -32,4 +32,3 @@ class SimpleFunctionsTest(unittest.TestCase):
         self.assertEqual(True, 'mul' in dir(el))
         self.assertEqual(True, 'sum' in dir(el))
         self.assertEqual(False, 'diff' in dir(el))
-
