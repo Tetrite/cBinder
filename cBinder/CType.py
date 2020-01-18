@@ -74,7 +74,6 @@ class CType(Enum):
     LONG_DOUBLE = 'long double'
     LONG_DOUBLE_POINTER = 'long double *'
 
-
     def get_ffi_string_def(self):
         """Returns type name for memory allocation in cffi"""
         if self.value.endswith(' *'):

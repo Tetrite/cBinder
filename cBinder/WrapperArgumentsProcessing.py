@@ -130,6 +130,7 @@ def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
                                                                              arrays_out_to_check_size_consistency,
                                                                              False)
 
+
 def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
     """
     When user wants to return a value from a C language function not through return statement
@@ -163,6 +164,7 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
                 writer.write_line(param.name + ' += [\'\']')
             else:
                 writer.write_line(param.name + ' += [0]')
+
 
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """

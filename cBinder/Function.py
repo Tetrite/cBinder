@@ -98,7 +98,8 @@ class FunctionDeclaration:
         if self.doxygen and self._is_valid_doxygen(self.doxygen):
             self.imbue_with_doxygen(self.doxygen)
 
-    def _is_valid_doxygen(self, doxygen):
+    @staticmethod
+    def _is_valid_doxygen(doxygen):
         return doxygen.find("/**") >= 0 and doxygen.find("*/") >= 0 and doxygen.find("@param") >0
 
     def set_parameters_names_if_empty(self):

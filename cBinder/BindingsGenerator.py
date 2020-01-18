@@ -1,3 +1,11 @@
+import os
+import pathlib
+import re
+import shutil
+import sys
+
+from cffi import FFI
+
 from cBinder.HeaderFile import *
 from cBinder.SourceFile import *
 from cBinder.LibraryFile import *
@@ -5,12 +13,6 @@ from cBinder.WrapperBuilder import WrapperBuilder
 from cBinder.WheelGenerator import WheelGenerator
 from cBinder.MiniPreprocessing import preprocess_headers
 from cBinder.LibPaths import LibPaths
-import pathlib
-from cffi import FFI
-import os
-import sys
-import shutil
-import re
 
 
 def get_soname_path(libpath, lib_dir):
@@ -152,7 +154,7 @@ class BindingsGenerator:
 
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
-            if not sys.platform in ("win32", "cygwin"):
+            if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
             ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
                                   include_dirs=self.args.include, libraries=self.args.library,
@@ -286,7 +288,8 @@ class BindingsGenerator:
 
         return pairs, lone_sources
 
-    def _copy_needed_files_to_output_dir(self, files):
+    @staticmethod
+    def _copy_needed_files_to_output_dir(files):
         """Copies all header or source files to output directory given in arguments"""
 
         for file in files:

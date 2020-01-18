@@ -11,18 +11,25 @@ def main():
     required_args.add_argument('-f', '--files_path', action='append', required=True, help='path to C files',metavar='PATH')
     required_args.add_argument('-d', '--dest', action='store', required=True, help='path to destination directory',metavar='PATH')
     optional_args.add_argument('-v', '--verbose', action='store_true', help='output verbosity')
-    optional_args.add_argument('-es', '--export_settings', action='store', help='settings file with declarations to be wrapped')
-    optional_args.add_argument('-mono', '--monolith', action='store', help='if this is specified then all sources are compiled into one module')
+    optional_args.add_argument('-es', '--export_settings', action='store',
+                               help='settings file with declarations to be wrapped')
+    optional_args.add_argument('-mono', '--monolith', action='store',
+                               help='if this is specified then all sources are compiled into one module')
     arg_parser._action_groups.append(optional_args)
     subparsers = arg_parser.add_subparsers(title='mode', dest='mode')
 
     compile_parser = subparsers.add_parser('compile', help='compile all given source files')
-    compile_parser.add_argument('-i', '--include', action='append',help='path to external library header files to be included', metavar='PATH')
-    compile_parser.add_argument('-l', '--library', action='append', help='name of dynamic library to be linked with',metavar='NAME')
-    compile_parser.add_argument('-b', '--lib_dir', action='append', help='path to directory with dynamic libraries',metavar='PATH')
-    compile_parser.add_argument('-e', '--extra_args', action='append', help='extra arguments passed to compiler',metavar='ARGS')
+    compile_parser.add_argument('-i', '--include', action='append',
+                                help='path to external library header files to be included', metavar='PATH')
+    compile_parser.add_argument('-l', '--library', action='append',
+                                help='name of dynamic library to be linked with',metavar='NAME')
+    compile_parser.add_argument('-b', '--lib_dir', action='append',
+                                help='path to directory with dynamic libraries',metavar='PATH')
+    compile_parser.add_argument('-e', '--extra_args', action='append',
+                                help='extra arguments passed to compiler',metavar='ARGS')
 
-    shared_parser = subparsers.add_parser('shared',help='create bindings to dynamic/shared libraries (requires header files too)')
+    shared_parser = subparsers.add_parser('shared',
+                                          help='create bindings to dynamic/shared libraries (requires header files too)')
 
     args = arg_parser.parse_args()
     if args.mode is None:

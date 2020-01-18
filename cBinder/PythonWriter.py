@@ -7,6 +7,7 @@ _trans = str.maketrans({
             '\"': '\\\"'
             })
 
+
 def _escape_string(s):
     return s.translate(_trans)
 
