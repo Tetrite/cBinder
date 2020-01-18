@@ -4,15 +4,16 @@ language: python
 
 jobs:
   include:
-  - name: Python 3.6 on Ubuntu Bionic 18.04
-    python: 3.6
-    dist: bionic
-  - name: Python 3.7 on Ubuntu Bionic 18.04
-    python: 3.7
-    dist: bionic
-  - name: Python 3.8 on Ubuntu Bionic 18.04
-    python: 3.8
-    dist: bionic
+# TODO check travis config for Ubuntu Bionic
+#  - name: Python 3.6 on Ubuntu Bionic 18.04
+#    python: 3.6
+#    dist: bionic
+#  - name: Python 3.7 on Ubuntu Bionic 18.04
+#    python: 3.7
+#    dist: bionic
+#  - name: Python 3.8 on Ubuntu Bionic 18.04
+#    python: 3.8
+#    dist: bionic
   - name: Python 3.6 on Ubuntu Xenial 16.04
     python: 3.6
     dist: xenial
@@ -22,6 +23,13 @@ jobs:
   - name: Python 3.8 on Ubuntu Xenial 16.04
     python: 3.8
     dist: xenial
+  - name: Python 3.6 on Windows
+    os: windows
+    language: shell
+    before_install:
+    - choco install python --version=3.6.0
+    - python -m pip install --upgrade pip
+    env: PATH=/c/Python36:/c/Python36/Scripts:$PATH
   - name: Python 3.7 on Windows
     os: windows
     language: shell
@@ -29,12 +37,11 @@ jobs:
     - choco install python --version=3.7.0
     - python -m pip install --upgrade pip
     env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
-
   - name: Python 3.8 on Windows
     os: windows
     language: shell
     before_install:
-    - choco install python --version=3.7.0
+    - choco install python --version=3.8.0
     - python -m pip install --upgrade pip
     env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 
