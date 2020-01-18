@@ -5,9 +5,9 @@ import sys
 
 from cffi import FFI
 
-from cBinder.HeaderFile import *
-from cBinder.SourceFile import *
-from cBinder.LibraryFile import *
+from cBinder.HeaderFile import HeaderFile, get_header_files
+from cBinder.LibraryFile import LibraryFile, get_shared_library_files
+from cBinder.SourceFile import SourceFile, get_source_files
 from cBinder.WrapperBuilder import WrapperBuilder
 from cBinder.WheelGenerator import WheelGenerator
 from cBinder.MiniPreprocessing import preprocess_headers

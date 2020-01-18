@@ -38,9 +38,10 @@ class ArgumentTypesTest(unittest.TestCase):
         os.makedirs(str(self.destination_path))
         os.chdir(self.current_working_directory_path)
         os.chdir("../..")
-        os.system(r'python cBinder libamtrack -f ' + str(self.sources_path) + ' -f ' + str(self.headers_path) + ' -d ' + str(self.destination_path) +
-                  ' -es ' + str(self.export_symbols_path) + ' -mono libAT compile ' + ' -i ' + str(self.include_path) + ' -i ' + str(self.headers_path) +
-                  ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m') #  noqa W504
+        cmd1 = r'python cBinder libamtrack -f ' + str(self.sources_path) + ' -f ' + str(self.headers_path) + ' -d ' + str(self.destination_path)
+        cmd2 = ' -es ' + str(self.export_symbols_path) + ' -mono libAT compile '
+        cmd3 = ' -i ' + str(self.include_path) + ' -i ' + str(self.headers_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m'
+        os.system(cmd1 + cmd2 + cmd3)
 
         os.chdir(self.destination_path)
 

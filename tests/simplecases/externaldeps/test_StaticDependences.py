@@ -32,8 +32,9 @@ class StaticDependencesOnLinux64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile ' + ' -i ' + str(self.include_path) +
-                  ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m ')
+        cmd1 = r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
+        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m '
+        os.system(cmd1 + cmd2)
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
@@ -65,13 +66,15 @@ class StaticDependencesOnWin64(unittest.TestCase):
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
 
-        print(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile ' + ' -i ' + str(self.include_path) +
-              ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')
-        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile ' + ' -i ' + str(self.include_path) +
-                  ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')
+        cmd1 = r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
+        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas '
+        print(cmd1 + cmd2)
+        cmd1 = r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
+        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas '
+        os.system(cmd1 + cmd2)
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
         from tests.simplecases.externaldeps.generated.sources import example
-        # c function return 0 if call was succesful
+        # c function return 0 if call was successful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)
