@@ -1,6 +1,6 @@
 from cBinder.DoxygenParser import DoxygenParser, DoxygenFunctionArrayParameter
 from cBinder.FunctionParameterTraits import ParameterType
-from cBinder.CType import CType, get_c_type_for_type
+from cBinder.CType import get_c_type_for_type
 
 
 class FunctionParameter:
@@ -129,10 +129,8 @@ class FunctionDeclaration:
                 else:
                     parameter.sizes = (1,)
 
-            parameter.is_out = doxygen_function_param.param_type == ParameterType.OUT or \
-                               doxygen_function_param.param_type == ParameterType.IN_AND_OUT
+            parameter.is_out = doxygen_function_param.param_type == ParameterType.OUT or doxygen_function_param.param_type == ParameterType.IN_AND_OUT
 
-            parameter.is_in = doxygen_function_param.param_type == ParameterType.IN or \
-                              doxygen_function_param.param_type == ParameterType.IN_AND_OUT
+            parameter.is_in = doxygen_function_param.param_type == ParameterType.IN or doxygen_function_param.param_type == ParameterType.IN_AND_OUT
 
             parameter.is_array_size = parser.metadata.is_array_size(parameter.name)

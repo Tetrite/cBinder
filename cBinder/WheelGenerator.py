@@ -6,15 +6,15 @@ import sys
 
 class WheelGenerator:
     """
-	Class used to generate wheel out of directory
+    Class used to generate wheel out of directory
 
-	Attributes
-	----------
-	lib_path : str
-		Library directory path string
-	package_name : str
-		Name of package to be generated
-	"""
+    Attributes
+    ----------
+    lib_path : str
+        Library directory path string
+    package_name : str
+        Name of package to be generated
+    """
 
     def __init__(self, args, path, pkg_name):
         self.args = args

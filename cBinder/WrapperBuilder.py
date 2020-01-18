@@ -1,5 +1,4 @@
 import platform
-import re
 
 from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
@@ -51,7 +50,7 @@ class WrapperBuilder:
                 writer.write_line('from cffi import FFI')
                 writer.write_line('ffi = FFI()')
 
-                enum_decls = writer.escaped('\n'.join(decl.declaration_string for decl in enums))
+                _ = writer.escaped('\n'.join(decl.declaration_string for decl in enums))
                 struct_decls = writer.escaped('\n'.join(decl.declaration_string for decl in structs))
                 func_decls = writer.escaped('\n'.join(decl.declaration_string for decl in functions))
                 writer.write_line(f'ffi.cdef("""{struct_decls}""")')
@@ -228,7 +227,7 @@ class WrapperBuilder:
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.value')
                 else:
-                    if parameter.is_out and parameter.is_array and not 'char' in parameter.type:
+                    if parameter.is_out and parameter.is_array and 'char' not in parameter.type:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
                         # If size is defined as a function parameter, in a wrapper it has to be named with prefix
                         # to avoid case when a function parameter name is a keyword in Python
@@ -251,15 +250,19 @@ class WrapperBuilder:
 
             parameter_list = []
             for param in function.parameters:
+                str1 = param.name + unique_identifier_suffix
                 if param.is_out and 'char' in param.type and not param.is_pointer_to_array:
-                    parameter_list.append(param.name + unique_identifier_suffix + '[0].encode() if ' + 'type(' + param.name + unique_identifier_suffix +
-                                          '[0]) is str ' + 'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
+                    str2 = '[0].encode() if ' + 'type(' + param.name + unique_identifier_suffix + '[0]) is str '
+                    str3 = 'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t'
                 else:
-                    parameter_list.append(param.name + unique_identifier_suffix + '.encode() if ' + 'type(' + param.name + unique_identifier_suffix +
-                                          ') is str ' + 'else ' + param.name + unique_identifier_suffix + '\n\t\t\t')
+                    str2 = '.encode() if ' + 'type(' + param.name + unique_identifier_suffix + ') is str '
+                    str3 = 'else ' + param.name + unique_identifier_suffix + '\n\t\t\t'
+                parameter_list.append(str1 + str2 + str3)
 
-            writer.write_line(('ret = ' if not function.returns.is_void else '') + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') +
-                              f'.{function.name}(' + ','.join(parameter_list) + ')')
+            br1 = ('ret = ' if not function.returns.is_void else '')
+            br2 = (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib')
+            br3 = f'.{function.name}(' + ','.join(parameter_list) + ')'
+            writer.write_line(br1 + br2 + br3)
 
             if function.returns.struct and not function.returns.is_void:
                 writer.write_line(f'ret_ = {function.returns.struct}()')

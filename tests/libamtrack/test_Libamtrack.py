@@ -38,9 +38,9 @@ class ArgumentTypesTest(unittest.TestCase):
         os.makedirs(str(self.destination_path))
         os.chdir(self.current_working_directory_path)
         os.chdir("../..")
-        os.system(r'python cBinder libamtrack ' + ' -f ' + str(self.sources_path) + ' -f ' + str(self.headers_path) + ' -d ' + str(self.destination_path) +
-                  ' -es ' + str(self.export_symbols_path) + ' -mono libAT' + ' compile ' + ' -i ' + str(self.include_path) + ' -i ' + str(self.headers_path) +
-                  ' -b ' + str(self.libs_path) + ' -l gsl' + ' -l gslcblas' + ' -l m')
+        os.system(r'python cBinder libamtrack -f ' + str(self.sources_path) + ' -f ' + str(self.headers_path) + ' -d ' + str(self.destination_path) +
+                  ' -es ' + str(self.export_symbols_path) + ' -mono libAT compile ' + ' -i ' + str(self.include_path) + ' -i ' + str(self.headers_path) +
+                  ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m') #  noqa W504
 
         os.chdir(self.destination_path)
 
@@ -59,7 +59,7 @@ class ArgumentTypesTest(unittest.TestCase):
     def test_libamtrack_AT_material_name_from_number(self):
         from tests.libamtrack.generated.libamtrack import libAT
         name = []
-        a = libAT.AT_particle_name_from_particle_no_single(222, name)
+        _ = libAT.AT_particle_name_from_particle_no_single(222, name)
         self.assertEqual(len(name), 1)
         self.assertEqual('222??', name[0])
 
@@ -72,6 +72,6 @@ class ArgumentTypesTest(unittest.TestCase):
         from tests.libamtrack.generated.libamtrack import libAT
         acronyms = ['Ag', 'Rh']
         numbers = []
-        a = libAT.AT_Z_from_element_acronym(acronyms, numbers)
+        _ = libAT.AT_Z_from_element_acronym(acronyms, numbers)
         self.assertEqual(numbers[0], 47)
         self.assertEqual(numbers[1], 45)

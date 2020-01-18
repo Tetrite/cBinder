@@ -22,7 +22,7 @@ def main():
     compile_parser.add_argument('-b', '--lib_dir', action='append', help='path to directory with dynamic libraries', metavar='PATH')
     compile_parser.add_argument('-e', '--extra_args', action='append', help='extra arguments passed to compiler', metavar='ARGS')
 
-    shared_parser = subparsers.add_parser('shared', help='create bindings to dynamic/shared libraries (requires header files too)')
+    subparsers.add_parser('shared', help='create bindings to dynamic/shared libraries (requires header files too)')
 
     args = arg_parser.parse_args()
     if args.mode is None:

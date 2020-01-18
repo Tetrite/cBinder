@@ -19,10 +19,10 @@ class SimpleFunctionsTest(unittest.TestCase):
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
         call_string = r'python cBinder sources ' + \
-                  r'-f ' + str(self.sources_path) + \
-                  r' -d ' + str(self.destination_path) + \
-                  r' -es ' + str(self.export_fun_path) + \
-                  r' compile'
+                      r'-f ' + str(self.sources_path) + \
+                      r' -d ' + str(self.destination_path) + \
+                      r' -es ' + str(self.export_fun_path) + \
+                      r' compile'
         print(call_string)
         os.system(call_string)
         os.chdir(self.destination_path.joinpath('sources'))

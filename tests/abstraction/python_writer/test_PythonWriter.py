@@ -1,6 +1,4 @@
 import unittest
-import pathlib
-import os
 
 from cBinder.PythonWriter import PythonWriter
 
