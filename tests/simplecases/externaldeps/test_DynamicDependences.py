@@ -31,9 +31,8 @@ class DynamicDependencesOnLinux64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        cmd1 = r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
-        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m '
-        os.system(cmd1 + cmd2)
+        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
+                  + ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m ')
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
@@ -59,12 +58,14 @@ class DynamicDependencesOnWin64(unittest.TestCase):
             os.makedirs(str(self.destination_path))
         clear_folder_contents(self.destination_path)
         os.chdir("../../../..")
-        cmd1 = r'python cBinder sources2 -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
-        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l return_n '
-        print(cmd1 + cmd2)
-        cmd1 = r'python cBinder sources2 -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile '
-        cmd2 = ' -i ' + str(self.include_path) + ' -b ' + str(self.libs_path) + ' -l return_n '
-        os.system(cmd1 + cmd2)
+        print(r'python cBinder sources2 -f ' + str(self.sources_path)
+              + ' -d ' + str(self.destination_path) + ' compile '
+              + ' -i ' + str(self.include_path)
+              + ' -b ' + str(self.libs_path) + ' -l return_n ')
+        os.system(r'python cBinder sources2 -f ' + str(self.sources_path)
+                  + ' -d ' + str(self.destination_path) + ' compile '
+                  + ' -i ' + str(self.include_path)
+                  + ' -b ' + str(self.libs_path) + ' -l return_n ')
         os.chdir(self.destination_path)
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 

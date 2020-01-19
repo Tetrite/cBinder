@@ -38,10 +38,19 @@ class ArgumentTypesTest(unittest.TestCase):
         os.makedirs(str(self.destination_path))
         os.chdir(self.current_working_directory_path)
         os.chdir("../..")
-        cmd1 = r'python cBinder libamtrack -f ' + str(self.sources_path) + ' -f ' + str(self.headers_path) + ' -d ' + str(self.destination_path)
-        cmd2 = ' -es ' + str(self.export_symbols_path) + ' -mono libAT compile '
-        cmd3 = ' -i ' + str(self.include_path) + ' -i ' + str(self.headers_path) + ' -b ' + str(self.libs_path) + ' -l gsl -l gslcblas -l m'
-        os.system(cmd1 + cmd2 + cmd3)
+        os.system(r'python cBinder libamtrack '
+                  + ' -f ' + str(self.sources_path)
+                  + ' -f ' + str(self.headers_path)
+                  + ' -d ' + str(self.destination_path)
+                  + ' -es ' + str(self.export_symbols_path)
+                  + ' -mono libAT'
+                  + ' compile '
+                  + ' -i ' + str(self.include_path)
+                  + ' -i ' + str(self.headers_path)
+                  + ' -b ' + str(self.libs_path)
+                  + ' -l gsl'
+                  + ' -l gslcblas'
+                  + ' -l m')
 
         os.chdir(self.destination_path)
 
@@ -60,7 +69,7 @@ class ArgumentTypesTest(unittest.TestCase):
     def test_libamtrack_AT_material_name_from_number(self):
         from tests.libamtrack.generated.libamtrack import libAT
         name = []
-        _ = libAT.AT_particle_name_from_particle_no_single(222, name)
+        libAT.AT_particle_name_from_particle_no_single(222, name)
         self.assertEqual(len(name), 1)
         self.assertEqual('222??', name[0])
 

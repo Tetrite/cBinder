@@ -250,19 +250,22 @@ class WrapperBuilder:
 
             parameter_list = []
             for param in function.parameters:
-                str1 = param.name + unique_identifier_suffix
                 if param.is_out and 'char' in param.type and not param.is_pointer_to_array:
-                    str2 = '[0].encode() if ' + 'type(' + param.name + unique_identifier_suffix + '[0]) is str '
-                    str3 = 'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t'
+                    parameter_list.append(
+                        param.name + unique_identifier_suffix + '[0].encode() if ' +
+                        'type(' + param.name + unique_identifier_suffix + '[0]) is str ' +
+                        'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
                 else:
-                    str2 = '.encode() if ' + 'type(' + param.name + unique_identifier_suffix + ') is str '
-                    str3 = 'else ' + param.name + unique_identifier_suffix + '\n\t\t\t'
-                parameter_list.append(str1 + str2 + str3)
+                    parameter_list.append(
+                        param.name + unique_identifier_suffix + '.encode() if ' +
+                        'type(' + param.name + unique_identifier_suffix + ') is str ' +
+                        'else ' + param.name + unique_identifier_suffix + '\n\t\t\t')
 
-            br1 = ('ret = ' if not function.returns.is_void else '')
-            br2 = (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib')
-            br3 = f'.{function.name}(' + ','.join(parameter_list) + ')'
-            writer.write_line(br1 + br2 + br3)
+            writer.write_line(
+                ('ret = ' if not function.returns.is_void else '')
+                + (f'_{module_name}.lib' if not self.wrap_dynamic_lib else 'lib') + f'.{function.name}('
+                + ','.join(parameter_list)
+                + ')')
 
             if function.returns.struct and not function.returns.is_void:
                 writer.write_line(f'ret_ = {function.returns.struct}()')
