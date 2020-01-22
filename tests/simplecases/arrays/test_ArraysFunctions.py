@@ -23,7 +23,7 @@ class SimpleFunctionsTest(unittest.TestCase):
     def test_generate_bindings_to_function_with_array(self):
 
         from tests.simplecases.arrays.generated.sources import arraytest
-        a = [0]*5
+        a = [0] * 5
         arraytest.func(a)
         self.assertEqual(a, [0.0, 1.0, 2.0, 3.0, 4.0])
 
@@ -33,4 +33,3 @@ class SimpleFunctionsTest(unittest.TestCase):
         a = [2.0, 3.0, 4.0, 5.0, 6.0]
         i = arraytest.sum(4.0, a)
         self.assertEqual(i, 24.0)
-

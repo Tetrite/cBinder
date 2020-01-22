@@ -16,8 +16,7 @@ class ArgumentTypesTest(unittest.TestCase):
         os.makedirs(str(self.destination_path))
         os.chdir(self.current_working_directory_path)
         os.chdir("../../..")
-        os.system(
-            r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
+        os.system(r'python cBinder sources -f ' + str(self.sources_path) + ' -d ' + str(self.destination_path) + ' compile')
         os.chdir(self.destination_path.joinpath('sources'))
 
     def test_standard_types(self):
@@ -46,7 +45,7 @@ class ArgumentTypesTest(unittest.TestCase):
         self.assertEqual(st.add_unsigned_long_long(a, b), 8)
         self.assertEqual(st.add_unsigned_long_long_int(a, b), 8)
 
-    #TODO: Solve long double problem
+    # TODO: Solve long double problem
     # def test_standard_types_long_double(self):
     #     from tests.withdoxygen.argument_types.generated.sources import standard_types as st
     #     a = 5.0

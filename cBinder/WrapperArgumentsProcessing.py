@@ -77,15 +77,13 @@ def _add_checking_procedure_for_one_array_size(writer, size, arr_param_list, typ
     This function, for a given parameters list, size, and string indicating type (IN/OUT),
     adds a checking script to a wrapping function
     """
-    writer.write_line(
-        '# Procedure to check if every ' + type_str + ' array of the same declared size, has indeed same size:')
+    writer.write_line('# Procedure to check if every ' + type_str + ' array of the same declared size, has indeed same size:')
     writer.write_line('# For arrays of declared size: ' + str(size))
     declared_arr_size_variable_name = 'declared_in_arr_param_size__' + str(size)
     writer.write_line(declared_arr_size_variable_name + ' = len(' + arr_param_list[0].name + ')')
     with writer.write_for('in_array_argument', '[' + ','.join([param.name for param in arr_param_list]) + ']'):
         with writer.write_if('len(in_array_argument) != ' + declared_arr_size_variable_name):
-            writer.write_line('raise ValueError(\"You passed as parameters two or more lists ' +
-                              'that should have the same size, with different sizes.\")')
+            writer.write_line('raise ValueError(\"You passed as parameters two or more lists ' + 'that should have the same size, with different sizes.\")')
 
 
 def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
@@ -126,9 +124,8 @@ def _initialize_out_arrays_if_necessary_and_check_sizes(writer, parameters):
         else:
             arrays_out_to_check_size_consistency.append(arr_out)
     if len(arrays_out_to_check_size_consistency) > 1:
-        _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(writer,
-                                                                             arrays_out_to_check_size_consistency,
-                                                                             False)
+        _check_if_every_array_of_the_same_size_and_type_has_indeed_same_size(writer, arrays_out_to_check_size_consistency, False)
+
 
 def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
     """
@@ -153,8 +150,7 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
     # Then add checking procedure with initialization
     for param in non_array_out_params:
         with writer.write_if('len(' + param.name + ') != 1'):
-            writer.write_line('out_param_auto_init = \"\\nWarning: OUT parameter (not an array)' +
-                              ' was passed with incorrect size.\\n\" + \\')
+            writer.write_line('out_param_auto_init = \"\\nWarning: OUT parameter (not an array)' + ' was passed with incorrect size.\\n\" + \\')
             writer.write_line('\t\"Wrapper initializes it with size 1\"')
             writer.write_line('warnings.warn(out_param_auto_init)')
             writer.write_line(param.name + '.clear()')
@@ -164,14 +160,13 @@ def _initialize_non_array_out_parameters_if_necessary(writer, parameters):
             else:
                 writer.write_line(param.name + ' += [0]')
 
+
 def _initialize_one_out_array(writer, arr_out_param, decisive_param_name):
     """ This function adds an array size initialization script to a wrapping function """
     writer.write_line('# Procedure to check if OUT array ' + arr_out_param.name + ' is passed correctly:')
     with writer.write_if('len(' + arr_out_param.name + ') != len(' + decisive_param_name + ')'):
-        writer.write_line('out_array_auto_init = \"\\nWarning: OUT array parameter ' + arr_out_param.name +
-                          ' was passed with incorrect size.\\n\" + \\')
-        writer.write_line('\t\"Wrapper initializes it with a correct value ' +
-                          'based on an IN array parameter of the same declared size\"')
+        writer.write_line('out_array_auto_init = \"\\nWarning: OUT array parameter ' + arr_out_param.name + ' was passed with incorrect size.\\n\" + \\')
+        writer.write_line('\t\"Wrapper initializes it with a correct value ' + 'based on an IN array parameter of the same declared size\"')
         writer.write_line('warnings.warn(out_array_auto_init)')
         writer.write_line(arr_out_param.name + '.clear()')
         writer.write_line(arr_out_param.name + ' += [0]*' + 'len(' + decisive_param_name + ')')

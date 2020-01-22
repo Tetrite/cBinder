@@ -11,6 +11,7 @@ from tests._util.folder_clearing import clear_folder_contents
 
 
 class StaticDependencesOnLinux64(unittest.TestCase):
+
     @unittest.skipIf(sys.platform in ("win32", "cygwin") or platform.architecture()[0] != "64bit", "Test linux x64 specific")
     def test_generate_bindings_to_gsl_sf_bessel_J(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
@@ -44,6 +45,7 @@ class StaticDependencesOnLinux64(unittest.TestCase):
 
 
 class StaticDependencesOnWin64(unittest.TestCase):
+
     @unittest.skipUnless(sys.platform in ("win32", "cygwin") and platform.architecture()[0] == "64bit", "Test windows x64 specific")
     def test_generate_bindings_to_gsl_sf_bessel_J(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
@@ -66,9 +68,9 @@ class StaticDependencesOnWin64(unittest.TestCase):
         os.chdir("../../../..")
 
         print(r'python cBinder sources -f ' + str(self.sources_path)
-                  + ' -d ' + str(self.destination_path) + ' compile '
-                  + ' -i ' + str(self.include_path)
-                  + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')
+              + ' -d ' + str(self.destination_path) + ' compile '
+              + ' -i ' + str(self.include_path)
+              + ' -b ' + str(self.libs_path) + ' -l gsl -l cblas ')
         os.system(r'python cBinder sources -f ' + str(self.sources_path)
                   + ' -d ' + str(self.destination_path) + ' compile '
                   + ' -i ' + str(self.include_path)
@@ -77,5 +79,5 @@ class StaticDependencesOnWin64(unittest.TestCase):
         os.environ['PATH'] = os.getcwd() + os.pathsep + os.environ['PATH']
 
         from tests.simplecases.externaldeps.generated.sources import example
-        # c function return 0 if call was succesful
+        # c function return 0 if call was successful
         self.assertEqual(example.print_gsl_sf_bessel_J0(1.7), 0)

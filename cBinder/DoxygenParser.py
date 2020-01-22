@@ -89,7 +89,8 @@ class DoxygenParser:
             return DoxygenFunctionArrayParameter(parameter_name, parameter_type, array_size)
         return DoxygenFunctionParameter(parameter_name, parameter_type)
 
-    def _get_parameter_type_from_line(self, line):
+    @staticmethod
+    def _get_parameter_type_from_line(line):
         if len(re.findall("@param\[in\]", line)) > 0:
             return ParameterType.IN
         if len(re.findall("@param\[out\]", line)) > 0:
@@ -121,7 +122,8 @@ class DoxygenParser:
     def _get_in_and_out_parameter_name(self, line):
         return self._get_parameter_name(line, self.REGEX_IN_AND_OUT_PARAM_NAME)
 
-    def _get_parameter_name(self, line, REGEX_STRING):
+    @staticmethod
+    def _get_parameter_name(line, REGEX_STRING):
         matches = re.findall(REGEX_STRING, line)
         if len(matches) == 0:
             return None
@@ -139,6 +141,7 @@ class DoxygenFunctionMetadata:
         List of DoxygenFunctionParameters - every element
         in a list contains description of a single parameter, that was read while parsing
     """
+
     def __init__(self, parameters):
         self.parameters = parameters
 
@@ -220,7 +223,6 @@ class DoxygenFunctionMetadata:
         return False
 
 
-
 class DoxygenFunctionParameter:
     """
     Class used to represent a function parameter - it contains information that
@@ -233,6 +235,7 @@ class DoxygenFunctionParameter:
     param_type: ParameterType
         Type of a parameter. It can be IN or OUT
     """
+
     def __init__(self, name, param_type: ParameterType):
         self.name = name
         self.param_type = param_type

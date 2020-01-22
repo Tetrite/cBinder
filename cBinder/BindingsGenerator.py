@@ -1,16 +1,17 @@
-from cBinder.HeaderFile import *
-from cBinder.SourceFile import *
-from cBinder.LibraryFile import *
+import os
+import pathlib
+import shutil
+import sys
+
+from cffi import FFI
+
+from cBinder.HeaderFile import HeaderFile, get_header_files
+from cBinder.LibraryFile import LibraryFile, get_shared_library_files
+from cBinder.SourceFile import SourceFile, get_source_files
 from cBinder.WrapperBuilder import WrapperBuilder
 from cBinder.WheelGenerator import WheelGenerator
 from cBinder.MiniPreprocessing import preprocess_headers
 from cBinder.LibPaths import LibPaths
-import pathlib
-from cffi import FFI
-import os
-import sys
-import shutil
-import re
 
 
 def get_soname_path(libpath, lib_dir):
@@ -122,7 +123,6 @@ class BindingsGenerator:
             if verbosity:
                 print(f'No header source pairs to process')
             return
-
         """ Attention: temporary measure.
             To properly compile sources that have internal dependencies,
             (for example: including function defined in other .c file)
@@ -152,11 +152,15 @@ class BindingsGenerator:
 
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
-            if not sys.platform in ("win32", "cygwin"):
+            if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=sources_combined,
-                                  include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+            ffibuilder.set_source('_' + name,
+                                  '\n'.join(source.includes),
+                                  sources=sources_combined,
+                                  include_dirs=self.args.include,
+                                  libraries=self.args.library,
+                                  library_dirs=self.args.lib_dir,
+                                  extra_link_args=extra_link_args,
                                   extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_header(name, header)
@@ -210,9 +214,13 @@ class BindingsGenerator:
         extra_link_args = []
         if sys.platform not in ("win32", "cygwin"):
             extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-        ffibuilder.set_source('_' + name, '\n'.join(includes), sources=sources_paths,
-                              include_dirs=self.args.include, libraries=self.args.library,
-                              library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+        ffibuilder.set_source('_' + name,
+                              '\n'.join(includes),
+                              sources=sources_paths,
+                              include_dirs=self.args.include,
+                              libraries=self.args.library,
+                              library_dirs=self.args.lib_dir,
+                              extra_link_args=extra_link_args,
                               extra_compile_args=self.args.extra_args)
         if os.name == 'nt':
             # on Windows deduce library name using distutils
@@ -252,14 +260,17 @@ class BindingsGenerator:
                 print(f'Declarations for which wrappers will be created:')
                 print(all_declaration_strings)
 
-
             ffibuilder.cdef(all_declaration_strings)
             extra_link_args = []
             if sys.platform not in ("win32", "cygwin"):
                 extra_link_args = ["-Wl,-rpath=$ORIGIN"]
-            ffibuilder.set_source('_' + name, '\n'.join(source.includes), sources=[source.filepath],
-                                  include_dirs=self.args.include, libraries=self.args.library,
-                                  library_dirs=self.args.lib_dir, extra_link_args=extra_link_args,
+            ffibuilder.set_source('_' + name,
+                                  '\n'.join(source.includes),
+                                  sources=[source.filepath],
+                                  include_dirs=self.args.include,
+                                  libraries=self.args.library,
+                                  library_dirs=self.args.lib_dir,
+                                  extra_link_args=extra_link_args,
                                   extra_compile_args=self.args.extra_args)
             ffibuilder.compile(verbose=verbosity)
             WrapperBuilder(self.args).build_wrapper_for_structs_and_functions(name, enums, structs, functions)
@@ -286,7 +297,8 @@ class BindingsGenerator:
 
         return pairs, lone_sources
 
-    def _copy_needed_files_to_output_dir(self, files):
+    @staticmethod
+    def _copy_needed_files_to_output_dir(files):
         """Copies all header or source files to output directory given in arguments"""
 
         for file in files:

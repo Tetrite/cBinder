@@ -1,4 +1,3 @@
-import re
 from cBinder.HeaderFile import get_header_files
 
 

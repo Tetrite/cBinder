@@ -1,17 +1,17 @@
 import platform
-import re
+
+from cBinder.PythonWriter import PythonWriter
 from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_is_not_empty
 from cBinder.WrapperArgumentsProcessing import _check_if_every_in_array_of_the_same_size_has_indeed_same_size
 from cBinder.WrapperArgumentsProcessing import _check_array_sizes_consistency_when_there_are_only_out_arrays
 from cBinder.WrapperArgumentsProcessing import _initialize_array_size_params_inside_wrapper
 from cBinder.WrapperArgumentsProcessing import _initialize_out_arrays_if_necessary_and_check_sizes
 from cBinder.WrapperArgumentsProcessing import _initialize_non_array_out_parameters_if_necessary
-from cBinder.PythonWriter import *
 
 unique_identifier_suffix = '__internal'
 
+# TODO: handle escaping when creating source that may contains strings
 
-# TODO: handle escaping when creating sorce that may contains trings
 
 class WrapperBuilder:
     """
@@ -50,7 +50,7 @@ class WrapperBuilder:
                 writer.write_line('from cffi import FFI')
                 writer.write_line('ffi = FFI()')
 
-                enum_decls = writer.escaped('\n'.join(decl.declaration_string for decl in enums))
+                _ = writer.escaped('\n'.join(decl.declaration_string for decl in enums))
                 struct_decls = writer.escaped('\n'.join(decl.declaration_string for decl in structs))
                 func_decls = writer.escaped('\n'.join(decl.declaration_string for decl in functions))
                 writer.write_line(f'ffi.cdef("""{struct_decls}""")')
@@ -99,33 +99,40 @@ class WrapperBuilder:
     def _build_wrapper_for_function(self, writer, header_name, function):
         self._build_python_wrapper_for_function(writer, header_name, function)
 
-    def _build_array_copy(self, writer, name, _to, _from):
+    @staticmethod
+    def _build_array_copy(writer, name, _to, _from):
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = v')
 
-    def _build_array_copy_char(self, writer, name, _to, _from):
+    @staticmethod
+    def _build_array_copy_char(writer, name, _to, _from):
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = ffi.string(v).decode()')
 
-    def _build_array_copy_enum_to_cffi(self, writer, name, _to, _from):
+    @staticmethod
+    def _build_array_copy_enum_to_cffi(writer, name, _to, _from):
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = v.value')
 
-    def _build_array_copy_enum_from_cffi(self, writer, enum, name, _to, _from):
+    @staticmethod
+    def _build_array_copy_enum_from_cffi(writer, enum, name, _to, _from):
         with writer.write_for('i,v', f'enumerate({name}{_from})'):
             writer.write_line(f'{name}{_to}[i] = {enum}(v)')
 
-    def _build_array_copy_struct_to_cffi(self, writer, name, _to, _from):
+    @staticmethod
+    def _build_array_copy_struct_to_cffi(writer, name, _to, _from):
         with writer.write_for('i', f'range(len({name}{_from}))'):
             # __keepalive must be in the scope
             writer.write_line(f'{name}{_from}[i].to_cffi_out({name}{_to}[i], __keepalive)')
 
-    def _build_array_copy_struct_from_cffi(self, writer, name, _to, _from):
+    @staticmethod
+    def _build_array_copy_struct_from_cffi(writer, name, _to, _from):
         with writer.write_for('i', f'range(len({name}{_from}))'):
             # __keepalive must be in the scope
             writer.write_line(f'{name}{_to}[i].from_cffi({name}{_from}[i])')
 
-    def _build_python_wrapper_for_enum(self, writer, module_name, enum):
+    @staticmethod
+    def _build_python_wrapper_for_enum(writer, module_name, enum):
         if enum.name:
             td = 'enum ' if not enum.typedef else ''
             writer.write_line(f'{enum.name} = Enum(\'{enum.name}\', ffi.typeof(\'{td}{enum.name}\').relements)')
@@ -135,7 +142,8 @@ class WrapperBuilder:
                 value = e['value']
                 writer.write_line(f'{name}={value}')
 
-    def _build_python_wrapper_for_struct(self, writer, module_name, struct):
+    @staticmethod
+    def _build_python_wrapper_for_struct(writer, module_name, struct):
         with writer.write_class(struct.name):
             with writer.write_def('__init__', ['self'] + ['p_' + member.name + '=None' for member in struct.members]):
                 for member in struct.members:
@@ -178,7 +186,8 @@ class WrapperBuilder:
                 self._add_series_of_array_arguments_checks(writer, function.parameters)
 
             if self.wrap_dynamic_lib:
-                # not so pretty way of solving libs not being found - construct absolute path using wrapper file location
+                # not so pretty way of solving libs not being found
+                # construct absolute path using wrapper file location
                 lib_open_str = f'os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib/{module_name}{self.dynamic_lib_ext}")'
                 writer.write_line(f'lib = ffi.dlopen({lib_open_str})')
 
@@ -196,8 +205,7 @@ class WrapperBuilder:
                             # to avoid case when a function parameter name is a keyword in Python
                             if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                                 size = 'p_' + size
-                            writer.write_line(
-                                f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
+                            writer.write_line(f'{parameter.name}{unique_identifier_suffix}_ = ffi.new("{parameter.struct}[]", {size})')
                             writer.write_line(
                                 f'{parameter.name}{unique_identifier_suffix} = ffi.cast("{parameter.struct}*", {parameter.name}{unique_identifier_suffix}_)')
                             self._build_array_copy_struct_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
@@ -206,8 +214,7 @@ class WrapperBuilder:
                             writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.struct}*")')
                             writer.write_line(f'{parameter.name}.to_cffi_out({parameter.name}{unique_identifier_suffix}[0], __keepalive)')
                     else:
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.to_cffi(__keepalive)[0]')
                 elif parameter.enum:
                     if parameter.is_out and parameter.is_array:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
@@ -215,20 +222,18 @@ class WrapperBuilder:
                         # to avoid case when a function parameter name is a keyword in Python
                         if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                             size = 'p_' + size
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("int[]", {size})')
                         self._build_array_copy_enum_to_cffi(writer, parameter.name, unique_identifier_suffix, '')
                     else:
                         writer.write_line(f'{parameter.name}{unique_identifier_suffix} = {parameter.name}.value')
                 else:
-                    if parameter.is_out and parameter.is_array and not 'char' in parameter.type:
+                    if parameter.is_out and parameter.is_array and 'char' not in parameter.type:
                         size = str(parameter.sizes[0]) if parameter.sizes[0] else 'len(' + parameter.name + ')'
                         # If size is defined as a function parameter, in a wrapper it has to be named with prefix
                         # to avoid case when a function parameter name is a keyword in Python
                         if parameter.sizes[0] and isinstance(parameter.sizes[0], str) and not parameter.sizes[0].isdigit():
                             size = 'p_' + size
-                        writer.write_line(
-                            f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
+                        writer.write_line(f'{parameter.name}{unique_identifier_suffix} = ffi.new("{parameter.c_type.get_ffi_string_def()}[]", {size})')
                         self._build_array_copy(writer, parameter.name, unique_identifier_suffix, '')
                     elif parameter.is_out and 'char' in parameter.type:
                         # Unless it is a 2D char array (which needs separate wrapping),
@@ -247,9 +252,9 @@ class WrapperBuilder:
             for param in function.parameters:
                 if param.is_out and 'char' in param.type and not param.is_pointer_to_array:
                     parameter_list.append(
-                            param.name + unique_identifier_suffix + '[0].encode() if ' +
-                            'type(' + param.name + unique_identifier_suffix + '[0]) is str ' +
-                            'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
+                        param.name + unique_identifier_suffix + '[0].encode() if ' +
+                        'type(' + param.name + unique_identifier_suffix + '[0]) is str ' +
+                        'else ' + param.name + unique_identifier_suffix + '[0]\n\t\t\t')
                 else:
                     parameter_list.append(
                         param.name + unique_identifier_suffix + '.encode() if ' +
@@ -306,7 +311,8 @@ class WrapperBuilder:
             # PEP8 empty line after function
             writer.write_line('')
 
-    def _add_documentation_to_a_function(self, writer, function):
+    @staticmethod
+    def _add_documentation_to_a_function(writer, function):
         """ Add documentation to a function, based on a doxygen comment """
         if function.doxygen is not None:
             writer.write_line(f'\"\"\"')
@@ -319,7 +325,8 @@ class WrapperBuilder:
                     writer.write_line(line[1:].strip())
             writer.write_line(f'\"\"\"')
 
-    def _get_relevant_parameters(self, parameters):
+    @staticmethod
+    def _get_relevant_parameters(parameters):
         """ Relevant parameters - such parameters that will be on a parameter list in a wrapping
             python function. Every parameter that is a size of an array, will be discarded.
         """
@@ -329,7 +336,8 @@ class WrapperBuilder:
                 relevant_parameters.append(param.name)
         return relevant_parameters
 
-    def _add_series_of_array_arguments_checks(self, writer, parameters):
+    @staticmethod
+    def _add_series_of_array_arguments_checks(writer, parameters):
         # Check 1:
         _check_if_every_in_array_is_not_empty(writer, parameters)
         # Check 2:

@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+
 setup(
     name="cBinder",
     version="1.0",
@@ -13,6 +14,7 @@ setup(
     extras_require={
         "dev": [
             "pytest==5.3.1",
+            "flake8"
         ]
     },
     package_data={'cBinder': ['setup.config']},

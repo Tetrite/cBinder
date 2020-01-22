@@ -1,8 +1,5 @@
-from enum import Enum
-from cBinder.CType import CType, get_c_type_for_type
-
-
 class EnumDeclaration:
+
     def __init__(self, enum):
         if 'name' in enum:
             self.name = enum['name']

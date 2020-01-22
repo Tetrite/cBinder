@@ -38,7 +38,7 @@ class SimpleStructsTest(unittest.TestCase):
         s1.b = 321.0
         s1.c = b'a'
         b = struct.get_b_sum([s0, s1])
-        self.assertAlmostEqual(b, s0.b+s1.b, places=6)
+        self.assertAlmostEqual(b, s0.b + s1.b, places=6)
 
     def test_generate_bindings_to_simple_function_with_struct(self):
         from tests.simplecases.simplestructs.generated.sources import struct

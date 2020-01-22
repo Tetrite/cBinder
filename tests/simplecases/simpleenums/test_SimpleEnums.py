@@ -7,7 +7,6 @@ from tests._util.folder_clearing import clear_folder_contents
 
 class SimpleEnumsTest(unittest.TestCase):
 
-
     @classmethod
     def setUpClass(self):
         self.current_working_directory_path = pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
