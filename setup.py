@@ -9,7 +9,7 @@ setup(
         "cffi==1.13.0",
         "robotpy-cppheaderparser==3.1.2",
         "wheel==0.33.6",
-        "setuptools==41.6.0",
+        "setuptools==65.5.1",
     ],
     extras_require={
         "dev": [
